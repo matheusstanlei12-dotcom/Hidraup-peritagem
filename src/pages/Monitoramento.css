@@ -1,0 +1,58 @@
+.page-subtitle {
+    color: #718096;
+    margin-top: -24px;
+    margin-bottom: 32px;
+}
+
+.process-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.process-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.process-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.process-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.process-tag {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.process-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.process-client {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.process-status-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}

@@ -1,0 +1,11 @@
+.layout-root {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 40px;
+    background-color: var(--bg-main);
+}
