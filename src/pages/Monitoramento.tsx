@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, ChevronRight, ArrowLeft, FileText, CheckCircle2, ShoppingCart, DollarSign, ClipboardCheck, User, Loader2, Wrench, XCircle, Check } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import './Monitoramento.css';
 
 // Atualizado: Fluxo de PCP
@@ -73,16 +74,29 @@ export const Monitoramento: React.FC = () => {
         }
     };
 
+    const { user } = useAuth(); // Contexto Auth
+
     const handleUpdateStatus = async (newStatus: string) => {
-        if (!selectedProcess) return;
+        if (!selectedProcess || !user) return;
+
+        const oldStatus = selectedProcess.statusTexto;
 
         try {
+            // 1. Atualizar Peritagem
             const { error } = await supabase
                 .from('peritagens')
                 .update({ status: newStatus })
                 .eq('id', selectedProcess.id);
 
             if (error) throw error;
+
+            // 2. Criar Histórico
+            await supabase.from('peritagem_historico').insert([{
+                peritagem_id: selectedProcess.id,
+                status_antigo: oldStatus,
+                status_novo: newStatus,
+                alterado_por: user.id
+            }]);
 
             // Atualiza localmente
             const updated = { ...selectedProcess, statusTexto: newStatus, etapaAtual: getEtapaIndex(newStatus) };
@@ -189,7 +203,10 @@ export const Monitoramento: React.FC = () => {
 
     return (
         <div className="monitoramento-container list-view">
-            <h1 className="page-title">Monitoramento de Processos</h1>
+            <div style={{ background: '#ffeb3b', padding: '10px', textAlign: 'center', marginBottom: '20px', borderRadius: '8px', border: '1px solid #d97706', color: '#000', fontWeight: 'bold' }}>
+                ⚠️ VERSÃO ATUALIZADA (V3.0) - SE VOCÊ VÊ ISSO, O CÓDIGO NOVO CARREGOU.
+            </div>
+            <h1 className="page-title">Monitoramento de Processos (Atualizado)</h1>
             <p className="page-subtitle">Selecione uma peritagem para visualizar a linha do tempo e o status atual.</p>
 
             <div className="search-bar">

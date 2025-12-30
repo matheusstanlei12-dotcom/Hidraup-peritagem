@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, ExternalLink, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import './Peritagens.css';
 
 interface Peritagem {
@@ -11,24 +12,39 @@ interface Peritagem {
     data_execucao: string;
     status: string;
     prioridade: string;
+    criado_por: string;
 }
 
 export const Peritagens: React.FC = () => {
+    const { user, role } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filterStatus, setFilterStatus] = useState<'all' | 'recusadas'>('all'); // Filtro para Perito
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchPeritagens();
-    }, []);
+        if (user) fetchPeritagens();
+    }, [user, role, filterStatus]);
 
     const fetchPeritagens = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('peritagens')
                 .select('*')
                 .order('created_at', { ascending: false });
+
+            // Se for PERITO, filtrar apenas as suas
+            if (role === 'perito') {
+                query = query.eq('criado_por', user.id);
+
+                // Se estiver vendo recusadas
+                if (filterStatus === 'recusadas') {
+                    query = query.eq('status', 'REVISÃO NECESSÁRIA');
+                }
+            }
+
+            const { data, error } = await query;
 
             if (error) throw error;
             setPeritagens(data || []);
@@ -47,7 +63,26 @@ export const Peritagens: React.FC = () => {
     return (
         <div className="peritagens-container">
             <div className="header-actions">
-                <h1 className="page-title">Todas as Peritagens</h1>
+                <h1 className="page-title">{role === 'perito' ? 'Minhas Peritagens' : 'Todas as Peritagens'}</h1>
+
+                {role === 'perito' && (
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button
+                            className={`btn-filter ${filterStatus === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('all')}
+                            style={{ padding: '8px 16px', borderRadius: '20px', border: filterStatus === 'all' ? '2px solid #3182ce' : '1px solid #ccc', background: filterStatus === 'all' ? '#ebf8ff' : 'white' }}
+                        >
+                            Todas
+                        </button>
+                        <button
+                            className={`btn-filter ${filterStatus === 'recusadas' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('recusadas')}
+                            style={{ padding: '8px 16px', borderRadius: '20px', border: filterStatus === 'recusadas' ? '2px solid #e53e3e' : '1px solid #ccc', background: filterStatus === 'recusadas' ? '#fff5f5' : 'white', color: '#e53e3e' }}
+                        >
+                            🔴 Recusadas
+                        </button>
+                    </div>
+                )}
                 <button className="btn-primary" style={{ width: 'auto' }} onClick={() => navigate('/nova-peritagem')}>
                     <Plus size={20} />
                     <span>Nova Peritagem</span>
