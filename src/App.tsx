@@ -8,6 +8,9 @@ import { Relatorios } from './pages/Relatorios';
 import { NovaPeritagem } from './pages/NovaPeritagem';
 import { Clientes } from './pages/Clientes';
 import { Manutencao } from './pages/Manutencao';
+import { PcpAprovaPeritagem } from './pages/PcpAprovaPeritagem';
+import { PcpLiberaPedido } from './pages/PcpLiberaPedido';
+import { PcpFinalizaProcesso } from './pages/PcpFinalizaProcesso';
 import { AdminUsers } from './pages/AdminUsers';
 import { Layout } from './components/Layout';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -47,6 +50,11 @@ function AppRoutes() {
       <Route path="/manutencao" element={<PrivateRoute><Layout><Manutencao /></Layout></PrivateRoute>} />
       <Route path="/relatorios" element={<PrivateRoute><Layout><Relatorios /></Layout></PrivateRoute>} />
       <Route path="/nova-peritagem" element={<PrivateRoute><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
+
+      {/* Rotas de Fluxo PCP */}
+      <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
+      <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
+      <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
 
       {/* Rota Exclusiva Gestor */}
       <Route path="/admin/usuarios" element={

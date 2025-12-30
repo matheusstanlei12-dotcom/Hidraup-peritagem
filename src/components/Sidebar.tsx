@@ -4,11 +4,13 @@ import {
     FileText,
     ClipboardList,
     PlusCircle,
-    Users,
     Wrench,
     FileSpreadsheet,
     Settings,
-    LogOut
+    LogOut,
+    CheckCircle,
+    ShoppingCart,
+    ClipboardSignature
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -60,7 +62,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                     <span>{role === 'perito' ? 'Minhas Peritagens' : 'Todas as Peritagens'}</span>
                 </NavLink>
 
-                {/* ITENS APENAS PARA PCP E GESTOR */}
                 {(role === 'pcp' || role === 'gestor') && (
                     <>
                         <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
@@ -68,10 +69,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <span>Status</span>
                         </NavLink>
 
-                        <NavLink to="/clientes" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Users size={20} />
-                            <span>Aguardando Clientes</span>
+                        <div className="sidebar-divider"></div>
+
+                        <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <ClipboardSignature size={20} />
+                            <span>1. Aprovar Peritagem</span>
                         </NavLink>
+
+                        <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <ShoppingCart size={20} />
+                            <span>2. Aguardando liberação do pedido</span>
+                        </NavLink>
+
+                        <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <CheckCircle size={20} />
+                            <span>3. Finalizar Processos</span>
+                        </NavLink>
+
+                        <div className="sidebar-divider"></div>
 
                         <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Wrench size={20} />
@@ -109,6 +124,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                     <span>Sair</span>
                 </button>
             </div>
-        </aside>
+        </aside >
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronRight, ArrowLeft, FileText, CheckCircle2, ShoppingCart, DollarSign, ClipboardCheck, User, Loader2, Wrench, XCircle, Check } from 'lucide-react';
+import { Search, ChevronRight, ArrowLeft, CheckCircle2, ShoppingCart, ClipboardCheck, User, Loader2, Wrench, XCircle, Check, FilePlus, CheckSquare, DollarSign, Zap } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,18 +15,46 @@ interface Processo {
     equipamento: string;
     etapaAtual: number;
     statusTexto: string;
+    numero_pedido?: string;
+    ordem_servico?: string;
+    nota_fiscal?: string;
+    camisa_int?: string;
+    camisa_ext?: string;
+    camisa_comp?: string;
+    haste_diam?: string;
+    haste_comp?: string;
+    curso?: string;
+    created_at?: string;
+    criado_por_nome?: string;
+}
+
+interface Historico {
+    id: string;
+    status_novo: string;
+    created_at: string;
+    responsavel_nome: string;
+    responsavel_cargo?: string;
 }
 
 const ETAPAS = [
-    { id: 1, titulo: 'AGUARDANDO APROVAÇÃO DO PCP', responsavel: 'PCP', icone: <ClipboardCheck size={24} /> },
-    { id: 2, titulo: 'AGUARDANDO APROVAÇÃO DO CLIENTE', responsavel: 'COMERCIAL', icone: <User size={24} /> },
-    { id: 3, titulo: 'EM MANUTENÇÃO', responsavel: 'OFICINA', icone: <Wrench size={24} /> },
-    { id: 4, titulo: 'PROCESSO FINALIZADO', responsavel: 'EXPEDIÇÃO', icone: <CheckCircle2 size={24} /> }
+    { id: 1, titulo: 'PERITAGEM CRIADA', responsavel: 'PERITO', icone: <div className="icon-inner"><FilePlus size={24} /></div> },
+    { id: 2, titulo: 'PERITAGEM FINALIZADA', responsavel: 'PERITO', icone: <div className="icon-inner"><CheckSquare size={24} /></div> },
+    { id: 3, titulo: 'AGUARDANDO COMPRAS', responsavel: 'COMPRADOR', icone: <div className="icon-inner"><ShoppingCart size={24} /></div> },
+    { id: 4, titulo: 'CUSTOS INSERIDOS', responsavel: 'COMPRADOR', icone: <div className="icon-inner"><DollarSign size={24} /></div> },
+    { id: 5, titulo: 'AGUARDANDO ORÇAMENTO', responsavel: 'ORÇAMENTISTA', icone: <div className="icon-inner"><Zap size={24} /></div> },
+    { id: 6, titulo: 'ORÇAMENTO FINALIZADO', responsavel: 'ORÇAMENTISTA', icone: <div className="icon-inner"><CheckCircle2 size={24} /></div> }
 ];
 
 const getEtapaIndex = (status: string) => {
-    const idx = ETAPAS.findIndex(e => e.titulo === status);
-    return idx !== -1 ? idx + 1 : 1;
+    const s = (status || "").toUpperCase();
+    if (s === 'PERITAGEM CRIADA' || s === 'AGUARDANDO APROVAÇÃO DO PCP') return 1;
+    if (s === 'PERITAGEM FINALIZADA') return 2;
+    if (s === 'AGUARDANDO COMPRAS') return 3;
+    if (s === 'CUSTOS INSERIDOS') return 4;
+    if (s === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || s === 'AGUARDANDO CLIENTES' || s === 'AGUARDANDO ORÇAMENTO') return 5;
+    if (s === 'EM MANUTENÇÃO' || s === 'CILINDROS EM MANUTENÇÃO' || s === 'AGUARDANDO CONFERÊNCIA FINAL') return 5;
+    if (s === 'PROCESSO FINALIZADO' || s === 'FINALIZADOS' || s === 'ORÇAMENTO FINALIZADO') return 6;
+    return 1;
 };
 
 export const Monitoramento: React.FC = () => {
@@ -35,6 +63,8 @@ export const Monitoramento: React.FC = () => {
     const [selectedProcess, setSelectedProcess] = useState<Processo | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+    const [historico, setHistorico] = useState<Historico[]>([]);
+    const [selectedStepInfo, setSelectedStepInfo] = useState<Historico | null>(null);
 
     useEffect(() => {
         fetchProcessos();
@@ -42,30 +72,27 @@ export const Monitoramento: React.FC = () => {
 
     const fetchProcessos = async () => {
         try {
+            setLoading(true);
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('*')
+                .select(`
+                    *,
+                    criador:profiles!criado_por(full_name)
+                `)
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro Supabase:', error);
+                // Fallback para busca sem join se o join falhar por algum motivo de relação
+                const { data: fallbackData, error: fallbackError } = await supabase
+                    .from('peritagens')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (data) {
-                const mapped = data.map((p: any) => ({
-                    id: p.id,
-                    os: p.numero_peritagem || p.os || 'S/N',
-                    cliente: p.cliente,
-                    equipamento: p.equipamento || 'Cilindro Hidráulico',
-                    etapaAtual: getEtapaIndex(p.status),
-                    statusTexto: p.status
-                }));
-                setProcessos(mapped);
-
-                // Auto-selecionar se vier ID via URL
-                const idFromUrl = searchParams.get('id');
-                if (idFromUrl) {
-                    const found = mapped.find((m: any) => m.id === idFromUrl);
-                    if (found) setSelectedProcess(found);
-                }
+                if (fallbackError) throw fallbackError;
+                processMappedData(fallbackData || []);
+            } else {
+                processMappedData(data || []);
             }
         } catch (err) {
             console.error('Erro ao buscar processos:', err);
@@ -74,9 +101,90 @@ export const Monitoramento: React.FC = () => {
         }
     };
 
-    const { user } = useAuth(); // Contexto Auth
+    const processMappedData = (data: any[]) => {
+        const mapped = data.map((p: any) => ({
+            id: p.id,
+            os: p.numero_peritagem || p.os || 'S/N',
+            cliente: p.cliente || 'Sem Cliente',
+            equipamento: p.equipamento || 'Cilindro Hidráulico',
+            etapaAtual: getEtapaIndex(p.status),
+            statusTexto: p.status || 'PERITAGEM CRIADA',
+            numero_pedido: p.numero_pedido,
+            ordem_servico: p.ordem_servico,
+            nota_fiscal: p.nota_fiscal,
+            camisa_int: p.camisa_int,
+            camisa_ext: p.camisa_ext,
+            camisa_comp: p.camisa_comp,
+            haste_diam: p.haste_diam,
+            haste_comp: p.haste_comp,
+            curso: p.curso,
+            created_at: p.created_at,
+            criado_por_nome: p.criador?.full_name || 'Usuário do Sistema'
+        }));
 
-    const handleUpdateStatus = async (newStatus: string) => {
+        setProcessos(mapped);
+
+        // Auto-selecionar se vier ID via URL
+        const idFromUrl = searchParams.get('id');
+        if (idFromUrl) {
+            const found = mapped.find((m: any) => m.id === idFromUrl);
+            if (found) setSelectedProcess(found);
+        }
+    };
+
+    const fetchHistory = async (peritagemId: string) => {
+        try {
+            // Primeiro, pegamos o histórico de mudanças de status
+            const { data: histData, error: histError } = await supabase
+                .from('peritagem_historico')
+                .select(`
+                    id,
+                    status_novo,
+                    created_at,
+                    alterado_por
+                `)
+                .eq('peritagem_id', peritagemId)
+                .order('created_at', { ascending: true });
+
+            if (histError) throw histError;
+
+            // Buscamos os nomes dos perfis separadamente para garantir o join
+            const userIds = [...new Set(histData?.map(h => h.alterado_por) || [])];
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, full_name, role')
+                .in('id', userIds);
+
+            // Mapeamos os dados
+            const mappedHist = histData?.map(h => {
+                const profile = profiles?.find(p => p.id === h.alterado_por);
+                return {
+                    id: h.id,
+                    status_novo: h.status_novo,
+                    created_at: h.created_at,
+                    responsavel_nome: profile?.full_name || 'Usuário do Sistema',
+                    responsavel_cargo: profile?.role?.toUpperCase() || 'COLABORADOR'
+                };
+            }) || [];
+
+            setHistorico(mappedHist);
+        } catch (err) {
+            console.error('Erro ao buscar histórico:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedProcess) {
+            fetchHistory(selectedProcess.id);
+            setSelectedStepInfo(null);
+        }
+    }, [selectedProcess]);
+
+    const { user, role } = useAuth(); // Contexto Auth
+
+    const [pedidoInput, setPedidoInput] = useState('');
+
+    const handleUpdateStatus = async (newStatus: string, additionalData: any = {}) => {
         if (!selectedProcess || !user) return;
 
         const oldStatus = selectedProcess.statusTexto;
@@ -85,7 +193,10 @@ export const Monitoramento: React.FC = () => {
             // 1. Atualizar Peritagem
             const { error } = await supabase
                 .from('peritagens')
-                .update({ status: newStatus })
+                .update({
+                    status: newStatus,
+                    ...additionalData
+                })
                 .eq('id', selectedProcess.id);
 
             if (error) throw error;
@@ -99,9 +210,15 @@ export const Monitoramento: React.FC = () => {
             }]);
 
             // Atualiza localmente
-            const updated = { ...selectedProcess, statusTexto: newStatus, etapaAtual: getEtapaIndex(newStatus) };
+            const updated = {
+                ...selectedProcess,
+                ...additionalData,
+                statusTexto: newStatus,
+                etapaAtual: getEtapaIndex(newStatus)
+            };
             setSelectedProcess(updated);
             setProcessos(prev => prev.map(p => p.id === updated.id ? updated : p));
+            setPedidoInput(''); // Limpa input de pedido
             alert(`Status atualizado para: ${newStatus}`);
         } catch (err: any) {
             console.error('Erro ao atualizar status:', err);
@@ -109,10 +226,31 @@ export const Monitoramento: React.FC = () => {
         }
     };
 
-    const filteredProcessos = processos.filter(p =>
-        p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.os.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filterParams = searchParams.get('filter');
+
+    const filteredProcessos = processos.filter(p => {
+        const cValue = (p.cliente || "").toLowerCase();
+        const osValue = (p.os || "").toLowerCase();
+        const search = searchTerm.toLowerCase();
+
+        const matchesSearch = cValue.includes(search) || osValue.includes(search);
+
+        if (!filterParams) return matchesSearch;
+
+        const status = (p.statusTexto || "").toUpperCase();
+
+        if (filterParams === 'pcp') {
+            return matchesSearch && (status === 'PERITAGEM CRIADA' || status === 'AGUARDANDO APROVAÇÃO DO PCP');
+        }
+        if (filterParams === 'cliente') {
+            return matchesSearch && (status === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || status === 'Aguardando Clientes');
+        }
+        if (filterParams === 'finalizar') {
+            return matchesSearch && (status === 'EM MANUTENÇÃO' || status === 'Cilindros em Manutenção' || status === 'AGUARDANDO CONFERÊNCIA FINAL');
+        }
+
+        return matchesSearch;
+    });
 
     if (selectedProcess) {
         return (
@@ -124,89 +262,273 @@ export const Monitoramento: React.FC = () => {
 
                 <div className="process-header-summary">
                     <div className="summary-left">
-                        <span className="summary-label">MONITORAMENTO: {selectedProcess.os} - {selectedProcess.cliente}</span>
-                        <h1 className="current-step-title">
-                            Etapa Atual: <span className="highlight">{selectedProcess.statusTexto}</span>
-                        </h1>
+                        <span className="monitoring-label">
+                            <Loader2 size={14} className="spinning-icon" /> MONITORAMENTO DE PROCESSO
+                        </span>
+                        <h2 className="current-step-title">
+                            Etapa atual: <span className="highlight-status">{selectedProcess.statusTexto}</span>
+                        </h2>
                     </div>
-                    <div className="responsible-card">
-                        <div className="user-icon-bg">
+                    <div className="responsible-card-new">
+                        <div className="user-icon-container">
                             <User size={24} />
                         </div>
-                        <div className="responsible-info">
-                            <span className="info-label">SETOR RESPONSÁVEL</span>
-                            <span className="info-value">{ETAPAS[selectedProcess.etapaAtual - 1]?.responsavel}</span>
+                        <div className="responsible-text">
+                            <span className="label">SETOR RESPONSÁVEL</span>
+                            <span className="value">{ETAPAS[selectedProcess.etapaAtual - 1]?.responsavel}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* AREA DE AÇÃO DO PCP */}
-                {selectedProcess.statusTexto === 'AGUARDANDO APROVAÇÃO DO PCP' && (
+                {/* AREA DE AÇÃO DO PCP / GESTOR */}
+                {(role === 'pcp' || role === 'gestor') && (
                     <div className="pcp-actions-card">
-                        <h3>Aprovação do PCP</h3>
-                        <p>Verifique se o formulário e os itens da peritagem estão corretos antes de prosseguir.</p>
-                        <div className="pcp-buttons">
-                            <button
-                                className="btn-approve"
-                                onClick={() => handleUpdateStatus('AGUARDANDO APROVAÇÃO DO CLIENTE')}
-                            >
-                                <Check size={18} />
-                                <span>Aprovar Peritagem</span>
-                            </button>
-                            <button
-                                className="btn-reject"
-                                onClick={() => handleUpdateStatus('REVISÃO NECESSÁRIA')}
-                            >
-                                <XCircle size={18} />
-                                <span>Solicitar Revisão</span>
-                            </button>
-                        </div>
+                        <h3>Controle de Processo (Ações PCP)</h3>
+
+                        {(selectedProcess.statusTexto === 'AGUARDANDO APROVAÇÃO DO PCP' || selectedProcess.statusTexto === 'PERITAGEM CRIADA') && (
+                            <>
+                                <p>Verifique os dados da peritagem abaixo antes de aprovar:</p>
+
+                                <div className="peritagem-details-grid" style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                                    gap: '1rem',
+                                    background: 'white',
+                                    padding: '1.5rem',
+                                    borderRadius: '12px',
+                                    marginBottom: '1.5rem',
+                                    border: '1px solid #e2e8f0'
+                                }}>
+                                    <div className="detail-item"><strong>O.S.:</strong> {selectedProcess.ordem_servico || '---'}</div>
+                                    <div className="detail-item"><strong>N.F.:</strong> {selectedProcess.nota_fiscal || '---'}</div>
+                                    <div className="detail-item"><strong>C. Interna:</strong> {selectedProcess.camisa_int || '---'}mm</div>
+                                    <div className="detail-item"><strong>C. Externa:</strong> {selectedProcess.camisa_ext || '---'}mm</div>
+                                    <div className="detail-item"><strong>C. Comprim.:</strong> {selectedProcess.camisa_comp || '---'}mm</div>
+                                    <div className="detail-item"><strong>H. Diâmetro:</strong> {selectedProcess.haste_diam || '---'}mm</div>
+                                    <div className="detail-item"><strong>H. Comprim.:</strong> {selectedProcess.haste_comp || '---'}mm</div>
+                                    <div className="detail-item"><strong>Curso:</strong> {selectedProcess.curso || '---'}mm</div>
+                                </div>
+
+                                <div className="pcp-buttons">
+                                    <button
+                                        className="btn-approve"
+                                        onClick={() => handleUpdateStatus('AGUARDANDO APROVAÇÃO DO CLIENTE')}
+                                    >
+                                        <Check size={18} />
+                                        <span>Aprovar Peritagem</span>
+                                    </button>
+                                    <button
+                                        className="btn-reject"
+                                        onClick={() => handleUpdateStatus('REVISÃO NECESSÁRIA')}
+                                    >
+                                        <XCircle size={18} />
+                                        <span>Solicitar Revisão</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {(selectedProcess.statusTexto === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || selectedProcess.statusTexto === 'Aguardando Clientes') && (
+                            <>
+                                <p>Informe o número do pedido do cliente para liberar para manutenção:</p>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <input
+                                        type="text"
+                                        className="pcp-input"
+                                        placeholder="Digite o número do pedido..."
+                                        value={pedidoInput}
+                                        onChange={(e) => setPedidoInput(e.target.value)}
+                                        style={{
+                                            padding: '0.75rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid #cbd5e0',
+                                            width: '100%',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+                                <div className="pcp-buttons">
+                                    <button
+                                        className="btn-approve"
+                                        disabled={!pedidoInput}
+                                        onClick={() => handleUpdateStatus('EM MANUTENÇÃO', { numero_pedido: pedidoInput })}
+                                    >
+                                        <ShoppingCart size={18} />
+                                        <span>Aprovar Liberação do Cliente</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {(selectedProcess.statusTexto === 'EM MANUTENÇÃO' || selectedProcess.statusTexto === 'Cilindros em Manutenção') && (
+                            <>
+                                <p>A manutenção foi concluída? Envie para conferência final do PCP.</p>
+                                <div className="pcp-buttons">
+                                    <button
+                                        className="btn-approve"
+                                        onClick={() => handleUpdateStatus('AGUARDANDO CONFERÊNCIA FINAL')}
+                                    >
+                                        <Wrench size={18} />
+                                        <span>Finalizar Manutenção</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {selectedProcess.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (
+                            <>
+                                <p>Confira todos os dados e o pedido <strong>#{selectedProcess.numero_pedido}</strong> antes de finalizar o processo.</p>
+                                <div className="pcp-buttons">
+                                    <button
+                                        className="btn-approve"
+                                        onClick={() => handleUpdateStatus('PROCESSO FINALIZADO')}
+                                    >
+                                        <CheckCircle2 size={18} />
+                                        <span>Aprovar Finalização e Expedir</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {selectedProcess.statusTexto === 'PROCESSO FINALIZADO' && (
+                            <p style={{ color: '#38a169', fontWeight: 'bold' }}>✅ Este processo já foi finalizado e aprovado.</p>
+                        )}
+
+                        {selectedProcess.statusTexto === 'REVISÃO NECESSÁRIA' && (
+                            <p style={{ color: '#e53e3e', fontWeight: 'bold' }}>⚠️ Aguardando revisão dos dados da peritagem.</p>
+                        )}
                     </div>
                 )}
 
-                {/* BOTÕES PARA AVANÇAR ETAPAS (DEV/TESTE) */}
-                <div className="dev-actions" style={{ marginTop: '20px', padding: '10px', background: '#f7fafc', borderRadius: '8px' }}>
-                    <small style={{ display: 'block', marginBottom: '5px', color: '#718096' }}>Controle Manual de Status:</small>
-                    <button style={{ marginRight: '10px' }} onClick={() => handleUpdateStatus('EM MANUTENÇÃO')}>Mover para Manutenção</button>
-                    <button onClick={() => handleUpdateStatus('PROCESSO FINALIZADO')}>Finalizar Processo</button>
-                </div>
+                <h2 className="page-title" style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Monitoramento de Processos</h2>
 
-                <div className="timeline-horizontal">
+                <div className="timeline-grid">
                     {ETAPAS.map((etapa, index) => {
                         const isCompleted = etapa.id < selectedProcess.etapaAtual;
                         const isActive = etapa.id === selectedProcess.etapaAtual;
                         const isPending = etapa.id > selectedProcess.etapaAtual;
 
+                        let stageHistory = historico.find(h => getEtapaIndex(h.status_novo) === etapa.id);
+
+                        if (etapa.id === 1 && !stageHistory && selectedProcess) {
+                            stageHistory = {
+                                id: 'initial',
+                                status_novo: 'PERITAGEM CRIADA',
+                                created_at: selectedProcess.created_at || '',
+                                responsavel_nome: selectedProcess.criado_por_nome || 'Sistema (Criação)',
+                                responsavel_cargo: 'SISTEMA'
+                            };
+                        }
+
+                        const canClick = !!stageHistory;
+
                         return (
                             <React.Fragment key={etapa.id}>
-                                <div className={`timeline-card ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isPending ? 'pending' : ''}`}>
-                                    <span className="step-number">0{etapa.id}</span>
-                                    <div className="step-icon">
+                                <div
+                                    className={`stage-card ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isPending ? 'pending' : ''} ${canClick ? 'clickable' : ''}`}
+                                    onClick={() => canClick && setSelectedStepInfo(stageHistory!)}
+                                >
+                                    <span className="stage-number">{etapa.id < 10 ? `0${etapa.id}` : etapa.id}</span>
+
+                                    <div className="stage-icon-box">
                                         {etapa.icone}
                                     </div>
-                                    <h4 className="step-title">{etapa.titulo}</h4>
-                                    <span className="step-responsible">{etapa.responsavel}</span>
-                                    {isActive && <div className="active-badge">ATIVO</div>}
+
+                                    <div className="stage-content">
+                                        <h4 className="stage-title">{etapa.titulo}</h4>
+                                        <span className="stage-responsible-role">{etapa.responsavel}</span>
+                                    </div>
+
+                                    {isActive && <div className="active-pill">ATIVO</div>}
                                 </div>
                                 {index < ETAPAS.length - 1 && (
-                                    <div className="timeline-connector">
-                                        <ChevronRight size={16} />
+                                    <div className="stage-connector">
+                                        <ChevronRight size={24} />
                                     </div>
                                 )}
                             </React.Fragment>
                         );
                     })}
                 </div>
-            </div>
+
+                <div className="timeline-footer">
+                    <div className="legend">
+                        <div className="legend-item"><span className="dot dot-executed"></span> EXECUTADO</div>
+                        <div className="legend-item"><span className="dot dot-active"></span> ETAPA ATUAL</div>
+                        <div className="legend-item"><span className="dot dot-pending"></span> PENDENTE</div>
+                    </div>
+
+                    <div className="instruction-text">
+                        CLIQUE NOS CARDS PARA VER DETALHES
+                    </div>
+
+                    <div className="process-id-display">
+                        O.S: {selectedProcess.os}
+                    </div>
+                </div>
+
+                {/* MODAL DE HISTÓRICO - ESTILO PREMIUM COM DESFOQUE */}
+                {
+                    selectedStepInfo && (
+                        <div className="history-modal-overlay" onClick={() => setSelectedStepInfo(null)}>
+                            <div className="history-modal-content" onClick={e => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <div className="modal-icon-container">
+                                        {ETAPAS.find(e => getEtapaIndex(selectedStepInfo.status_novo) === e.id)?.icone || <ClipboardCheck size={24} />}
+                                    </div>
+                                    <div className="modal-header-text">
+                                        <h3>{selectedStepInfo.status_novo}</h3>
+                                        <span>INFORMAÇÕES DE EXECUÇÃO</span>
+                                    </div>
+                                    <button className="modal-close-x" onClick={() => setSelectedStepInfo(null)}>
+                                        <XCircle size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="modal-body">
+                                    <div className="info-row">
+                                        <div className="info-icon-box"><CheckCircle2 size={20} color="#3182ce" /></div>
+                                        <div className="info-text-box">
+                                            <label>EXECUTADO EM</label>
+                                            <strong>{selectedStepInfo.created_at ? new Date(selectedStepInfo.created_at).toLocaleDateString('pt-BR') : '---'}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <div className="info-icon-box"><Loader2 size={20} color="#3182ce" /></div>
+                                        <div className="info-text-box">
+                                            <label>HORÁRIO</label>
+                                            <strong>{selectedStepInfo.created_at ? new Date(selectedStepInfo.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '---'}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <div className="info-icon-box"><User size={20} color="#3182ce" /></div>
+                                        <div className="info-text-box">
+                                            <label>RESPONSÁVEL</label>
+                                            <strong>{selectedStepInfo.responsavel_nome}</strong>
+                                            <span className="sub-role" style={{ fontSize: '0.75rem', marginTop: '2px', opacity: 0.8 }}>
+                                                {selectedStepInfo.responsavel_cargo}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button className="modal-close-btn" onClick={() => setSelectedStepInfo(null)}>
+                                    FECHAR DETALHES
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
+            </div >
         );
     }
 
     return (
         <div className="monitoramento-container list-view">
-            <div style={{ background: '#ffeb3b', padding: '10px', textAlign: 'center', marginBottom: '20px', borderRadius: '8px', border: '1px solid #d97706', color: '#000', fontWeight: 'bold' }}>
-                ⚠️ VERSÃO ATUALIZADA (V3.0) - SE VOCÊ VÊ ISSO, O CÓDIGO NOVO CARREGOU.
-            </div>
-            <h1 className="page-title">Monitoramento de Processos (Atualizado)</h1>
+
+            <h1 className="page-title" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Monitoramento de Processos</h1>
             <p className="page-subtitle">Selecione uma peritagem para visualizar a linha do tempo e o status atual.</p>
 
             <div className="search-bar">
@@ -229,21 +551,83 @@ export const Monitoramento: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        {filteredProcessos.map(processo => (
-                            <div key={processo.id} className="process-card" onClick={() => setSelectedProcess(processo)}>
-                                <div className="process-info">
-                                    <span className="process-tag">{processo.os}</span>
-                                    <h3 className="process-title">{processo.cliente}</h3>
-                                    <span className="process-client">{processo.equipamento}</span>
+                        {filteredProcessos.map(processo => {
+                            const showActions = (role === 'pcp' || role === 'gestor');
+                            const isPcpAwaiting = processo.statusTexto === 'PERITAGEM CRIADA' || processo.statusTexto === 'AGUARDANDO APROVAÇÃO DO PCP';
+                            const isClientAwaiting = processo.statusTexto === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || processo.statusTexto === 'Aguardando Clientes';
+                            const isMaintenance = processo.statusTexto === 'EM MANUTENÇÃO' || processo.statusTexto === 'Cilindros em Manutenção';
+
+                            return (
+                                <div key={processo.id} className="process-card">
+                                    <div className="process-main-info" onClick={() => setSelectedProcess(processo)}>
+                                        <div className="process-info">
+                                            <span className="process-tag">{processo.os}</span>
+                                            <h3 className="process-title">{processo.cliente}</h3>
+                                            <span className="process-client">{processo.equipamento}</span>
+                                        </div>
+
+                                        <div className="process-flow-indicator">
+                                            {ETAPAS.map(e => (
+                                                <div
+                                                    key={e.id}
+                                                    className={`flow-dot ${e.id <= processo.etapaAtual ? 'filled' : ''} ${e.id === processo.etapaAtual ? 'current' : ''}`}
+                                                    title={e.titulo}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        <div className="process-status-wrapper">
+                                            <span className={`status-badge ${processo.statusTexto.toLowerCase().replace(/ /g, '-')}`}>
+                                                {processo.statusTexto}
+                                            </span>
+                                            <ChevronRight size={20} color="#cbd5e0" />
+                                        </div>
+                                    </div>
+
+                                    {showActions && (
+                                        <div className="process-quick-actions">
+                                            {isPcpAwaiting && (
+                                                <button
+                                                    className="btn-quick-approve"
+                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus('AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
+                                                >
+                                                    <Check size={16} />
+                                                    <span>Aprovar Peritagem</span>
+                                                </button>
+                                            )}
+                                            {isClientAwaiting && (
+                                                <button
+                                                    className="btn-quick-client"
+                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus('EM MANUTENÇÃO'); }}
+                                                >
+                                                    <ShoppingCart size={16} />
+                                                    <span>Liberar Pedido</span>
+                                                </button>
+                                            )}
+                                            {isMaintenance && (
+                                                <button
+                                                    className="btn-quick-finish"
+                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus('AGUARDANDO CONFERÊNCIA FINAL'); }}
+                                                >
+                                                    <Wrench size={16} />
+                                                    <span>Finalizar Oficina</span>
+                                                </button>
+                                            )}
+                                            {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (
+                                                <button
+                                                    className="btn-quick-finish"
+                                                    style={{ background: '#2d3748' }}
+                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus('PROCESSO FINALIZADO'); }}
+                                                >
+                                                    <CheckCircle2 size={16} />
+                                                    <span>Conferir e Finalizar</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="process-status-wrapper">
-                                    <span className={`status-badge ${processo.statusTexto.toLowerCase().replace(/ /g, '-')}`}>
-                                        {processo.statusTexto}
-                                    </span>
-                                    <ChevronRight size={20} color="#cbd5e0" />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {filteredProcessos.length === 0 && (
                             <div className="no-results">Nenhum processo encontrado.</div>
                         )}

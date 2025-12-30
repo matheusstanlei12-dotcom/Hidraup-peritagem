@@ -43,13 +43,23 @@
 
 .nav-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* Align to top for multiline consistency */
     gap: 12px;
-    padding: 12px 16px;
+    padding: 10px 16px;
+    /* Slightly reduced vertical padding */
     color: #4a5568;
     border-radius: 8px;
     transition: all 0.2s;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    /* Slightly smaller font to fit text better */
+    line-height: 1.25;
+}
+
+.nav-item svg {
+    margin-top: 2px;
+    /* Small offset to center icon with first line of text */
+    flex-shrink: 0;
 }
 
 .nav-item:hover {
@@ -58,9 +68,17 @@
 }
 
 .nav-item.active {
-    background-color: #f0fff4;
-    color: var(--primary);
-    font-weight: 500;
+    background-color: #ebf8ff;
+    /* Light blue for active (matches PCP theme) */
+    color: #2b6cb0;
+    font-weight: 600;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background-color: #edf2f7;
+    margin: 8px 16px;
+    /* Match gap spacing */
 }
 
 .sidebar-footer {

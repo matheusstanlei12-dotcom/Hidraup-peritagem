@@ -96,10 +96,30 @@ export const Manutencao: React.FC = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <button className="btn-action" onClick={() => navigate(`/monitoramento?id=${p.id}`)}>
-                                            <span>VER STATUS</span>
-                                            <ExternalLink size={16} />
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button className="btn-action" onClick={() => navigate(`/monitoramento?id=${p.id}`)}>
+                                                <span>STATUS</span>
+                                                <ExternalLink size={16} />
+                                            </button>
+                                            <button
+                                                className="btn-action"
+                                                style={{ background: '#38a169', color: 'white' }}
+                                                onClick={async () => {
+                                                    const { error } = await supabase
+                                                        .from('peritagens')
+                                                        .update({ status: 'AGUARDANDO CONFERÊNCIA FINAL' })
+                                                        .eq('id', p.id);
+
+                                                    if (!error) {
+                                                        alert('Finalizado e enviado para conferência do PCP!');
+                                                        window.location.reload();
+                                                    }
+                                                }}
+                                            >
+                                                <span>FINALIZAR</span>
+                                                <Wrench size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

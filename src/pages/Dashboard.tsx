@@ -1,5 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import {
     FileText,
     DollarSign,
@@ -30,11 +32,16 @@ ChartJS.register(
 );
 
 export const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
+    const { role } = useAuth();
     const [counts, setCounts] = React.useState({
         total: 0,
         aguardando: 0,
         manutencao: 0,
-        finalizados: 0
+        finalizados: 0,
+        pendentePcp: 0,
+        aguardandoCliente: 0,
+        conferenciaFinal: 0
     });
     const [loading, setLoading] = React.useState(true);
 
@@ -52,11 +59,13 @@ export const Dashboard: React.FC = () => {
 
             if (data) {
                 const total = data.length;
-                const aguardando = data.filter(p => p.status === 'Aguardando Clientes').length;
-                const manutencao = data.filter(p => p.status === 'Cilindros em Manutenção').length;
-                const finalizados = data.filter(p => p.status === 'Finalizados' || p.status === 'ORÇAMENTO FINALIZADO').length;
+                const pendentePcp = data.filter(p => p.status === 'AGUARDANDO APROVAÇÃO DO PCP' || p.status === 'PERITAGEM CRIADA').length;
+                const aguardandoCliente = data.filter(p => p.status === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || p.status === 'Aguardando Clientes').length;
+                const manutencao = data.filter(p => p.status === 'EM MANUTENÇÃO' || p.status === 'Cilindros em Manutenção').length;
+                const conferenciaFinal = data.filter(p => p.status === 'AGUARDANDO CONFERÊNCIA FINAL').length;
+                const finalizados = data.filter(p => p.status === 'PROCESSO FINALIZADO' || p.status === 'Finalizados' || p.status === 'ORÇAMENTO FINALIZADO').length;
 
-                setCounts({ total, aguardando, manutencao, finalizados });
+                setCounts({ total, aguardando: aguardandoCliente, manutencao, finalizados, pendentePcp, aguardandoCliente, conferenciaFinal });
             }
         } catch (err) {
             console.error('Erro ao buscar estatísticas:', err);
@@ -66,10 +75,46 @@ export const Dashboard: React.FC = () => {
     };
 
     const stats = [
-        { label: 'Total de Peritagens', value: counts.total, icon: <FileText size={32} color="#3182ce" />, color: '#ebf8ff' },
-        { label: 'Aguardando Clientes', value: counts.aguardando, icon: <DollarSign size={32} color="#ed8936" />, color: '#fffaf0' },
-        { label: 'Cilindros em Manutenção', value: counts.manutencao, icon: <Wrench size={32} color="#38a169" />, color: '#f0fff4' },
-        { label: 'Finalizados', value: counts.finalizados, icon: <CheckCircle2 size={32} color="#48bb78" />, color: '#f0fff4' },
+        {
+            label: '1. Aprovar Peritagem',
+            value: counts.pendentePcp,
+            icon: <FileText size={32} color="#3182ce" />,
+            color: '#ebf8ff',
+            link: '/pcp/aprovar',
+            show: role === 'pcp' || role === 'gestor'
+        },
+        {
+            label: '2. Liberar Pedido',
+            value: counts.aguardandoCliente,
+            icon: <DollarSign size={32} color="#ed8936" />,
+            color: '#fffaf0',
+            link: '/pcp/liberar',
+            show: role === 'pcp' || role === 'gestor'
+        },
+        {
+            label: '3. Conferência Final',
+            value: counts.conferenciaFinal,
+            icon: <CheckCircle2 size={32} color="#2d3748" />,
+            color: '#edf2f7',
+            link: '/pcp/finalizar',
+            show: role === 'pcp' || role === 'gestor'
+        },
+        {
+            label: 'Em Manutenção',
+            value: counts.manutencao,
+            icon: <Wrench size={32} color="#38a169" />,
+            color: '#f0fff4',
+            link: '/monitoramento',
+            show: true
+        },
+        {
+            label: 'Finalizados',
+            value: counts.finalizados,
+            icon: <CheckCircle2 size={32} color="#48bb78" />,
+            color: '#f0fff4',
+            link: '/monitoramento',
+            show: true
+        },
     ];
 
     const barData = {
@@ -85,11 +130,11 @@ export const Dashboard: React.FC = () => {
     };
 
     const doughnutData = {
-        labels: ['Finalizados', 'Total de Peritagens', 'Pendentes'],
+        labels: ['Finalizados', 'PCP Aprovação', 'Liberação Pedido', 'Oficina', 'Conferência'],
         datasets: [
             {
-                data: [0, 1, 0],
-                backgroundColor: ['#48bb78', '#3182ce', '#e53e3e'],
+                data: [counts.finalizados, counts.pendentePcp, counts.aguardandoCliente, counts.manutencao, counts.conferenciaFinal],
+                backgroundColor: ['#48bb78', '#3182ce', '#ed8936', '#ecc94b', '#2d3748'],
                 borderWidth: 0,
             },
         ],
@@ -97,14 +142,19 @@ export const Dashboard: React.FC = () => {
 
     return (
         <div className="dashboard-container">
-            <h1 className="page-title">Visão Geral do Sistema</h1>
+            <h1 className="page-title">Painel de Controle HIDRAUP</h1>
 
             {loading ? (
                 <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando dados...</div>
             ) : (
                 <div className="stats-grid">
-                    {stats.map((stat, index) => (
-                        <div key={index} className="stat-card" style={{ backgroundColor: '#ffffff' }}>
+                    {stats.filter(s => s.show).map((stat, index) => (
+                        <div
+                            key={index}
+                            className="stat-card clickable"
+                            style={{ backgroundColor: '#ffffff', cursor: 'pointer' }}
+                            onClick={() => navigate(stat.link)}
+                        >
                             <div className="stat-icon-wrapper" style={{ backgroundColor: stat.color }}>
                                 {stat.icon}
                             </div>
