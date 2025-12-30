@@ -4,6 +4,9 @@ import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import './Monitoramento.css';
 
+// Atualizado: Fluxo de PCP
+
+
 interface Processo {
     id: string;
     os: string;

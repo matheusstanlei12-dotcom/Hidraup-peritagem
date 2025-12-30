@@ -13,6 +13,7 @@
     /* Firefox */
     -ms-overflow-style: none;
     /* IE/Edge */
+    z-index: 100;
 }
 
 .sidebar::-webkit-scrollbar {
