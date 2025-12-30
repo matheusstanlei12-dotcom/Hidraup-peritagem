@@ -28,7 +28,7 @@ export const NovaPeritagem: React.FC = () => {
     // Dados Gerais
     const [formData, setFormData] = useState({
         cliente: '',
-        os: '',
+
         ordem: '',
         notaFiscal: '',
         camisaInt: '',
@@ -100,7 +100,7 @@ export const NovaPeritagem: React.FC = () => {
                 .insert([{
                     numero_peritagem: numeroPeritagem,
                     cliente: formData.cliente,
-                    os: formData.os,
+
                     ordem_servico: formData.ordem,
                     nota_fiscal: formData.notaFiscal,
                     camisa_int: formData.camisaInt,
@@ -184,10 +184,7 @@ export const NovaPeritagem: React.FC = () => {
                             <label>CLIENTE</label>
                             <input name="cliente" value={formData.cliente} onChange={handleInputChange} placeholder="Nome do Cliente" required />
                         </div>
-                        <div className="form-group">
-                            <label>O.S.</label>
-                            <input name="os" value={formData.os} onChange={handleInputChange} placeholder="Ex: 286754" />
-                        </div>
+
                         <div className="form-group">
                             <label>ORDEM DE SERVIÇO</label>
                             <input name="ordem" value={formData.ordem} onChange={handleInputChange} placeholder="Número da Ordem" />
