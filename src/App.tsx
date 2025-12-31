@@ -31,16 +31,18 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
 };
 
 function AppRoutes() {
-  const { session, loading } = useAuth();
+  const { session, loading, role } = useAuth();
 
   if (loading) return null;
 
+  const defaultPath = role === 'perito' ? "/nova-peritagem" : "/dashboard";
+
   return (
     <Routes>
-      <Route path="/login" element={session ? <Navigate to="/dashboard" /> : <LoginPage />} />
-      <Route path="/register" element={session ? <Navigate to="/dashboard" /> : <RegisterPage />} />
+      <Route path="/login" element={session ? <Navigate to={defaultPath} /> : <LoginPage />} />
+      <Route path="/register" element={session ? <Navigate to={defaultPath} /> : <RegisterPage />} />
 
-      <Route path="/" element={<Navigate to={session ? "/dashboard" : "/login"} replace />} />
+      <Route path="/" element={<Navigate to={session ? defaultPath : "/login"} replace />} />
 
       {/* Rotas Protegidas */}
       <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />

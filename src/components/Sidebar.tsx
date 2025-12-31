@@ -44,63 +44,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
             </div>
 
             <nav className="sidebar-nav">
-                {/* PAINEL - Todos veem */}
-                <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <LayoutDashboard size={20} />
-                    <span>Painel</span>
-                </NavLink>
-
-                {/* NOVA PERITAGEM - Todos veem */}
+                {/* NOVA PERITAGEM - Essencial para o executor */}
                 <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                     <PlusCircle size={20} />
                     <span>Nova Peritagem</span>
                 </NavLink>
 
-                {/* PERITAGENS - Label muda conforme role */}
+                {/* PERITAGENS - Lista de análises */}
                 <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                     <FileText size={20} />
                     <span>{role === 'perito' ? 'Minhas Peritagens' : 'Todas as Peritagens'}</span>
                 </NavLink>
 
-                {(role === 'pcp' || role === 'gestor') && (
-                    <>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <ClipboardList size={20} />
-                            <span>Status</span>
-                        </NavLink>
+                {/* STATUS/MONITORAMENTO - Acompanhar o fluxo */}
+                <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                    <ClipboardList size={20} />
+                    <span>Status de Processos</span>
+                </NavLink>
 
-                        <div className="sidebar-divider"></div>
+                {/* Ocultando Dashboard, PCP e Relatórios para todos para manter o app simples */}
 
-                        <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <ClipboardSignature size={20} />
-                            <span>1. Aprovar Peritagem</span>
-                        </NavLink>
-
-                        <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <ShoppingCart size={20} />
-                            <span>2. Aguardando liberação do pedido</span>
-                        </NavLink>
-
-                        <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <CheckCircle size={20} />
-                            <span>3. Finalizar Processos</span>
-                        </NavLink>
-
-                        <div className="sidebar-divider"></div>
-
-                        <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Wrench size={20} />
-                            <span>Cilindros em Manutenção</span>
-                        </NavLink>
-
-                        <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <FileSpreadsheet size={20} />
-                            <span>Relatórios em PDF</span>
-                        </NavLink>
-                    </>
-                )}
-
-                {/* GESTÃO DE USUÁRIOS - APENAS GESTOR */}
+                {/* GESTÃO DE USUÁRIOS - SE o gestor precisar no app */}
                 {role === 'gestor' && (
                     <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                         <Settings size={20} />

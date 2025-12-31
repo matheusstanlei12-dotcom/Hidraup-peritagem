@@ -64,6 +64,19 @@
     font-weight: 600;
 }
 
-.create-account:hover {
-    text-decoration: underline;
+@media (max-width: 480px) {
+    .login-container {
+        padding: 0;
+        background: white;
+    }
+
+    .login-card {
+        padding: 30px 20px;
+        box-shadow: none;
+        border-radius: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 }

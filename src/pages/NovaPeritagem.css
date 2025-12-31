@@ -228,7 +228,94 @@
 }
 
 @media (max-width: 768px) {
+    .nova-peritagem-container {
+        padding: 1rem;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .grid-inputs {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
     .dimensions-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.75rem;
+    }
+
+    .form-group input {
+        padding: 0.85rem;
+        font-size: 1.1rem;
+        /* Maior para facilitar digitação no celular */
+    }
+
+    /* Ajustes das Tabelas para Celular */
+    .checklist-table th,
+    .checklist-table td,
+    .vedacoes-table th,
+    .vedacoes-table td {
+        padding: 0.5rem;
+    }
+
+    .checklist-table td:nth-child(2) {
+        min-width: 150px;
+        /* Garante que a descrição não suma */
+    }
+
+    .small-input,
+    .full-input {
+        padding: 0.75rem;
+    }
+
+    .btn-add {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .form-actions-footer {
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary-large {
+        width: 100%;
+        justify-content: center;
+        padding: 1.25rem;
+        font-size: 1rem;
+    }
+
+    /* Facilita o clique no Checkbox */
+    .checklist-table td.center-cell {
+        padding: 0 1rem;
+    }
+
+    input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
+}
+
+@media (max-width: 480px) {
+    .dimensions-grid {
+        grid-template-columns: 1fr;
     }
 }

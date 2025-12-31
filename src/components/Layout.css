@@ -60,10 +60,10 @@
 
     .main-content {
         margin-left: 0 !important;
-        padding: 16px;
+        padding: 12px;
         margin-top: 60px;
-        /* Space for mobile header */
-        width: 100%;
-        box-sizing: border-box;
+        width: 100vw;
+        min-height: calc(100vh - 60px);
+        overflow-x: hidden;
     }
 }

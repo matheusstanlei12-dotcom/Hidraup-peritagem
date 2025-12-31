@@ -122,15 +122,15 @@ export const Peritagens: React.FC = () => {
                         <tbody>
                             {filteredPeritagens.map((p) => (
                                 <tr key={p.id}>
-                                    <td className="peritagem-id">{p.numero_peritagem}</td>
-                                    <td>{p.cliente}</td>
-                                    <td>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
-                                    <td>
+                                    <td className="peritagem-id" data-label="O.S">{p.numero_peritagem}</td>
+                                    <td data-label="Cliente">{p.cliente}</td>
+                                    <td data-label="Data">{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
+                                    <td data-label="Status">
                                         <span className={`status-badge ${p.status.toLowerCase().replace(/ /g, '-')}`}>
                                             {p.status}
                                         </span>
                                     </td>
-                                    <td>{p.prioridade}</td>
+                                    <td data-label="Prioridade">{p.prioridade}</td>
                                     <td>
                                         <button className="btn-action" onClick={() => navigate(`/monitoramento?id=${p.id}`)}>
                                             <span>VER STATUS</span>

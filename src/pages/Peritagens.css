@@ -122,8 +122,67 @@
     border: 1px solid #fae3c4;
 }
 
-.status-badge.cilindros-em-manutenção {
-    background-color: #f0fff4;
-    color: #38a169;
-    border: 1px solid #c6f6d5;
+@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .peritagens-table thead {
+        display: none;
+        /* Esconde cabeçalho em mobile */
+    }
+
+    .peritagens-table,
+    .peritagens-table tbody,
+    .peritagens-table tr,
+    .peritagens-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .peritagens-table tr {
+        margin-bottom: 1rem;
+        background: white;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .peritagens-table td {
+        padding: 0.5rem 0;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .peritagens-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #718096;
+        text-transform: uppercase;
+    }
+
+    .peritagem-id {
+        font-size: 1.1rem;
+        color: #2b6cb0;
+        justify-content: flex-start !important;
+    }
+
+    .peritagem-id::before {
+        display: none;
+    }
+
+    .btn-action {
+        width: 100%;
+        background: #f7fafc;
+        padding: 0.75rem;
+        border-radius: 8px;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
 }
