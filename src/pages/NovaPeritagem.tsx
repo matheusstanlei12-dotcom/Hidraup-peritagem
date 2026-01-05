@@ -293,7 +293,7 @@ export const NovaPeritagem: React.FC = () => {
                         <h3>Identificação do Equipamento</h3>
                     </div>
                     <div className="grid-form">
-                        <div className="form-group">
+                        <div className="form-group grid-col-2">
                             <label>TAG DO CILINDRO *</label>
                             <input
                                 required
@@ -302,15 +302,7 @@ export const NovaPeritagem: React.FC = () => {
                                 onChange={e => setFixedData({ ...fixedData, tag: e.target.value.toUpperCase() })}
                             />
                         </div>
-                        <div className="form-group">
-                            <label>LOCAL / EQUIPAMENTO</label>
-                            <input
-                                placeholder="Ex: Prensa 01"
-                                value={fixedData.local_equipamento}
-                                onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
+                        <div className="form-group grid-col-2">
                             <label>CLIENTE</label>
                             <input
                                 placeholder="Nome do Cliente"
@@ -318,7 +310,15 @@ export const NovaPeritagem: React.FC = () => {
                                 onChange={e => setFixedData({ ...fixedData, cliente: e.target.value })}
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="form-group grid-col-2">
+                            <label>LOCAL / EQUIPAMENTO</label>
+                            <input
+                                placeholder="Ex: Prensa 01"
+                                value={fixedData.local_equipamento}
+                                onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group grid-col-2">
                             <label>RESPONSÁVEL TÉCNICO</label>
                             <input
                                 placeholder="Nome do Responsável"
@@ -338,20 +338,32 @@ export const NovaPeritagem: React.FC = () => {
                     </div>
                     <div className="grid-dimensions">
                         <div className="dim-group">
-                            <label>Ø Interno (mm)</label>
-                            <input type="text" value={dimensions.diametroInterno} onChange={e => { setDimensions({ ...dimensions, diametroInterno: e.target.value }); setDimStatus('verde'); }} />
+                            <label>Ø Interno</label>
+                            <div className="input-with-unit">
+                                <input type="text" value={dimensions.diametroInterno} onChange={e => { setDimensions({ ...dimensions, diametroInterno: e.target.value }); setDimStatus('verde'); }} />
+                                <span className="unit">mm</span>
+                            </div>
                         </div>
                         <div className="dim-group">
-                            <label>Ø Haste (mm)</label>
-                            <input type="text" value={dimensions.diametroHaste} onChange={e => { setDimensions({ ...dimensions, diametroHaste: e.target.value }); setDimStatus('verde'); }} />
+                            <label>Ø Haste</label>
+                            <div className="input-with-unit">
+                                <input type="text" value={dimensions.diametroHaste} onChange={e => { setDimensions({ ...dimensions, diametroHaste: e.target.value }); setDimStatus('verde'); }} />
+                                <span className="unit">mm</span>
+                            </div>
                         </div>
                         <div className="dim-group">
-                            <label>Curso (mm)</label>
-                            <input type="text" value={dimensions.curso} onChange={e => { setDimensions({ ...dimensions, curso: e.target.value }); setDimStatus('verde'); }} />
+                            <label>Curso</label>
+                            <div className="input-with-unit">
+                                <input type="text" value={dimensions.curso} onChange={e => { setDimensions({ ...dimensions, curso: e.target.value }); setDimStatus('verde'); }} />
+                                <span className="unit">mm</span>
+                            </div>
                         </div>
                         <div className="dim-group">
-                            <label>Comp. Total (mm)</label>
-                            <input type="text" value={dimensions.comprimentoTotal} onChange={e => { setDimensions({ ...dimensions, comprimentoTotal: e.target.value }); setDimStatus('verde'); }} />
+                            <label>Comp. Total</label>
+                            <div className="input-with-unit">
+                                <input type="text" value={dimensions.comprimentoTotal} onChange={e => { setDimensions({ ...dimensions, comprimentoTotal: e.target.value }); setDimStatus('verde'); }} />
+                                <span className="unit">mm</span>
+                            </div>
                         </div>
                         <div className="dim-group">
                             <label>Montagem</label>
@@ -366,7 +378,10 @@ export const NovaPeritagem: React.FC = () => {
                         </div>
                         <div className="dim-group">
                             <label>Pressão Nominal</label>
-                            <input type="text" value={dimensions.pressaoNominal} onChange={e => { setDimensions({ ...dimensions, pressaoNominal: e.target.value }); setDimStatus('verde'); }} />
+                            <div className="input-with-unit">
+                                <input type="text" value={dimensions.pressaoNominal} onChange={e => { setDimensions({ ...dimensions, pressaoNominal: e.target.value }); setDimStatus('verde'); }} />
+                                <span className="unit">bar</span>
+                            </div>
                         </div>
                         <div className="dim-group full-width">
                             <label>Fabricante / Modelo</label>
