@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Camera, X, CheckCircle, AlertCircle, Save, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Camera, X, CheckCircle, AlertCircle, Save, Info, Trash2, CameraIcon, FilePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { USIMINAS_ITEMS } from '../constants/usiminasItems';
+import { STANDARD_ITEMS } from '../constants/standardItems';
 import './NovaPeritagem.css';
 
 type StatusColor = 'vermelho' | 'amarelo' | 'verde' | 'azul';
@@ -82,7 +83,17 @@ export const NovaPeritagem: React.FC = () => {
         numero_os: '',
         ni: '',
         pedido: '',
-        nota_fiscal: ''
+        nota_fiscal: '',
+        // Novos campos conforme imagem do formulário
+        desenho_conjunto: '',
+        tipo_modelo: '',
+        fabricante: '',
+        lubrificante: '',
+        volume: '',
+        acoplamento_polia: '',
+        sistema_lubrificacao: '',
+        outros_especificar: '',
+        observacoes_gerais: ''
     });
 
     // Dimensões
@@ -112,21 +123,26 @@ export const NovaPeritagem: React.FC = () => {
             if (fixedData.cliente === 'USIMINAS') {
                 list = USIMINAS_ITEMS;
             } else {
-                list = cylinderType === 'Hidráulico' ? HIDRAULICO_CHECKLIST : PNEUMATICO_CHECKLIST;
+                list = STANDARD_ITEMS;
             }
 
-            setChecklistItems(list.map(text => ({
-                id: crypto.randomUUID(),
-                text,
-                status: 'vermelho',
-                conformidade: null,
-                anomalia: '',
-                solucao: '',
-                fotos: [],
-                dimensoes: '',
-                qtd: '1',
-                tipo: 'componente'
-            })));
+            setChecklistItems(list.map((text, index) => {
+                // Itens 79, 80 e 81 do padrão têm Qtd 1 por padrão
+                const isDefaultService = !fixedData.cliente.includes('USIMINAS') && index >= 79;
+
+                return {
+                    id: crypto.randomUUID(),
+                    text,
+                    status: 'vermelho',
+                    conformidade: isDefaultService ? 'conforme' : null,
+                    anomalia: '',
+                    solucao: '',
+                    fotos: [],
+                    dimensoes: '',
+                    qtd: '1',
+                    tipo: 'componente'
+                };
+            }));
             setVedacoes([]);
         }
     }, [cylinderType, fixedData.cliente]);
@@ -257,7 +273,17 @@ export const NovaPeritagem: React.FC = () => {
                     fabricante_modelo: dimensions.fabricanteModelo,
                     foto_frontal: fotoFrontal,
                     criado_por: user?.id,
-                    status: 'AGUARDANDO APROVAÇÃO DO PCP'
+                    status: 'AGUARDANDO APROVAÇÃO DO PCP',
+                    // Novos campos de cabeçalho
+                    desenho_conjunto: fixedData.desenho_conjunto,
+                    lubrificante: fixedData.lubrificante,
+                    volume: fixedData.volume,
+                    acoplamento_polia: fixedData.acoplamento_polia,
+                    sistema_lubrificacao: fixedData.sistema_lubrificacao,
+                    outros_especificar: fixedData.outros_especificar,
+                    observacoes_gerais: fixedData.observacoes_gerais,
+                    fabricante: fixedData.fabricante,
+                    tipo_modelo: fixedData.tipo_modelo
                 }])
                 .select()
                 .single();
@@ -286,11 +312,11 @@ export const NovaPeritagem: React.FC = () => {
             const analysesVedacoes = vedacoes.map(item => ({
                 peritagem_id: peritagem.id,
                 componente: item.text,
-                conformidade: 'não conforme', // Padronizado para salvar como item a ser tratado
+                conformidade: 'não conforme',
                 anomalias: item.observacao || '',
                 solucao: '',
                 fotos: [],
-                dimensoes: '',
+                dimensoes: item.unidade || '',
                 qtd: item.qtd,
                 tipo: 'vedação',
                 status_indicador: 'azul'
@@ -432,15 +458,127 @@ export const NovaPeritagem: React.FC = () => {
                         <h3>Identificação do Equipamento</h3>
                     </div>
                     <div className="grid-form">
-                        <div className="form-group full-row">
+                        <div className="form-group">
+                            <label>CLIENTE *</label>
+                            <input
+                                required
+                                placeholder="Nome do cliente..."
+                                value={fixedData.cliente}
+                                onChange={e => setFixedData({ ...fixedData, cliente: e.target.value.toUpperCase() })}
+                            />
+                        </div>
+                        <div className="form-group">
                             <label>NÚMERO DA ORDEM DE SERVIÇO (O.S) *</label>
                             <input
                                 required
-                                placeholder="Digite o número da OS..."
+                                placeholder="Número da OS..."
                                 value={fixedData.numero_os}
                                 onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
                             />
                         </div>
+
+                        {fixedData.cliente !== 'USIMINAS' && (
+                            <>
+                                <div className="form-group">
+                                    <label>NI (NÚMERO DE IDENTIFICAÇÃO)</label>
+                                    <input
+                                        placeholder="Ex: 123456"
+                                        value={fixedData.ni}
+                                        onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>NOTA FISCAL</label>
+                                    <input
+                                        placeholder="Número da NF..."
+                                        value={fixedData.nota_fiscal}
+                                        onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group grid-col-2">
+                                    <label>DESENHO DE CONJUNTO</label>
+                                    <input
+                                        placeholder="Referência do desenho..."
+                                        value={fixedData.desenho_conjunto}
+                                        onChange={e => setFixedData({ ...fixedData, desenho_conjunto: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>TIPO/MODELO</label>
+                                    <input
+                                        placeholder="Modelo do equipamento..."
+                                        value={fixedData.tipo_modelo}
+                                        onChange={e => setFixedData({ ...fixedData, tipo_modelo: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>FABRICANTE</label>
+                                    <input
+                                        placeholder="Nome do fabricante..."
+                                        value={fixedData.fabricante}
+                                        onChange={e => setFixedData({ ...fixedData, fabricante: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>LUBRIFICANTE</label>
+                                    <input
+                                        placeholder="Tipo de lubrificante..."
+                                        value={fixedData.lubrificante}
+                                        onChange={e => setFixedData({ ...fixedData, lubrificante: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>VOLUME</label>
+                                    <input
+                                        placeholder="Volume (L)..."
+                                        value={fixedData.volume}
+                                        onChange={e => setFixedData({ ...fixedData, volume: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>RECEBIDO COM ACOPLAMENTO OU POLIA?</label>
+                                    <select
+                                        value={fixedData.acoplamento_polia}
+                                        onChange={e => setFixedData({ ...fixedData, acoplamento_polia: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="SIM">SIM</option>
+                                        <option value="NÃO">NÃO</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>SISTEMA DE LUBRIFICAÇÃO?</label>
+                                    <select
+                                        value={fixedData.sistema_lubrificacao}
+                                        onChange={e => setFixedData({ ...fixedData, sistema_lubrificacao: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="SIM">SIM</option>
+                                        <option value="NÃO">NÃO</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group full-row">
+                                    <label>OUTROS (ESPECIFICAR)</label>
+                                    <input
+                                        placeholder="Outros detalhes..."
+                                        value={fixedData.outros_especificar}
+                                        onChange={e => setFixedData({ ...fixedData, outros_especificar: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group full-row">
+                                    <label>OBSERVAÇÕES GERAIS</label>
+                                    <textarea
+                                        style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '2px solid #f1f3f5' }}
+                                        placeholder="Observações complementares..."
+                                        value={fixedData.observacoes_gerais}
+                                        onChange={e => setFixedData({ ...fixedData, observacoes_gerais: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         <div className="form-group grid-col-2">
                             <label>TAG DO CILINDRO *</label>
                             <input
@@ -451,19 +589,11 @@ export const NovaPeritagem: React.FC = () => {
                             />
                         </div>
                         <div className="form-group grid-col-2">
-                            <label>CLIENTE</label>
-                            <input
-                                placeholder="Nome do Cliente"
-                                value={fixedData.cliente}
-                                onChange={e => setFixedData({ ...fixedData, cliente: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group grid-col-2">
                             <label>LOCAL / EQUIPAMENTO</label>
                             <input
                                 placeholder="Ex: Prensa 01"
                                 value={fixedData.local_equipamento}
-                                onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value })}
+                                onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value.toUpperCase() })}
                             />
                         </div>
                         <div className="form-group grid-col-2">
@@ -474,7 +604,7 @@ export const NovaPeritagem: React.FC = () => {
                                 onChange={e => setFixedData({ ...fixedData, responsavel_tecnico: e.target.value })}
                             />
                         </div>
-                        {fixedData.cliente === 'USIMINAS' && (
+                        {fixedData.cliente === 'USIMINAS' ? (
                             <>
                                 <div className="form-group grid-col-2">
                                     <label>NI</label>
@@ -496,6 +626,104 @@ export const NovaPeritagem: React.FC = () => {
                                     <label>NOTA FISCAL</label>
                                     <input
                                         placeholder="Número da NF"
+                                        value={fixedData.nota_fiscal}
+                                        onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="form-group full-row">
+                                    <label>DESENHO DE CONJUNTO</label>
+                                    <input
+                                        placeholder="Referência do desenho..."
+                                        value={fixedData.desenho_conjunto}
+                                        onChange={e => setFixedData({ ...fixedData, desenho_conjunto: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>TIPO/MODELO</label>
+                                    <input
+                                        placeholder="Ex: H-123"
+                                        value={fixedData.tipo_modelo}
+                                        onChange={e => setFixedData({ ...fixedData, tipo_modelo: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>FABRICANTE</label>
+                                    <input
+                                        placeholder="Fabricante..."
+                                        value={fixedData.fabricante}
+                                        onChange={e => setFixedData({ ...fixedData, fabricante: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>LUBRIFICANTE</label>
+                                    <input
+                                        placeholder="Óleo, Graxa..."
+                                        value={fixedData.lubrificante}
+                                        onChange={e => setFixedData({ ...fixedData, lubrificante: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>VOLUME</label>
+                                    <input
+                                        placeholder="Volume..."
+                                        value={fixedData.volume}
+                                        onChange={e => setFixedData({ ...fixedData, volume: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>RECEBIDO COM ACOPLAMENTO OU POLIA?</label>
+                                    <select
+                                        value={fixedData.acoplamento_polia}
+                                        onChange={e => setFixedData({ ...fixedData, acoplamento_polia: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="SIM">SIM</option>
+                                        <option value="NÃO">NÃO</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>SISTEMA DE LUBRIFICAÇÃO?</label>
+                                    <select
+                                        value={fixedData.sistema_lubrificacao}
+                                        onChange={e => setFixedData({ ...fixedData, sistema_lubrificacao: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="SIM">SIM</option>
+                                        <option value="NÃO">NÃO</option>
+                                    </select>
+                                </div>
+                                <div className="form-group full-row">
+                                    <label>OUTROS (ESPECIFICAR)</label>
+                                    <input
+                                        placeholder="Outros detalhes..."
+                                        value={fixedData.outros_especificar}
+                                        onChange={e => setFixedData({ ...fixedData, outros_especificar: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group full-row">
+                                    <label>OBSERVAÇÕES GERAIS</label>
+                                    <textarea
+                                        style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '2px solid #f1f3f5' }}
+                                        placeholder="Observações complementares..."
+                                        value={fixedData.observacoes_gerais}
+                                        onChange={e => setFixedData({ ...fixedData, observacoes_gerais: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group grid-col-2">
+                                    <label>NI (IDENTIFICAÇÃO)</label>
+                                    <input
+                                        placeholder="Número NI"
+                                        value={fixedData.ni}
+                                        onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group grid-col-2">
+                                    <label>NOTA FISCAL</label>
+                                    <input
+                                        placeholder="Número NF"
                                         value={fixedData.nota_fiscal}
                                         onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
                                     />
@@ -620,6 +848,40 @@ export const NovaPeritagem: React.FC = () => {
 
                                 {item.conformidade === 'não conforme' && (
                                     <div className="non-conformity-block slide-in" onClick={(e) => e.stopPropagation()}>
+                                        {/* FOTOS EM PRIMEIRO - Conforme solicitado pelo usuário */}
+                                        <div className="photo-section" style={{ marginBottom: '1.5rem', borderBottom: '1px solid #edf2f7', paddingBottom: '1rem' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4a5568', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Evidências Fotográficas (Componente)</label>
+                                            <div className="photo-grid">
+                                                {item.fotos.map((foto, idx) => (
+                                                    <div key={idx} className="photo-preview">
+                                                        <img src={foto} alt={`Anomalia ${idx}`} />
+                                                        <button type="button" className="btn-remove-photo" onClick={() => {
+                                                            const newPhotos = item.fotos.filter((_, i) => i !== idx);
+                                                            updateItemDetails(item.id, 'fotos', newPhotos);
+                                                        }}><X size={14} /></button>
+                                                    </div>
+                                                ))}
+                                                <div className="photo-upload-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="btn-action-photo camera"
+                                                        onClick={(e) => { e.stopPropagation(); handlePhotoUpload(item.id, 'cam'); }}
+                                                    >
+                                                        <Camera size={20} />
+                                                        <span>Câmera</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn-action-photo gallery"
+                                                        onClick={(e) => { e.stopPropagation(); handlePhotoUpload(item.id, 'gallery'); }}
+                                                    >
+                                                        <Plus size={20} />
+                                                        <span>Galeria</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {fixedData.cliente === 'USIMINAS' && (
                                             <div className="usiminas-item-fields" style={{ marginBottom: '1rem' }}>
                                                 <div className="input-field" style={{ flex: '0 0 80px' }}>
@@ -716,37 +978,6 @@ export const NovaPeritagem: React.FC = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="photo-section">
-                                            <div className="photo-grid">
-                                                {item.fotos.map((foto, idx) => (
-                                                    <div key={idx} className="photo-preview">
-                                                        <img src={foto} alt={`Anomalia ${idx}`} />
-                                                        <button type="button" className="btn-remove-photo" onClick={() => {
-                                                            const newPhotos = item.fotos.filter((_, i) => i !== idx);
-                                                            updateItemDetails(item.id, 'fotos', newPhotos);
-                                                        }}><X size={14} /></button>
-                                                    </div>
-                                                ))}
-                                                <div className="photo-upload-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="btn-action-photo camera"
-                                                        onClick={(e) => { e.stopPropagation(); handlePhotoUpload(item.id, 'cam'); }}
-                                                    >
-                                                        <Camera size={20} />
-                                                        <span>Câmera</span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn-action-photo gallery"
-                                                        onClick={(e) => { e.stopPropagation(); handlePhotoUpload(item.id, 'gallery'); }}
-                                                    >
-                                                        <Plus size={20} />
-                                                        <span>Galeria</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -778,67 +1009,87 @@ export const NovaPeritagem: React.FC = () => {
                     </button>
                 </section>
 
-                {fixedData.cliente === 'USIMINAS' && (
-                    <section className="form-card">
-                        <div className="card-header">
-                            <Info size={20} color="#7f8c8d" />
-                            <h3>Vedações</h3>
+                <section className="form-card">
+                    <div className="card-header">
+                        <Info size={20} color="#7f8c8d" />
+                        <h3>Vedações</h3>
+                    </div>
+                    <div className="vedacoes-list">
+                        <div className="vedacao-row header" style={{ background: '#f8fafc', fontWeight: 'bold', fontSize: '0.7rem', display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '10px' }}>
+                            <span style={{ width: '30px' }}>N°</span>
+                            <span style={{ flex: 1 }}>DESCRIÇÃO</span>
+                            <span style={{ width: '60px', textAlign: 'center' }}>QTD</span>
+                            <span style={{ width: '60px', textAlign: 'center' }}>UN.</span>
+                            <span style={{ flex: 1 }}>OBSERVAÇÃO</span>
+                            <span style={{ width: '30px' }}></span>
                         </div>
-                        <div className="vedacoes-list">
-                            {vedacoes.map((v, idx) => (
-                                <div key={v.id} className="vedacao-row">
-                                    <input
-                                        placeholder="Descrição da vedação"
-                                        value={v.text}
-                                        onChange={e => {
-                                            const newV = [...vedacoes];
-                                            newV[idx].text = e.target.value;
-                                            setVedacoes(newV);
-                                        }}
-                                    />
-                                    <input
-                                        placeholder="Qtd"
-                                        style={{ width: '60px' }}
-                                        value={v.qtd}
-                                        onChange={e => {
-                                            const newV = [...vedacoes];
-                                            newV[idx].qtd = e.target.value;
-                                            setVedacoes(newV);
-                                        }}
-                                    />
-                                    <input
-                                        placeholder="Obs"
-                                        value={v.observacao}
-                                        onChange={e => {
-                                            const newV = [...vedacoes];
-                                            newV[idx].observacao = e.target.value;
-                                            setVedacoes(newV);
-                                        }}
-                                    />
-                                    <button type="button" onClick={() => setVedacoes(vedacoes.filter((_, i) => i !== idx))}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                        <button type="button" className="btn-add-comp" onClick={() => {
-                            setVedacoes([...vedacoes, {
-                                id: crypto.randomUUID(),
-                                text: '',
-                                qtd: '1',
-                                status: 'verde',
-                                conformidade: 'não conforme',
-                                anomalia: '',
-                                solucao: '',
-                                fotos: [],
-                                observacao: '',
-                                tipo: 'vedação'
-                            }]);
-                        }}>
-                            <Plus size={18} /> Adicionar Vedação
-                        </button>
-                    </section>
-                )}
+                        {vedacoes.map((v, idx) => (
+                            <div key={v.id} className="vedacao-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderBottom: '1px solid #f1f3f5' }}>
+                                <span style={{ width: '30px', fontSize: '0.8rem', color: '#7f8c8d', textAlign: 'center' }}>{idx + 1}</span>
+                                <input
+                                    placeholder="Descrição da vedação"
+                                    style={{ flex: 1, height: '38px' }}
+                                    value={v.text}
+                                    onChange={e => {
+                                        const newV = [...vedacoes];
+                                        newV[idx].text = e.target.value.toUpperCase();
+                                        setVedacoes(newV);
+                                    }}
+                                />
+                                <input
+                                    placeholder="Qtd"
+                                    style={{ width: '60px', height: '38px', textAlign: 'center' }}
+                                    value={v.qtd}
+                                    onChange={e => {
+                                        const newV = [...vedacoes];
+                                        newV[idx].qtd = e.target.value;
+                                        setVedacoes(newV);
+                                    }}
+                                />
+                                <input
+                                    placeholder="UN"
+                                    style={{ width: '60px', height: '38px', textAlign: 'center' }}
+                                    value={v.unidade || ''}
+                                    onChange={e => {
+                                        const newV = [...vedacoes];
+                                        newV[idx].unidade = e.target.value.toUpperCase();
+                                        setVedacoes(newV);
+                                    }}
+                                />
+                                <input
+                                    placeholder="Obs"
+                                    style={{ flex: 1, height: '38px' }}
+                                    value={v.observacao}
+                                    onChange={e => {
+                                        const newV = [...vedacoes];
+                                        newV[idx].observacao = e.target.value.toUpperCase();
+                                        setVedacoes(newV);
+                                    }}
+                                />
+                                <button type="button" style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', padding: '5px' }} onClick={() => setVedacoes(vedacoes.filter((_, i) => i !== idx))}>
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <button type="button" className="btn-add-comp" style={{ marginTop: '1.5rem' }} onClick={() => {
+                        setVedacoes([...vedacoes, {
+                            id: crypto.randomUUID(),
+                            text: '',
+                            qtd: '1',
+                            unidade: 'PC',
+                            status: 'azul',
+                            conformidade: 'não conforme',
+                            anomalia: '',
+                            solucao: '',
+                            fotos: [],
+                            observacao: '',
+                            tipo: 'vedação'
+                        }]);
+                    }}>
+                        <Plus size={18} /> Adicionar Vedação
+                    </button>
+                </section>
 
                 <div className="footer-actions">
                     <button type="submit" className="btn-finalize" disabled={loading}>
@@ -863,6 +1114,6 @@ export const NovaPeritagem: React.FC = () => {
                 accept="image/*"
                 onChange={onFileChange}
             />
-        </div>
+        </div >
     );
 };

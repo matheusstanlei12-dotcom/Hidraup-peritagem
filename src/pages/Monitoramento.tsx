@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronRight, ArrowLeft, CheckCircle2, ShoppingCart, ClipboardCheck, User, Loader2, Wrench, XCircle, Check, FilePlus, CheckSquare, DollarSign, Zap } from 'lucide-react';
+import { Search, ChevronRight, ArrowLeft, CheckCircle2, ShoppingCart, ClipboardCheck, User, Loader2, Wrench, XCircle, Check, FilePlus, CheckSquare } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,8 +24,23 @@ interface Processo {
     haste_diam?: string;
     haste_comp?: string;
     curso?: string;
+    montagem?: string;
+    pressao_nominal?: string;
+    fabricante_modelo?: string;
+    foto_frontal?: string;
     created_at?: string;
     criado_por_nome?: string;
+}
+
+interface AnaliseTecnica {
+    id: string;
+    componente: string;
+    conformidade: string;
+    anomalias?: string;
+    solucao?: string;
+    fotos?: string[];
+    dimensoes?: string;
+    qtd?: string;
 }
 
 interface Historico {
@@ -38,22 +53,21 @@ interface Historico {
 
 const ETAPAS = [
     { id: 1, titulo: 'PERITAGEM CRIADA', responsavel: 'PERITO', icone: <div className="icon-inner"><FilePlus size={24} /></div> },
-    { id: 2, titulo: 'PERITAGEM FINALIZADA', responsavel: 'PERITO', icone: <div className="icon-inner"><CheckSquare size={24} /></div> },
-    { id: 3, titulo: 'AGUARDANDO COMPRAS', responsavel: 'COMPRADOR', icone: <div className="icon-inner"><ShoppingCart size={24} /></div> },
-    { id: 4, titulo: 'CUSTOS INSERIDOS', responsavel: 'COMPRADOR', icone: <div className="icon-inner"><DollarSign size={24} /></div> },
-    { id: 5, titulo: 'AGUARDANDO ORÇAMENTO', responsavel: 'ORÇAMENTISTA', icone: <div className="icon-inner"><Zap size={24} /></div> },
-    { id: 6, titulo: 'ORÇAMENTO FINALIZADO', responsavel: 'ORÇAMENTISTA', icone: <div className="icon-inner"><CheckCircle2 size={24} /></div> }
+    { id: 2, titulo: 'EM ANÁLISE PCP', responsavel: 'PCP', icone: <div className="icon-inner"><CheckSquare size={24} /></div> },
+    { id: 3, titulo: 'AGUARDANDO CLIENTE', responsavel: 'COMERCIAL', icone: <div className="icon-inner"><User size={24} /></div> },
+    { id: 4, titulo: 'EM MANUTENÇÃO', responsavel: 'OFICINA', icone: <div className="icon-inner"><Wrench size={24} /></div> },
+    { id: 5, titulo: 'CONFERÊNCIA FINAL', responsavel: 'PCP', icone: <div className="icon-inner"><ClipboardCheck size={24} /></div> },
+    { id: 6, titulo: 'PROCESSO FINALIZADO', responsavel: 'EXPEDIÇÃO', icone: <div className="icon-inner"><CheckCircle2 size={24} /></div> }
 ];
 
 const getEtapaIndex = (status: string) => {
     const s = (status || "").toUpperCase();
-    if (s === 'PERITAGEM CRIADA' || s === 'AGUARDANDO APROVAÇÃO DO PCP') return 1;
-    if (s === 'PERITAGEM FINALIZADA') return 2;
-    if (s === 'AGUARDANDO COMPRAS') return 3;
-    if (s === 'CUSTOS INSERIDOS') return 4;
-    if (s === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || s === 'AGUARDANDO CLIENTES' || s === 'AGUARDANDO ORÇAMENTO') return 5;
-    if (s === 'EM MANUTENÇÃO' || s === 'CILINDROS EM MANUTENÇÃO' || s === 'AGUARDANDO CONFERÊNCIA FINAL') return 5;
-    if (s === 'PROCESSO FINALIZADO' || s === 'FINALIZADOS' || s === 'ORÇAMENTO FINALIZADO') return 6;
+    if (s === 'PERITAGEM CRIADA' || s === 'REVISÃO NECESSÁRIA') return 1;
+    if (s === 'AGUARDANDO APROVAÇÃO DO PCP' || s === 'PERITAGEM FINALIZADA') return 2;
+    if (s === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || s === 'AGUARDANDO CLIENTES' || s === 'AGUARDANDO ORÇAMENTO') return 3;
+    if (s === 'EM MANUTENÇÃO' || s === 'CILINDROS EM MANUTENÇÃO') return 4;
+    if (s === 'AGUARDANDO CONFERÊNCIA FINAL') return 5;
+    if (s === 'PROCESSO FINALIZADO' || s === 'FINALIZADOS' || s === 'FINALIZADO') return 6;
     return 1;
 };
 
@@ -65,6 +79,8 @@ export const Monitoramento: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [historico, setHistorico] = useState<Historico[]>([]);
     const [selectedStepInfo, setSelectedStepInfo] = useState<Historico | null>(null);
+    const [technicalAnalyses, setTechnicalAnalyses] = useState<AnaliseTecnica[]>([]);
+    const [loadingAnalyses, setLoadingAnalyses] = useState(false);
 
     useEffect(() => {
         fetchProcessos();
@@ -118,6 +134,10 @@ export const Monitoramento: React.FC = () => {
             haste_diam: p.haste_diam,
             haste_comp: p.haste_comp,
             curso: p.curso,
+            montagem: p.montagem,
+            pressao_nominal: p.pressao_nominal,
+            fabricante_modelo: p.fabricante_modelo,
+            foto_frontal: p.foto_frontal,
             created_at: p.created_at,
             criado_por_nome: p.criador?.full_name || 'Usuário do Sistema'
         }));
@@ -173,9 +193,27 @@ export const Monitoramento: React.FC = () => {
         }
     };
 
+    const fetchAnalyses = async (peritagemId: string) => {
+        try {
+            setLoadingAnalyses(true);
+            const { data, error } = await supabase
+                .from('peritagem_analise_tecnica')
+                .select('*')
+                .eq('peritagem_id', peritagemId);
+
+            if (error) throw error;
+            setTechnicalAnalyses(data || []);
+        } catch (err) {
+            console.error('Erro ao buscar análises técnicas:', err);
+        } finally {
+            setLoadingAnalyses(false);
+        }
+    };
+
     useEffect(() => {
         if (selectedProcess) {
             fetchHistory(selectedProcess.id);
+            fetchAnalyses(selectedProcess.id);
             setSelectedStepInfo(null);
         }
     }, [selectedProcess]);
@@ -285,44 +323,114 @@ export const Monitoramento: React.FC = () => {
                     <div className="pcp-actions-card">
                         <h3>Controle de Processo (Ações PCP)</h3>
 
-                        {(selectedProcess.statusTexto === 'AGUARDANDO APROVAÇÃO DO PCP' || selectedProcess.statusTexto === 'PERITAGEM CRIADA') && (
+                        {(selectedProcess.statusTexto === 'AGUARDANDO APROVAÇÃO DO PCP' || selectedProcess.statusTexto === 'PERITAGEM CRIADA' || selectedProcess.statusTexto === 'REVISÃO NECESSÁRIA') && (
                             <>
-                                <p>Verifique os dados da peritagem abaixo antes de aprovar:</p>
+                                <p style={{ marginBottom: '1.5rem', fontWeight: '500' }}>Dados da Peritagem para Aprovação:</p>
 
-                                <div className="peritagem-details-grid" style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                                    gap: '1rem',
-                                    background: 'white',
-                                    padding: '1.5rem',
-                                    borderRadius: '12px',
-                                    marginBottom: '1.5rem',
-                                    border: '1px solid #e2e8f0'
-                                }}>
-                                    <div className="detail-item"><strong>O.S.:</strong> {selectedProcess.ordem_servico || '---'}</div>
-                                    <div className="detail-item"><strong>N.F.:</strong> {selectedProcess.nota_fiscal || '---'}</div>
-                                    <div className="detail-item"><strong>C. Interna:</strong> {selectedProcess.camisa_int || '---'}mm</div>
-                                    <div className="detail-item"><strong>C. Externa:</strong> {selectedProcess.camisa_ext || '---'}mm</div>
-                                    <div className="detail-item"><strong>C. Comprim.:</strong> {selectedProcess.camisa_comp || '---'}mm</div>
-                                    <div className="detail-item"><strong>H. Diâmetro:</strong> {selectedProcess.haste_diam || '---'}mm</div>
-                                    <div className="detail-item"><strong>H. Comprim.:</strong> {selectedProcess.haste_comp || '---'}mm</div>
-                                    <div className="detail-item"><strong>Curso:</strong> {selectedProcess.curso || '---'}mm</div>
+                                <div className="peritagem-full-review">
+                                    {selectedProcess.foto_frontal && (
+                                        <div className="review-section">
+                                            <h4 className="review-subtitle">Foto Frontal do Equipamento</h4>
+                                            <div className="review-image-container">
+                                                <img src={selectedProcess.foto_frontal} alt="Frontal" className="review-image-main" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="review-section">
+                                        <h4 className="review-subtitle">Identificação e Dimensões</h4>
+                                        <div className="peritagem-details-grid">
+                                            <div className="detail-item"><strong>O.S.:</strong> {selectedProcess.os}</div>
+                                            <div className="detail-item"><strong>Cliente:</strong> {selectedProcess.cliente}</div>
+                                            <div className="detail-item"><strong>NI:</strong> {selectedProcess.id.split('-')[0].toUpperCase()}</div> {/* Fallback UI for NI if not in Processo, though selectedProcess has it from fetch */}
+                                            <div className="detail-item"><strong>N.F.:</strong> {selectedProcess.nota_fiscal || '---'}</div>
+                                            <div className="detail-item"><strong>Ø Interno:</strong> {selectedProcess.camisa_int || '---'}mm</div>
+                                            <div className="detail-item"><strong>Ø Haste:</strong> {selectedProcess.haste_diam || '---'}mm</div>
+                                            <div className="detail-item"><strong>Curso:</strong> {selectedProcess.curso || '---'}mm</div>
+                                            <div className="detail-item"><strong>Comp. Total:</strong> {selectedProcess.camisa_comp || '---'}mm</div>
+                                            <div className="detail-item"><strong>Comp. Haste:</strong> {selectedProcess.haste_comp || '---'}mm</div>
+                                            <div className="detail-item"><strong>Pressão Nom.:</strong> {selectedProcess.pressao_nominal || '---'} bar</div>
+                                            <div className="detail-item full-row"><strong>Montagem:</strong> {selectedProcess.montagem || '---'}</div>
+                                            <div className="detail-item full-row"><strong>Fabricante/Modelo:</strong> {selectedProcess.fabricante_modelo || '---'}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="review-section">
+                                        <h4 className="review-subtitle">Análise Técnica (Checklist)</h4>
+                                        {loadingAnalyses ? (
+                                            <div className="loading-mini"><Loader2 size={24} className="spinning-icon" /> Carregando análise...</div>
+                                        ) : (
+                                            <div className="analysis-review-list">
+                                                {technicalAnalyses.length > 0 ? (
+                                                    technicalAnalyses.map(analise => (
+                                                        <div key={analise.id} className={`review-item-card ${analise.conformidade === 'não conforme' ? 'not-ok' : 'ok'}`}>
+                                                            <div className="review-item-header">
+                                                                <div className="item-info">
+                                                                    <span className="item-name">{analise.componente}</span>
+                                                                    {(analise.dimensoes || analise.qtd) && (
+                                                                        <div className="item-subtext">
+                                                                            {analise.dimensoes && <span>Dim: {analise.dimensoes}</span>}
+                                                                            {analise.qtd && <span>Qtd: {analise.qtd}</span>}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <span className={`badge-conformity ${analise.conformidade === 'conforme' ? 'ok' : 'nok'}`}>
+                                                                    {analise.conformidade.toUpperCase()}
+                                                                </span>
+                                                            </div>
+
+                                                            {analise.conformidade === 'não conforme' && (
+                                                                <div className="review-item-details">
+                                                                    {analise.anomalias && (
+                                                                        <div className="detail-field">
+                                                                            <label>Anomalia</label>
+                                                                            <p>{analise.anomalias}</p>
+                                                                        </div>
+                                                                    )}
+                                                                    {analise.solucao && (
+                                                                        <div className="detail-field">
+                                                                            <label>Solução Sugerida</label>
+                                                                            <p>{analise.solucao}</p>
+                                                                        </div>
+                                                                    )}
+                                                                    {analise.fotos && analise.fotos.length > 0 && (
+                                                                        <div className="detail-field">
+                                                                            <label>Evidências Fotográficas</label>
+                                                                            <div className="review-photo-grid">
+                                                                                {analise.fotos.map((foto, idx) => (
+                                                                                    <div key={idx} className="review-photo-item" onClick={() => window.open(foto, '_blank')}>
+                                                                                        <img src={foto} alt={`Dano ${idx + 1}`} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div style={{ textAlign: 'center', padding: '1rem', color: '#718096' }}>Nenhuma análise detalhada encontrada.</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="pcp-buttons">
+                                <div className="pcp-buttons" style={{ marginTop: '2rem' }}>
                                     <button
                                         className="btn-approve"
                                         onClick={() => handleUpdateStatus('AGUARDANDO APROVAÇÃO DO CLIENTE')}
                                     >
                                         <Check size={18} />
-                                        <span>Aprovar Peritagem</span>
+                                        <span>Aprovar para Comercial</span>
                                     </button>
                                     <button
                                         className="btn-reject"
                                         onClick={() => handleUpdateStatus('REVISÃO NECESSÁRIA')}
                                     >
                                         <XCircle size={18} />
-                                        <span>Solicitar Revisão</span>
+                                        <span>Solicitar Revisão ao Perito</span>
                                     </button>
                                 </div>
                             </>
