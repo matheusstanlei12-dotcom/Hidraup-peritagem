@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Camera, X, CheckCircle, AlertCircle, Save, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { USIMINAS_ITEMS } from '../constants/usiminasItems';
 import './NovaPeritagem.css';
 
 type StatusColor = 'vermelho' | 'amarelo' | 'verde' | 'azul';
@@ -14,6 +15,14 @@ interface ChecklistItem {
     anomalia: string;
     solucao: string;
     fotos: string[];
+    dimensoes?: string;
+    qtd?: string;
+    tipo?: 'componente' | 'vedação';
+    unidade?: string;
+    observacao?: string;
+    diametro_encontrado?: string;
+    diametro_ideal?: string;
+    material_faltante?: string;
 }
 
 const HIDRAULICO_CHECKLIST = [
@@ -70,7 +79,10 @@ export const NovaPeritagem: React.FC = () => {
         data_inspecao: new Date().toISOString().split('T')[0],
         responsavel_tecnico: '',
         cliente: '',
-        numero_os: ''
+        numero_os: '',
+        ni: '',
+        pedido: '',
+        nota_fiscal: ''
     });
 
     // Dimensões
@@ -79,19 +91,30 @@ export const NovaPeritagem: React.FC = () => {
         diametroHaste: '',
         curso: '',
         comprimentoTotal: '',
+        diametroExterno: '',
+        comprimentoHaste: '',
         montagem: '',
         pressaoNominal: '',
         fabricanteModelo: ''
     });
     const [dimStatus, setDimStatus] = useState<StatusColor>('vermelho');
+    const [fotoFrontal, setFotoFrontal] = useState<string>('');
+    const frontalPhotoRef = React.useRef<HTMLInputElement>(null);
 
     // Checklist
     const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+    const [vedacoes, setVedacoes] = useState<ChecklistItem[]>([]);
 
     // Quando mudar o tipo de cilindro, inicializa o checklist
     useEffect(() => {
         if (cylinderType) {
-            const list = cylinderType === 'Hidráulico' ? HIDRAULICO_CHECKLIST : PNEUMATICO_CHECKLIST;
+            let list = [];
+            if (fixedData.cliente === 'USIMINAS') {
+                list = USIMINAS_ITEMS;
+            } else {
+                list = cylinderType === 'Hidráulico' ? HIDRAULICO_CHECKLIST : PNEUMATICO_CHECKLIST;
+            }
+
             setChecklistItems(list.map(text => ({
                 id: crypto.randomUUID(),
                 text,
@@ -99,10 +122,14 @@ export const NovaPeritagem: React.FC = () => {
                 conformidade: null,
                 anomalia: '',
                 solucao: '',
-                fotos: []
+                fotos: [],
+                dimensoes: '',
+                qtd: '1',
+                tipo: 'componente'
             })));
+            setVedacoes([]);
         }
-    }, [cylinderType]);
+    }, [cylinderType, fixedData.cliente]);
 
     // Lógica de Autoload por TAG
     useEffect(() => {
@@ -122,6 +149,8 @@ export const NovaPeritagem: React.FC = () => {
                         diametroHaste: data.haste_diam || '',
                         curso: data.curso || '',
                         comprimentoTotal: data.camisa_comp || '',
+                        diametroExterno: data.camisa_ext || '',
+                        comprimentoHaste: data.haste_comp || '',
                         montagem: data.montagem || '',
                         pressaoNominal: data.pressao_nominal || '',
                         fabricanteModelo: data.fabricante_modelo || ''
@@ -156,7 +185,7 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
-    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text', value: any) => {
+    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante', value: any) => {
         setChecklistItems(prev => prev.map(item => {
             if (item.id === itemId) {
                 // Se estiver alterando o texto de um componente novo, vira amarelo
@@ -193,7 +222,11 @@ export const NovaPeritagem: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        if (!fotoFrontal) {
+            alert('A foto frontal do equipamento é obrigatória!');
+            setLoading(false);
+            return;
+        }
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -210,13 +243,19 @@ export const NovaPeritagem: React.FC = () => {
                     local_equipamento: fixedData.local_equipamento,
                     responsavel_tecnico: fixedData.responsavel_tecnico,
                     tipo_cilindro: cylinderType,
+                    ni: fixedData.ni,
+                    numero_pedido: fixedData.pedido,
+                    nota_fiscal: fixedData.nota_fiscal,
                     camisa_int: dimensions.diametroInterno,
+                    camisa_ext: dimensions.diametroExterno,
                     haste_diam: dimensions.diametroHaste,
+                    haste_comp: dimensions.comprimentoHaste,
                     curso: dimensions.curso,
                     camisa_comp: dimensions.comprimentoTotal,
                     montagem: dimensions.montagem,
                     pressao_nominal: dimensions.pressaoNominal,
                     fabricante_modelo: dimensions.fabricanteModelo,
+                    foto_frontal: fotoFrontal,
                     criado_por: user?.id,
                     status: 'AGUARDANDO APROVAÇÃO DO PCP'
                 }])
@@ -235,13 +274,34 @@ export const NovaPeritagem: React.FC = () => {
                     anomalias: item.anomalia,
                     solucao: item.solucao,
                     fotos: item.fotos,
+                    dimensoes: item.dimensoes,
+                    qtd: item.qtd,
+                    diametro_encontrado: item.diametro_encontrado,
+                    diametro_ideal: item.diametro_ideal,
+                    material_faltante: item.material_faltante,
+                    tipo: item.tipo || 'componente',
                     status_indicador: 'azul'
                 }));
 
-            if (analyses.length > 0) {
+            const analysesVedacoes = vedacoes.map(item => ({
+                peritagem_id: peritagem.id,
+                componente: item.text,
+                conformidade: 'não conforme', // Padronizado para salvar como item a ser tratado
+                anomalias: item.observacao || '',
+                solucao: '',
+                fotos: [],
+                dimensoes: '',
+                qtd: item.qtd,
+                tipo: 'vedação',
+                status_indicador: 'azul'
+            }));
+
+            const allAnalyses = [...analyses, ...analysesVedacoes];
+
+            if (allAnalyses.length > 0) {
                 const { error: aError } = await supabase
                     .from('peritagem_analise_tecnica')
-                    .insert(analyses);
+                    .insert(allAnalyses);
                 if (aError) throw aError;
             }
 
@@ -325,6 +385,46 @@ export const NovaPeritagem: React.FC = () => {
             </header>
 
             <form className="peritagem-dynamic-form" onSubmit={handleSubmit}>
+                {/* FOTO FRONTAL OBRIGATÓRIA */}
+                <section className="form-card frontal-photo-section">
+                    <div className="card-header">
+                        <Camera size={20} color="#2980b9" />
+                        <h3>Foto Frontal do Equipamento *</h3>
+                    </div>
+                    <div className="frontal-photo-upload" onClick={() => frontalPhotoRef.current?.click()}>
+                        {fotoFrontal ? (
+                            <div className="frontal-preview">
+                                <img src={fotoFrontal} alt="Foto Frontal" />
+                                <div className="change-photo-overlay">
+                                    <Camera size={24} />
+                                    <span>Alterar Foto</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="frontal-placeholder">
+                                <Camera size={48} color="#bdc3c7" />
+                                <p>Clique para capturar ou anexar a foto frontal</p>
+                                <span>(Obrigatório)</span>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            ref={frontalPhotoRef}
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => setFotoFrontal(reader.result as string);
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                        />
+                    </div>
+                </section>
+
                 {/* CAMPOS FIXOS */}
                 <section className="form-card">
                     <div className="card-header">
@@ -374,6 +474,34 @@ export const NovaPeritagem: React.FC = () => {
                                 onChange={e => setFixedData({ ...fixedData, responsavel_tecnico: e.target.value })}
                             />
                         </div>
+                        {fixedData.cliente === 'USIMINAS' && (
+                            <>
+                                <div className="form-group grid-col-2">
+                                    <label>NI</label>
+                                    <input
+                                        placeholder="Número NI"
+                                        value={fixedData.ni}
+                                        onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group grid-col-2">
+                                    <label>PEDIDO</label>
+                                    <input
+                                        placeholder="Número do Pedido"
+                                        value={fixedData.pedido}
+                                        onChange={e => setFixedData({ ...fixedData, pedido: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div className="form-group grid-col-2">
+                                    <label>NOTA FISCAL</label>
+                                    <input
+                                        placeholder="Número da NF"
+                                        value={fixedData.nota_fiscal}
+                                        onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                            </>
+                        )}
                     </div>
                 </section>
 
@@ -420,6 +548,24 @@ export const NovaPeritagem: React.FC = () => {
                                 <span className="unit">bar</span>
                             </div>
                         </div>
+                        {fixedData.cliente === 'USIMINAS' && (
+                            <>
+                                <div className="dim-group">
+                                    <label>Ø Externo Camisa</label>
+                                    <div className="input-with-unit">
+                                        <input type="text" value={dimensions.diametroExterno} onChange={e => { setDimensions({ ...dimensions, diametroExterno: e.target.value }); setDimStatus('verde'); }} />
+                                        <span className="unit">mm</span>
+                                    </div>
+                                </div>
+                                <div className="dim-group">
+                                    <label>Comp. Haste</label>
+                                    <div className="input-with-unit">
+                                        <input type="text" value={dimensions.comprimentoHaste} onChange={e => { setDimensions({ ...dimensions, comprimentoHaste: e.target.value }); setDimStatus('verde'); }} />
+                                        <span className="unit">mm</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                         <div className="dim-group full-width">
                             <label>Fabricante / Modelo</label>
                             <input type="text" value={dimensions.fabricanteModelo} onChange={e => { setDimensions({ ...dimensions, fabricanteModelo: e.target.value }); setDimStatus('verde'); }} />
@@ -452,6 +598,8 @@ export const NovaPeritagem: React.FC = () => {
                                             <span className="item-text">{item.text}</span>
                                         )}
                                     </div>
+
+
                                     <div className="conformity-toggle">
                                         <button
                                             type="button"
@@ -472,6 +620,84 @@ export const NovaPeritagem: React.FC = () => {
 
                                 {item.conformidade === 'não conforme' && (
                                     <div className="non-conformity-block slide-in" onClick={(e) => e.stopPropagation()}>
+                                        {fixedData.cliente === 'USIMINAS' && (
+                                            <div className="usiminas-item-fields" style={{ marginBottom: '1rem' }}>
+                                                <div className="input-field" style={{ flex: '0 0 80px' }}>
+                                                    <label>Qtd</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Qtd"
+                                                        value={item.qtd}
+                                                        onChange={e => updateItemDetails(item.id, 'qtd', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="input-field" style={{ flex: 1 }}>
+                                                    <label>Dimensões</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Dimensões"
+                                                        value={item.dimensoes}
+                                                        onChange={e => updateItemDetails(item.id, 'dimensoes', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="usiminas-diametros-calc" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div className="input-field">
+                                                <label>Diâmetro Encontrado</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.001"
+                                                    placeholder="0.000"
+                                                    value={item.diametro_encontrado || ''}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        const ideal = parseFloat(item.diametro_ideal || '0');
+                                                        const found = parseFloat(val || '0');
+                                                        const diff = (ideal - found).toFixed(3);
+                                                        updateItemDetails(item.id, 'diametro_encontrado', val);
+                                                        updateItemDetails(item.id, 'material_faltante', diff);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="input-field">
+                                                <label>Diâmetro Ideal</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.001"
+                                                    placeholder="0.000"
+                                                    value={item.diametro_ideal || ''}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        const found = parseFloat(item.diametro_encontrado || '0');
+                                                        const ideal = parseFloat(val || '0');
+                                                        const diff = (ideal - found).toFixed(3);
+                                                        updateItemDetails(item.id, 'diametro_ideal', val);
+                                                        updateItemDetails(item.id, 'material_faltante', diff);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="input-field">
+                                                <label style={{ color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                    Material Faltante
+                                                </label>
+                                                <div className="calc-result" style={{
+                                                    background: parseFloat(item.material_faltante || '0') < 0 ? '#fff5f5' : '#f0fff4',
+                                                    border: `2px solid ${parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60'}`,
+                                                    borderRadius: '0.75rem',
+                                                    height: '3rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontWeight: 'bold',
+                                                    color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60'
+                                                }}>
+                                                    {item.material_faltante || '0.000'} mm
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="analysis-inputs">
                                             <div className="input-field">
                                                 <label>Anomalia encontrada</label>
@@ -543,13 +769,76 @@ export const NovaPeritagem: React.FC = () => {
                             conformidade: null,
                             anomalia: '',
                             solucao: '',
-                            fotos: []
+                            fotos: [],
+                            tipo: 'componente'
                         };
                         setChecklistItems([...checklistItems, newItem]);
                     }}>
                         <Plus size={18} /> Adicionar Componente
                     </button>
                 </section>
+
+                {fixedData.cliente === 'USIMINAS' && (
+                    <section className="form-card">
+                        <div className="card-header">
+                            <Info size={20} color="#7f8c8d" />
+                            <h3>Vedações</h3>
+                        </div>
+                        <div className="vedacoes-list">
+                            {vedacoes.map((v, idx) => (
+                                <div key={v.id} className="vedacao-row">
+                                    <input
+                                        placeholder="Descrição da vedação"
+                                        value={v.text}
+                                        onChange={e => {
+                                            const newV = [...vedacoes];
+                                            newV[idx].text = e.target.value;
+                                            setVedacoes(newV);
+                                        }}
+                                    />
+                                    <input
+                                        placeholder="Qtd"
+                                        style={{ width: '60px' }}
+                                        value={v.qtd}
+                                        onChange={e => {
+                                            const newV = [...vedacoes];
+                                            newV[idx].qtd = e.target.value;
+                                            setVedacoes(newV);
+                                        }}
+                                    />
+                                    <input
+                                        placeholder="Obs"
+                                        value={v.observacao}
+                                        onChange={e => {
+                                            const newV = [...vedacoes];
+                                            newV[idx].observacao = e.target.value;
+                                            setVedacoes(newV);
+                                        }}
+                                    />
+                                    <button type="button" onClick={() => setVedacoes(vedacoes.filter((_, i) => i !== idx))}>
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <button type="button" className="btn-add-comp" onClick={() => {
+                            setVedacoes([...vedacoes, {
+                                id: crypto.randomUUID(),
+                                text: '',
+                                qtd: '1',
+                                status: 'verde',
+                                conformidade: 'não conforme',
+                                anomalia: '',
+                                solucao: '',
+                                fotos: [],
+                                observacao: '',
+                                tipo: 'vedação'
+                            }]);
+                        }}>
+                            <Plus size={18} /> Adicionar Vedação
+                        </button>
+                    </section>
+                )}
 
                 <div className="footer-actions">
                     <button type="submit" className="btn-finalize" disabled={loading}>

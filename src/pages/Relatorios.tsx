@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, FileText, Download, Loader2 } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import { ReportTemplate } from '../components/ReportTemplate';
+import { UsiminasReportTemplate } from '../components/UsiminasReportTemplate';
 import { supabase } from '../lib/supabase';
 import { generateTechnicalOpinion } from '../lib/reportUtils';
 import './Relatorios.css';
@@ -26,6 +27,11 @@ interface Peritagem {
     setor?: string;
     local_equipamento?: string;
     responsavel_tecnico?: string;
+    ni?: string;
+    numero_pedido?: string;
+    camisa_ext?: string;
+    haste_comp?: string;
+    foto_frontal?: string;
     itens?: any[];
 }
 
@@ -77,27 +83,72 @@ export const Relatorios: React.FC = () => {
 
             const reportData = {
                 laudoNum: String(peritagem.numero_peritagem || ''),
+                numero_os: String(peritagem.numero_peritagem || ''),
                 data: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleDateString('pt-BR') : '',
                 hora: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
                 area: String(peritagem.setor || 'GERAL'),
                 linha: String(peritagem.local_equipamento || 'OFICINA'),
+                local_equipamento: String(peritagem.local_equipamento || 'OFICINA'),
                 equipamento: String(peritagem.equipamento || 'CILINDRO HIDRÁULICO'),
                 tag: String(peritagem.tag || 'N/A'),
                 material: 'AÇO INDUSTRIAL',
                 desenho: 'N/A',
                 cliente: String(peritagem.cliente || ''),
-                os: String(peritagem.os || ''),
-                notaFiscal: String(peritagem.nota_fiscal || ''),
-                itens: (analise || []).map((i: any, idx: number) => ({
-                    id: idx + 1,
-                    desc: String(i.componente || ''),
-                    especificacao: '-',
-                    quantidade: '1',
-                    avaria: String(i.anomalias || 'SEM ANOMALIAS'),
-                    recuperacao: String(i.solucao || 'N/A'),
-                    foto: i.fotos && i.fotos.length > 0 ? i.fotos[0] : undefined
-                })),
-                parecerTecnico: String(parecer || '')
+                nota_fiscal: String(peritagem.nota_fiscal || ''),
+                ni: String(peritagem.ni || ''),
+                pedido: String(peritagem.numero_pedido || ''),
+                camisa_ext: String(peritagem.camisa_ext || ''),
+                haste_comp: String(peritagem.haste_comp || ''),
+                camisa_int: String(peritagem.camisa_int || ''),
+                camisa_comp: String(peritagem.camisa_comp || ''),
+                haste_diam: String(peritagem.haste_diam || ''),
+                curso: String(peritagem.curso || ''),
+                responsavel_tecnico: String(peritagem.responsavel_tecnico || ''),
+                logo_trusteng: '/logo.png',
+                itens: (analise || [])
+                    .filter((i: any) => i.conformidade === 'conforme' || i.conformidade === 'não conforme')
+                    .map((i: any, idx: number) => ({
+                        id: idx + 1,
+                        desc: String(i.componente || ''),
+                        especificacao: '-',
+                        quantidade: String(i.qtd || '1'),
+                        avaria: String(i.anomalias || ''),
+                        recuperacao: String(i.solucao || ''),
+                        conformidade: String(i.conformidade || 'conforme'),
+                        diametro_encontrado: i.diametro_encontrado,
+                        diametro_ideal: i.diametro_ideal,
+                        material_faltante: i.material_faltante,
+                        foto: i.fotos && i.fotos.length > 0 ? i.fotos[0] : undefined
+                    })),
+                items: (analise || [])
+                    .filter((i: any) => i.tipo !== 'vedação' && (i.conformidade === 'conforme' || i.conformidade === 'não conforme'))
+                    .map((i: any, idx: number) => ({
+                        id: idx + 1,
+                        descricao: String(i.componente || ''),
+                        qtd: String(i.qtd || '1'),
+                        dimensoes: String(i.dimensoes || '-'),
+                        conformidade: String(i.conformidade || ''),
+                        selecionado: i.conformidade === 'não conforme',
+                        diametro_encontrado: i.diametro_encontrado,
+                        diametro_ideal: i.diametro_ideal,
+                        material_faltante: i.material_faltante,
+                        anomalias: i.anomalias,
+                        solucao: i.solucao,
+                        fotos: i.fotos || []
+                    })),
+                vedacoes: (analise || [])
+                    .filter((i: any) => i.tipo === 'vedação' && (i.conformidade === 'conforme' || i.conformidade === 'não conforme'))
+                    .map((i: any) => ({
+                        descricao: String(i.componente || ''),
+                        qtd: String(i.qtd || '1'),
+                        unidade: 'UN',
+                        observacao: String(i.anomalias || ''),
+                        conformidade: String(i.conformidade || 'conforme'),
+                        selecionado: i.conformidade === 'não conforme'
+                    })),
+                parecer_tecnico: String(parecer || ''),
+                parecerTecnico: String(parecer || ''),
+                foto_frontal: peritagem.foto_frontal
             };
 
             setFullReportData(reportData);
@@ -119,7 +170,11 @@ export const Relatorios: React.FC = () => {
             const data = await handleGenerateData(peritagem);
             if (!data) return;
 
-            const blob = await pdf(<ReportTemplate data={data} />).toBlob();
+            const template = peritagem.cliente.toUpperCase() === 'USIMINAS'
+                ? <UsiminasReportTemplate data={data} />
+                : <ReportTemplate data={data} />;
+
+            const blob = await pdf(template).toBlob();
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;

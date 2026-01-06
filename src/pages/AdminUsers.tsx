@@ -6,10 +6,10 @@ import './AdminUsers.css';
 
 interface UserProfile {
     id: string;
-    email: string; // Nota: profiles precisa ter email, se não tiver, pegar de auth é dificil pelo client. Assumindo que tem ou vamos pegar.
+    email: string;
     full_name: string;
     role: string;
-    status: string; // 'PENDENTE' | 'APROVADO'
+    status: string;
     created_at: string;
 }
 
@@ -22,24 +22,16 @@ export const AdminUsers: React.FC = () => {
     }, []);
 
     const fetchUsers = async () => {
-        console.log('🔍 AdminUsers: Fetching users...');
         try {
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*');
 
-            console.log('📊 AdminUsers: Query result:', { data, error });
-
-            if (error) {
-                console.error('❌ AdminUsers: Error from Supabase:', error);
-                throw error;
-            }
-
-            console.log(`✅ AdminUsers: Loaded ${data?.length || 0} users`);
+            if (error) throw error;
             setUsers(data || []);
         } catch (error: any) {
-            console.error('💥 AdminUsers: Exception:', error);
-            alert(`Não foi possível carregar os usuários.\n\nErro: ${error.message || 'Desconhecido'}`);
+            console.error('Erro ao buscar usuários:', error);
+            alert('Não foi possível carregar os usuários.');
         } finally {
             setLoading(false);
         }
@@ -70,6 +62,22 @@ export const AdminUsers: React.FC = () => {
             setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
         } catch (error) {
             alert('Erro ao atualizar função.');
+        }
+    };
+
+    const handleDeleteUser = async (id: string, name: string) => {
+        if (!window.confirm(`Tem certeza que deseja excluir o usuário ${name}?`)) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            setUsers(users.filter(u => u.id !== id));
+        } catch (error: any) {
+            alert('Erro ao excluir usuário: ' + error.message);
         }
     };
 
@@ -129,7 +137,11 @@ export const AdminUsers: React.FC = () => {
                                                     <Check size={18} />
                                                 </button>
                                             )}
-                                            <button className="btn-delete-user" title="Excluir/Bloquear">
+                                            <button
+                                                className="btn-delete-user"
+                                                title="Excluir Usuário"
+                                                onClick={() => handleDeleteUser(user.id, user.full_name)}
+                                            >
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>

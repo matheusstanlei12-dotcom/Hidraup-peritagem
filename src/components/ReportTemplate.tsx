@@ -182,6 +182,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 1,
     },
+    statusConforme: {
+        fontSize: 10,
+        color: '#27ae60',
+        fontWeight: 'bold',
+    },
 
     // Parecer Técnico
     parecerBox: {
@@ -249,9 +254,14 @@ interface ReportData {
         quantidade: string;
         avaria: string;
         recuperacao: string;
+        conformidade: string;
+        diametro_encontrado?: string;
+        diametro_ideal?: string;
+        material_faltante?: string;
         foto?: string;
     }>;
     parecerTecnico?: string;
+    foto_frontal?: string;
 }
 
 const Footer = () => (
@@ -298,6 +308,13 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
                 </View>
             </View>
 
+            {data.foto_frontal && (
+                <View style={{ marginBottom: 20, alignItems: 'center' }}>
+                    <Image src={data.foto_frontal} style={{ width: '100%', maxHeight: 250, objectFit: 'contain', borderRadius: 5 }} />
+                    <Text style={{ fontSize: 8, color: '#64748b', marginTop: 5, textAlign: 'center' }}>VISTA GERAL DO EQUIPAMENTO NO RECEBIMENTO</Text>
+                </View>
+            )}
+
             <Text style={styles.sectionTitle}>1. Identificação do Equipamento e Ativo</Text>
             <View style={styles.infoGrid}>
                 <View style={styles.infoItem}><Text style={styles.infoLabel}>CLIENTE</Text><Text style={styles.infoValue}>{data.cliente}</Text></View>
@@ -309,33 +326,80 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
             </View>
 
             <Text style={styles.sectionTitle}>2. Diagnóstico Detalhado por Componente</Text>
-            {data.itens && data.itens.map((item, idx) => (
-                <View key={idx} style={styles.itemBox} break={idx > 0 && idx % 2 === 0}>
-                    <View style={styles.itemHeader}>
-                        <Text>ITEM {idx + 1}: {item.desc}</Text>
-                    </View>
-                    <View style={styles.itemContent}>
-                        <View style={styles.itemImageColumn}>
-                            {item.foto ? (
-                                <Image src={item.foto} style={styles.itemImage} />
-                            ) : (
-                                <View style={[styles.itemImage, { justifyContent: 'center', alignItems: 'center' }]}>
-                                    <Text style={{ color: '#cbd5e1', fontSize: 8 }}>SEM REGISTRO FOTOGRÁFICO</Text>
-                                </View>
-                            )}
+            {data.itens && data.itens.map((item, idx) => {
+                const isNaoConforme = item.conformidade === 'não conforme';
+
+                if (!isNaoConforme) {
+                    return (
+                        <View key={idx} style={[styles.itemHeader, { marginBottom: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0fff4', borderLeftColor: '#27ae60' }]}>
+                            <Text>ITEM {idx + 1}: {item.desc}</Text>
+                            <Text style={styles.statusConforme}>CONFORME</Text>
                         </View>
-                        <View style={styles.itemDataColumn}>
-                            <View style={styles.dataField}><Text style={styles.dataLabel}>Especificação Técnica</Text><Text style={styles.dataValue}>{item.especificacao}</Text></View>
-                            <View style={styles.dataField}><Text style={styles.dataLabel}>Quantidade</Text><Text style={styles.dataValue}>{item.quantidade}</Text></View>
-                            <View style={styles.dataField}><Text style={styles.dataLabel}>Anomalias Detectadas</Text><Text style={styles.dataAlert}>{item.avaria}</Text></View>
-                            <View style={[styles.dataField, { borderTopWidth: 1, borderTopColor: '#f1f5f9', borderTopStyle: 'solid', paddingTop: 5, marginTop: 5 }]}>
-                                <Text style={styles.dataLabel}>Recomendação de Reparo</Text>
-                                <Text style={styles.dataValue}>{item.recuperacao}</Text>
+                    );
+                }
+
+                return (
+                    <View key={idx} style={styles.itemBox} break={idx > 0 && idx % 2 === 0}>
+                        <View style={[styles.itemHeader, { backgroundColor: '#fff5f5', borderLeftColor: '#e74c3c' }]}>
+                            <Text>ITEM {idx + 1}: {item.desc}</Text>
+                        </View>
+                        <View style={styles.itemContent}>
+                            <View style={styles.itemImageColumn}>
+                                {item.foto ? (
+                                    <Image src={item.foto} style={styles.itemImage} />
+                                ) : (
+                                    <View style={[styles.itemImage, { justifyContent: 'center', alignItems: 'center' }]}>
+                                        <Text style={{ color: '#cbd5e1', fontSize: 8 }}>SEM REGISTRO FOTOGRÁFICO</Text>
+                                    </View>
+                                )}
+                            </View>
+                            <View style={styles.itemDataColumn}>
+                                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.dataLabel}>Qtd</Text>
+                                        <Text style={styles.dataValue}>{item.quantidade}</Text>
+                                    </View>
+                                    <View style={{ flex: 2 }}>
+                                        <Text style={styles.dataLabel}>Status</Text>
+                                        <Text style={styles.dataAlert}>NÃO CONFORME</Text>
+                                    </View>
+                                </View>
+
+                                {(item.diametro_encontrado || item.diametro_ideal) && (
+                                    <View style={{ backgroundColor: '#f8fafc', padding: 5, borderRadius: 4, marginBottom: 8 }}>
+                                        <Text style={[styles.dataLabel, { marginBottom: 3 }]}>Medições Técnicas (mm)</Text>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <View>
+                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Encontrado</Text>
+                                                <Text style={{ fontSize: 8 }}>{item.diametro_encontrado || '0.000'}</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Ideal</Text>
+                                                <Text style={{ fontSize: 8 }}>{item.diametro_ideal || '0.000'}</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Faltante</Text>
+                                                <Text style={{ fontSize: 8, color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60', fontWeight: 'bold' }}>
+                                                    {item.material_faltante || '0.000'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+
+                                <View style={styles.dataField}>
+                                    <Text style={styles.dataLabel}>Anomalias Detectadas</Text>
+                                    <Text style={styles.dataValue}>{item.avaria}</Text>
+                                </View>
+                                <View style={[styles.dataField, { borderTopWidth: 1, borderTopColor: '#f1f5f9', borderTopStyle: 'solid', paddingTop: 5, marginTop: 5 }]}>
+                                    <Text style={styles.dataLabel}>Recomendação de Reparo</Text>
+                                    <Text style={styles.dataValue}>{item.recuperacao}</Text>
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            ))}
+                );
+            })}
 
             <Footer />
         </Page>
