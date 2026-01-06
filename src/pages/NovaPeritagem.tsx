@@ -282,6 +282,17 @@ export const NovaPeritagem: React.FC = () => {
                         <button className={`type-btn ${cylinderType === 'Pneumático' ? 'active' : ''}`} onClick={() => setCylinderType('Pneumático')}>
                             Cilindro Pneumático
                         </button>
+                        <div className="divider-or">ou atalho rápido</div>
+                        <button
+                            className="type-btn usiminas-btn"
+                            onClick={() => {
+                                setCylinderType('Hidráulico');
+                                setFixedData(prev => ({ ...prev, cliente: 'USIMINAS' }));
+                                setStep(1);
+                            }}
+                        >
+                            <span className="btn-label">Cliente Usiminas</span>
+                        </button>
                     </div>
                     {cylinderType && (
                         <button className="btn-start" onClick={() => setStep(1)}>

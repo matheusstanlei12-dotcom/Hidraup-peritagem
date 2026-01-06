@@ -109,6 +109,51 @@
     box-shadow: 0 0.5rem 1.5rem rgba(41, 128, 185, 0.3);
 }
 
+.divider-or {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.divider-or::before,
+.divider-or::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.usiminas-btn {
+    border-color: #005696;
+    /* Azul Usiminas */
+    color: #005696;
+    background: #f0f7ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.usiminas-btn:hover {
+    background: #e1effe;
+    border-color: #e67e22;
+    /* Laranja Usiminas no hover */
+    color: #e67e22;
+}
+
+.usiminas-btn .btn-label {
+    font-size: 1.125rem;
+    font-weight: 800;
+}
+
 .btn-start {
     width: 100%;
     height: var(--btn-height-mobile);
