@@ -444,13 +444,12 @@ export const NovaPeritagem: React.FC = () => {
                     </div>
                 </section>
 
-                {/* CAMPOS FIXOS */}
                 <section className="form-card">
-                    <div className="card-header">
-                        <CheckCircle size={20} color="#2980b9" />
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <h3 style={{ margin: 0 }}>FORMULÁRIO DE PERITAGEM</h3>
-                            <span style={{ fontSize: '0.7rem', color: '#7f8c8d' }}>CILINDROS HIDRÁULICOS E PNEUMÁTICOS | PÁG.: 1 DE 2</span>
+                    <div className="card-header main-card-header">
+                        <CheckCircle className="header-icon-blue" />
+                        <div className="header-titles">
+                            <h3>FORMULÁRIO DE PERITAGEM</h3>
+                            <span className="subtitle">CILINDROS HIDRÁULICOS E PNEUMÁTICOS | PÁG.: 1 DE 2</span>
                         </div>
                     </div>
                     <div className="grid-form">
@@ -732,10 +731,9 @@ export const NovaPeritagem: React.FC = () => {
                         <div className="checklist-header-row">
                             <span className="cl-num">N°</span>
                             <span className="cl-desc">DESCRIÇÃO DE PEÇAS / SERVIÇOS</span>
-                            <span className="cl-x">X</span>
-                            <span className="cl-qtd">QTD</span>
-                            <span className="cl-dim">DIMENSÕES</span>
-                            <span className="cl-status">STATUS</span>
+                            <span className="cl-x"></span>
+                            <span className="cl-qtd"></span>
+                            <span className="cl-dim"></span>
                         </div>
                         {checklistItems.map((item, index) => (
                             <div key={item.id} className="checklist-row" onClick={() => handleChecklistItemClick(item.id)}>
@@ -785,8 +783,6 @@ export const NovaPeritagem: React.FC = () => {
                                                 style={{ width: '100%', border: 'none', background: 'transparent' }}
                                             />
                                         </div>
-
-                                        {renderIndicator(item.status)}
                                     </div>
 
 

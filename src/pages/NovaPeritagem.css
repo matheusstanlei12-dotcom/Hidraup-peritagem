@@ -27,8 +27,9 @@
 .nova-peritagem-container {
     padding: 0;
     width: 100%;
-    max-width: 100vw;
-    background-color: var(--bg-color);
+    max-width: 100%;
+    background-color: #ffffff;
+    /* White background to match the "enquadrar" request */
     min-height: 100vh;
     font-family: var(--font-family);
     color: var(--text-main);
@@ -298,12 +299,9 @@
     top: 0;
     z-index: 1000;
     background: #ffffff;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     display: flex !important;
-    flex-direction: column !important;
-    /* Força empilhamento no mobile */
-    align-items: flex-start !important;
     gap: 1rem;
     width: 100% !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -392,23 +390,24 @@
 
 /* Formulário e Cards */
 .peritagem-dynamic-form {
-    padding: 1.5rem;
+    padding: 0;
     padding-bottom: 8rem;
     width: 100%;
-    max-width: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0;
+    /* Removing gaps between sections for seamless fit */
 }
 
 .form-card {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 1.75rem;
-    box-shadow: var(--shadow);
+    background: #ffffff;
+    border-radius: 0;
+    /* Edge to edge */
+    padding: 2rem 1.5rem;
     width: 100%;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
     transition: var(--transition);
 }
 
@@ -428,10 +427,44 @@
 
 .card-header h3 {
     margin: 0;
-    font-size: 1.125rem;
-    color: var(--text-main);
+    font-size: 1.25rem;
+    color: var(--primary);
     font-weight: 800;
     flex-grow: 1;
+    letter-spacing: -0.01em;
+}
+
+.main-card-header {
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.main-card-header .header-icon-blue {
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary);
+    stroke-width: 2.5px;
+}
+
+.main-card-header .header-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.main-card-header h3 {
+    font-size: 1.5rem !important;
+    letter-spacing: -0.01em;
+    color: var(--primary);
+}
+
+.main-card-header .subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
 }
 
 .status-dot {
@@ -469,7 +502,7 @@
 }
 
 .form-group label {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: var(--text-muted);
     text-transform: uppercase;

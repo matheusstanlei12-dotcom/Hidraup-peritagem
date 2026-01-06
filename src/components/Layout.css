@@ -6,10 +6,12 @@
 .main-content {
     flex: 1;
     margin-left: var(--sidebar-width);
-    padding: 1.5rem;
+    padding: 0;
+    /* Removed padding for edge-to-edge look */
     background-color: var(--bg-main);
     transition: var(--transition);
     max-width: calc(100vw - var(--sidebar-width));
+    min-height: 100vh;
 }
 
 .mobile-header {
