@@ -258,6 +258,15 @@ interface ReportData {
         diametro_encontrado?: string;
         diametro_ideal?: string;
         material_faltante?: string;
+        diametro_externo_encontrado?: string;
+        diametro_externo_especificado?: string;
+        desvio_externo?: string;
+        diametro_interno_encontrado?: string;
+        diametro_interno_especificado?: string;
+        desvio_interno?: string;
+        comprimento_encontrado?: string;
+        comprimento_especificado?: string;
+        desvio_comprimento?: string;
         foto?: string;
     }>;
     parecerTecnico?: string;
@@ -365,25 +374,64 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
                                     </View>
                                 </View>
 
-                                {(item.diametro_encontrado || item.diametro_ideal) && (
+                                {(item.diametro_externo_encontrado || item.diametro_externo_especificado || item.diametro_interno_encontrado || item.diametro_interno_especificado || item.comprimento_encontrado || item.comprimento_especificado) && (
                                     <View style={{ backgroundColor: '#f8fafc', padding: 5, borderRadius: 4, marginBottom: 8 }}>
-                                        <Text style={[styles.dataLabel, { marginBottom: 3 }]}>Medições Técnicas (mm)</Text>
-                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <View>
-                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Ideal</Text>
-                                                <Text style={{ fontSize: 8 }}>{item.diametro_ideal || '0.000'}</Text>
+                                        {(item.diametro_externo_encontrado || item.diametro_externo_especificado) && (
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Ext. Espec.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.diametro_externo_especificado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Ext. Enc.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.diametro_externo_encontrado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Desvio</Text>
+                                                    <Text style={{ fontSize: 8, color: parseFloat(item.desvio_externo || '0') < 0 ? '#e74c3c' : '#27ae60', fontWeight: 'bold' }}>
+                                                        {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
+                                                    </Text>
+                                                </View>
                                             </View>
-                                            <View>
-                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Encontrado</Text>
-                                                <Text style={{ fontSize: 8 }}>{item.diametro_encontrado || '0.000'}</Text>
+                                        )}
+
+                                        {(item.diametro_interno_encontrado || item.diametro_interno_especificado) && (
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Int. Espec.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.diametro_interno_especificado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Int. Enc.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.diametro_interno_encontrado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Desvio</Text>
+                                                    <Text style={{ fontSize: 8, color: parseFloat(item.desvio_interno || '0') < 0 ? '#e74c3c' : '#27ae60', fontWeight: 'bold' }}>
+                                                        {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
+                                                    </Text>
+                                                </View>
                                             </View>
-                                            <View>
-                                                <Text style={{ fontSize: 6, color: '#64748b' }}>Desvio</Text>
-                                                <Text style={{ fontSize: 8, color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60', fontWeight: 'bold' }}>
-                                                    {item.material_faltante || '0.000'}
-                                                </Text>
+                                        )}
+
+                                        {(item.comprimento_encontrado || item.comprimento_especificado) && (
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Comp. Espec.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.comprimento_especificado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Comp. Enc.</Text>
+                                                    <Text style={{ fontSize: 8 }}>{item.comprimento_encontrado || '-'}</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={{ fontSize: 6, color: '#64748b' }}>Desvio</Text>
+                                                    <Text style={{ fontSize: 8, color: parseFloat(item.desvio_comprimento || '0') < 0 ? '#e74c3c' : '#27ae60', fontWeight: 'bold' }}>
+                                                        {item.desvio_comprimento ? `${parseFloat(item.desvio_comprimento) >= 0 ? '+' : ''}${item.desvio_comprimento.replace('.', ',')} mm` : '-'}
+                                                    </Text>
+                                                </View>
                                             </View>
-                                        </View>
+                                        )}
                                     </View>
                                 )}
 

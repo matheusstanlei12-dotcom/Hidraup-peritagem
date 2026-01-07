@@ -434,21 +434,66 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                                     <Text style={styles.analysisValue}>{item.dimensoes || '-'}</Text>
                                 </View>
                             </View>
-                            {(item.diametro_encontrado || item.diametro_ideal) && (
+                            {/* Diâmetro Externo */}
+                            {(item.diametro_externo_encontrado || item.diametro_externo_especificado) && (
                                 <View style={styles.analysisRow}>
                                     <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Diâmetro Ideal</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_ideal || '0.000'}</Text>
+                                        <Text style={styles.analysisLabel}>Ø Ext. Espec. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.diametro_externo_especificado || '-'}</Text>
                                     </View>
                                     <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Diâmetro Encontrado</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_encontrado || '0.000'}</Text>
+                                        <Text style={styles.analysisLabel}>Ø Ext. Enc. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.diametro_externo_encontrado || '-'}</Text>
                                     </View>
                                     <View style={styles.analysisField}>
                                         <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
                                         <View style={styles.materialFaltanteBox}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
-                                                {item.material_faltante || '0.000'} mm
+                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_externo || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
+
+                            {/* Diâmetro Interno */}
+                            {(item.diametro_interno_encontrado || item.diametro_interno_especificado) && (
+                                <View style={styles.analysisRow}>
+                                    <View style={styles.analysisField}>
+                                        <Text style={styles.analysisLabel}>Ø Int. Espec. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.diametro_interno_especificado || '-'}</Text>
+                                    </View>
+                                    <View style={styles.analysisField}>
+                                        <Text style={styles.analysisLabel}>Ø Int. Enc. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.diametro_interno_encontrado || '-'}</Text>
+                                    </View>
+                                    <View style={styles.analysisField}>
+                                        <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
+                                        <View style={styles.materialFaltanteBox}>
+                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_interno || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
+
+                            {/* Comprimento */}
+                            {(item.comprimento_encontrado || item.comprimento_especificado) && (
+                                <View style={styles.analysisRow}>
+                                    <View style={styles.analysisField}>
+                                        <Text style={styles.analysisLabel}>Comp. Espec. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.comprimento_especificado || '-'}</Text>
+                                    </View>
+                                    <View style={styles.analysisField}>
+                                        <Text style={styles.analysisLabel}>Comp. Enc. (mm)</Text>
+                                        <Text style={styles.analysisValue}>{item.comprimento_encontrado || '-'}</Text>
+                                    </View>
+                                    <View style={styles.analysisField}>
+                                        <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
+                                        <View style={styles.materialFaltanteBox}>
+                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_comprimento || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                {item.desvio_comprimento ? `${parseFloat(item.desvio_comprimento) >= 0 ? '+' : ''}${item.desvio_comprimento.replace('.', ',')} mm` : '-'}
                                             </Text>
                                         </View>
                                     </View>

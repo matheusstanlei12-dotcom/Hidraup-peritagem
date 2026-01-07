@@ -24,6 +24,16 @@ interface ChecklistItem {
     diametro_encontrado?: string;
     diametro_ideal?: string;
     material_faltante?: string;
+    // Novos campos dimensionais padronizados
+    diametro_externo_encontrado?: string;
+    diametro_externo_especificado?: string;
+    desvio_externo?: string;
+    diametro_interno_encontrado?: string;
+    diametro_interno_especificado?: string;
+    desvio_interno?: string;
+    comprimento_encontrado?: string;
+    comprimento_especificado?: string;
+    desvio_comprimento?: string;
 }
 
 const COMPONENTES = [
@@ -200,7 +210,7 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
-    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante', value: any) => {
+    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante' | 'diametro_externo_encontrado' | 'diametro_externo_especificado' | 'desvio_externo' | 'diametro_interno_encontrado' | 'diametro_interno_especificado' | 'desvio_interno' | 'comprimento_encontrado' | 'comprimento_especificado' | 'desvio_comprimento', value: any) => {
         setChecklistItems(prev => prev.map(item => {
             if (item.id === itemId) {
                 // Se estiver alterando o texto de um componente novo, vira amarelo
@@ -871,57 +881,194 @@ export const NovaPeritagem: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="usiminas-diametros-calc" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                                <div className="input-field">
-                                                    <label>Diâmetro Ideal</label>
-                                                    <input
-                                                        type="number"
-                                                        step="0.001"
-                                                        placeholder="0.000"
-                                                        value={item.diametro_ideal || ''}
-                                                        onChange={e => {
-                                                            const val = e.target.value;
-                                                            const found = parseFloat(item.diametro_encontrado || '0');
-                                                            const ideal = parseFloat(val || '0');
-                                                            const diff = (ideal - found).toFixed(3);
-                                                            updateItemDetails(item.id, 'diametro_ideal', val);
-                                                            updateItemDetails(item.id, 'material_faltante', diff);
-                                                        }}
-                                                    />
+                                            {/* BLOCO DE DIMENSÕES PADRONIZADO */}
+                                            <div className="dimensional-block" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#2d3748', borderBottom: '1px solid #cbd5e0', paddingBottom: '5px' }}>ANÁLISE DIMENSIONAL</div>
+
+                                                {/* 1. Diâmetro Externo */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Externo Encontrado Ø</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.diametro_externo_encontrado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(val || '0');
+                                                                const spec = parseFloat(item.diametro_externo_especificado || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'diametro_externo_encontrado', val);
+                                                                // Só atualiza o desvio se houver valores
+                                                                if (val && item.diametro_externo_especificado) {
+                                                                    updateItemDetails(item.id, 'desvio_externo', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_externo', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Externo Especificado Ø</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.diametro_externo_especificado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(item.diametro_externo_encontrado || '0');
+                                                                const spec = parseFloat(val || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'diametro_externo_especificado', val);
+                                                                if (val && item.diametro_externo_encontrado) {
+                                                                    updateItemDetails(item.id, 'desvio_externo', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_externo', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Desvio</label>
+                                                        <div style={{
+                                                            height: '38px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            background: '#e2e8f0',
+                                                            borderRadius: '4px',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '13px',
+                                                            color: item.desvio_externo ? (parseFloat(item.desvio_externo) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
+                                                        }}>
+                                                            {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="input-field">
-                                                    <label>Diâmetro Encontrado</label>
-                                                    <input
-                                                        type="number"
-                                                        step="0.001"
-                                                        placeholder="0.000"
-                                                        value={item.diametro_encontrado || ''}
-                                                        onChange={e => {
-                                                            const val = e.target.value;
-                                                            const ideal = parseFloat(item.diametro_ideal || '0');
-                                                            const found = parseFloat(val || '0');
-                                                            const diff = (ideal - found).toFixed(3);
-                                                            updateItemDetails(item.id, 'diametro_encontrado', val);
-                                                            updateItemDetails(item.id, 'material_faltante', diff);
-                                                        }}
-                                                    />
+
+                                                {/* 2. Diâmetro Interno */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Encontrado Ø</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.diametro_interno_encontrado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(val || '0');
+                                                                const spec = parseFloat(item.diametro_interno_especificado || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'diametro_interno_encontrado', val);
+                                                                if (val && item.diametro_interno_especificado) {
+                                                                    updateItemDetails(item.id, 'desvio_interno', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_interno', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Especificado Ø</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.diametro_interno_especificado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(item.diametro_interno_encontrado || '0');
+                                                                const spec = parseFloat(val || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'diametro_interno_especificado', val);
+                                                                if (val && item.diametro_interno_encontrado) {
+                                                                    updateItemDetails(item.id, 'desvio_interno', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_interno', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Desvio</label>
+                                                        <div style={{
+                                                            height: '38px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            background: '#e2e8f0',
+                                                            borderRadius: '4px',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '13px',
+                                                            color: item.desvio_interno ? (parseFloat(item.desvio_interno) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
+                                                        }}>
+                                                            {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="input-field">
-                                                    <label style={{ color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
-                                                        Desvio
-                                                    </label>
-                                                    <div className="calc-result" style={{
-                                                        background: parseFloat(item.material_faltante || '0') < 0 ? '#fff5f5' : '#f0fff4',
-                                                        border: `2px solid ${parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60'}`,
-                                                        borderRadius: '0.75rem',
-                                                        height: '3rem',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontWeight: 'bold',
-                                                        color: parseFloat(item.material_faltante || '0') < 0 ? '#e74c3c' : '#27ae60'
-                                                    }}>
-                                                        {item.material_faltante || '0.000'} mm
+
+                                                {/* 3. Comprimento */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Comprimento Encontrado</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.comprimento_encontrado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(val || '0');
+                                                                const spec = parseFloat(item.comprimento_especificado || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'comprimento_encontrado', val);
+                                                                if (val && item.comprimento_especificado) {
+                                                                    updateItemDetails(item.id, 'desvio_comprimento', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_comprimento', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Comprimento Especificado</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.0001"
+                                                            placeholder="0.0000"
+                                                            value={item.comprimento_especificado || ''}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                const found = parseFloat(item.comprimento_encontrado || '0');
+                                                                const spec = parseFloat(val || '0');
+                                                                const diff = (found - spec).toFixed(4);
+                                                                updateItemDetails(item.id, 'comprimento_especificado', val);
+                                                                if (val && item.comprimento_encontrado) {
+                                                                    updateItemDetails(item.id, 'desvio_comprimento', diff);
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'desvio_comprimento', '');
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Desvio</label>
+                                                        <div style={{
+                                                            height: '38px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            background: '#e2e8f0',
+                                                            borderRadius: '4px',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '13px',
+                                                            color: item.desvio_comprimento ? (parseFloat(item.desvio_comprimento) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
+                                                        }}>
+                                                            {item.desvio_comprimento ? `${parseFloat(item.desvio_comprimento) >= 0 ? '+' : ''}${item.desvio_comprimento.replace('.', ',')} mm` : '-'}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
