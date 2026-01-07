@@ -43,6 +43,7 @@ export const Dashboard: React.FC = () => {
         aguardandoCliente: 0,
         conferenciaFinal: 0
     });
+    const [clientStats, setClientStats] = React.useState<{ name: string; count: number }[]>([]);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
@@ -53,7 +54,7 @@ export const Dashboard: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('status');
+                .select('status, cliente');
 
             if (error) throw error;
 
@@ -66,6 +67,20 @@ export const Dashboard: React.FC = () => {
                 const finalizados = data.filter(p => p.status === 'PROCESSO FINALIZADO' || p.status === 'Finalizados' || p.status === 'ORÇAMENTO FINALIZADO').length;
 
                 setCounts({ total, aguardando: aguardandoCliente, manutencao, finalizados, pendentePcp, aguardandoCliente, conferenciaFinal });
+
+                // Processar estatísticas por cliente
+                const clients = data.map(p => p.cliente || 'Sem Cliente');
+                const clientCounts: { [key: string]: number } = {};
+                clients.forEach(c => {
+                    clientCounts[c] = (clientCounts[c] || 0) + 1;
+                });
+
+                const sortedClients = Object.entries(clientCounts)
+                    .map(([name, count]) => ({ name, count }))
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 5);
+
+                setClientStats(sortedClients);
             }
         } catch (err) {
             console.error('Erro ao buscar estatísticas:', err);
@@ -123,11 +138,11 @@ export const Dashboard: React.FC = () => {
     ];
 
     const barData = {
-        labels: ['Cliente A', 'Cliente B', 'Cliente C', 'Cliente D', 'Cliente E'],
+        labels: clientStats.length > 0 ? clientStats.map(s => s.name) : ['Sem dados'],
         datasets: [
             {
                 label: 'Peritagens',
-                data: [1, 0, 0, 0, 0],
+                data: clientStats.length > 0 ? clientStats.map(s => s.count) : [0],
                 backgroundColor: '#3b82f6',
                 borderRadius: 8,
                 hoverBackgroundColor: '#2563eb',
