@@ -191,6 +191,15 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
+    const handleResetItem = (itemId: string) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                return { ...item, conformidade: null, status: 'vermelho' };
+            }
+            return item;
+        }));
+    };
+
     const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante', value: any) => {
         setChecklistItems(prev => prev.map(item => {
             if (item.id === itemId) {
@@ -739,14 +748,7 @@ export const NovaPeritagem: React.FC = () => {
                                 <div className="row-main">
                                     <div className="item-info">
                                         <div style={{ width: '60px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{
-                                                width: '14px',
-                                                height: '14px',
-                                                borderRadius: '50%',
-                                                backgroundColor: item.conformidade ? '#2ecc71' : '#e74c3c',
-                                                flexShrink: 0,
-                                                boxShadow: '0 0 4px rgba(0,0,0,0.1)'
-                                            }} />
+                                            <div className={`status-dot-animated ${item.conformidade ? 'verde' : 'vermelho'}`} />
                                             <span style={{ fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
                                         </div>
                                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -762,6 +764,16 @@ export const NovaPeritagem: React.FC = () => {
                                                 </select>
                                             ) : (
                                                 <span>{item.text}</span>
+                                            )}
+                                            {item.conformidade && (
+                                                <button
+                                                    type="button"
+                                                    className="clear-item-btn"
+                                                    onClick={(e) => { e.stopPropagation(); handleResetItem(item.id); }}
+                                                    title="Limpar resposta"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             )}
                                         </div>
 
