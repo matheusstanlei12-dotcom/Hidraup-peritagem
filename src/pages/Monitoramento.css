@@ -219,6 +219,12 @@
     margin-bottom: 2rem;
 }
 
+.process-header-summary.mini {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
 .summary-label {
     display: block;
     text-transform: uppercase;
