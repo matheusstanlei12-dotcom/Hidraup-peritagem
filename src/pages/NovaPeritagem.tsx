@@ -41,7 +41,7 @@ export const NovaPeritagem: React.FC = () => {
     const galleryInputRef = React.useRef<HTMLInputElement>(null);
 
     // Pergunta Inicial
-    const [cylinderType, setCylinderType] = useState<'Hidráulico' | 'Pneumático' | null>(null);
+    const [cylinderType, setCylinderType] = useState<'Cilindros' | null>(null);
 
     // Campos Fixos
     const [fixedData, setFixedData] = useState({
@@ -372,17 +372,14 @@ export const NovaPeritagem: React.FC = () => {
                     <h2>Selecione o Tipo de Cilindro</h2>
                     <p>Inicie o formulário de peritagem escolhendo a tecnologia do equipamento.</p>
                     <div className="type-options">
-                        <button className={`type-btn ${cylinderType === 'Hidráulico' ? 'active' : ''}`} onClick={() => setCylinderType('Hidráulico')}>
-                            Cilindro Hidráulico
-                        </button>
-                        <button className={`type-btn ${cylinderType === 'Pneumático' ? 'active' : ''}`} onClick={() => setCylinderType('Pneumático')}>
-                            Cilindro Pneumático
+                        <button className={`type-btn ${cylinderType === 'Cilindros' ? 'active' : ''}`} onClick={() => setCylinderType('Cilindros')}>
+                            Cilindros
                         </button>
                         <div className="divider-or">ou atalho rápido</div>
                         <button
                             className="type-btn usiminas-btn"
                             onClick={() => {
-                                setCylinderType('Hidráulico');
+                                setCylinderType('Cilindros');
                                 setFixedData(prev => ({ ...prev, cliente: 'USIMINAS' }));
                                 setStep(1);
                             }}
