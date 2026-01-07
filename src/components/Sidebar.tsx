@@ -25,7 +25,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     const navigate = useNavigate();
-    const { role, user } = useAuth();
+    const { role, user, isAdmin } = useAuth();
 
     const isApp = Capacitor.getPlatform() !== 'web';
     const isPerito = role === 'perito';
@@ -87,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
 
                         <div className="sidebar-divider"></div>
 
-                        {(role === 'pcp' || role === 'gestor') && (
+                        {isAdmin && (
                             <>
                                 <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <ClipboardSignature size={20} />

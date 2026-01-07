@@ -178,7 +178,7 @@ export const Monitoramento: React.FC = () => {
         }
     }, [selectedProcess]);
 
-    const { user, role } = useAuth();
+    const { user, role, isAdmin } = useAuth();
 
     const handleUpdateStatus = async (targetProcess: any, newStatus: string, additionalData: any = {}) => {
         if (!targetProcess || !user) return;
@@ -453,7 +453,7 @@ export const Monitoramento: React.FC = () => {
 
                                     {showActions && (
                                         <div className="process-quick-actions">
-                                            {isPcpAwaiting && (
+                                            {isPcpAwaiting && isAdmin && (
                                                 <button
                                                     className="btn-quick-approve"
                                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
@@ -462,7 +462,7 @@ export const Monitoramento: React.FC = () => {
                                                     <span>Aprovar Peritagem</span>
                                                 </button>
                                             )}
-                                            {isClientAwaiting && (
+                                            {isClientAwaiting && (isAdmin || role === 'perito') && (
                                                 <button
                                                     className="btn-quick-client"
                                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'EM MANUTENÇÃO'); }}
@@ -471,7 +471,7 @@ export const Monitoramento: React.FC = () => {
                                                     <span>Liberar Pedido</span>
                                                 </button>
                                             )}
-                                            {isMaintenance && (
+                                            {isMaintenance && (isAdmin || role === 'perito') && (
                                                 <button
                                                     className="btn-quick-finish"
                                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL'); }}
@@ -480,7 +480,7 @@ export const Monitoramento: React.FC = () => {
                                                     <span>Finalizar Oficina</span>
                                                 </button>
                                             )}
-                                            {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (
+                                            {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (isAdmin || role === 'perito') && (
                                                 <button
                                                     className="btn-quick-finish"
                                                     style={{ background: '#2d3748' }}

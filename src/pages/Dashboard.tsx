@@ -33,7 +33,7 @@ ChartJS.register(
 
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
-    const { role } = useAuth();
+    const { isAdmin } = useAuth();
     const [counts, setCounts] = React.useState({
         total: 0,
         aguardando: 0,
@@ -97,7 +97,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(59, 130, 246, 0.15)',
             iconColor: '#3b82f6',
             link: '/pcp/aprovar',
-            show: role === 'pcp' || role === 'gestor'
+            show: isAdmin
         },
         {
             label: '2. Liberação de Pedido',
@@ -106,7 +106,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(245, 158, 11, 0.15)',
             iconColor: '#f59e0b',
             link: '/pcp/liberar',
-            show: role === 'pcp' || role === 'gestor'
+            show: isAdmin
         },
         {
             label: '3. Conferência Final',
@@ -115,7 +115,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(15, 23, 42, 0.1)',
             iconColor: '#0f172a',
             link: '/pcp/finalizar',
-            show: role === 'pcp' || role === 'gestor'
+            show: isAdmin
         },
         {
             label: 'Em Manutenção',
