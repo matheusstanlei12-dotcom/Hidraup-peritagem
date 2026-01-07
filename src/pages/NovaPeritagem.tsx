@@ -237,8 +237,16 @@ export const NovaPeritagem: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+
         if (!fotoFrontal) {
             alert('A foto frontal do equipamento é obrigatória!');
+            setLoading(false);
+            return;
+        }
+
+        if (!fixedData.cliente || !fixedData.numero_os || !fixedData.tag) {
+            alert('Por favor, preencha os campos obrigatórios (*): Cliente, O.S e TAG.');
             setLoading(false);
             return;
         }
