@@ -354,7 +354,7 @@ export const NovaPeritagem: React.FC = () => {
             verde: '#27ae60',
             azul: '#2980b9'
         };
-        return <div className="status-dot" style={{ backgroundColor: colors[status] }} />;
+        return <div className="status-dot-animated" style={{ backgroundColor: colors[status], width: '14px', height: '14px' }} />;
     };
 
     if (step === 0) {
@@ -860,15 +860,6 @@ export const NovaPeritagem: React.FC = () => {
                                                         onChange={e => updateItemDetails(item.id, 'qtd', e.target.value)}
                                                     />
                                                 </div>
-                                                <div className="input-field" style={{ flex: 1 }}>
-                                                    <label>Dimensões</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Dimensões"
-                                                        value={item.dimensoes}
-                                                        onChange={e => updateItemDetails(item.id, 'dimensoes', e.target.value)}
-                                                    />
-                                                </div>
                                             </div>
 
                                             <div className="usiminas-diametros-calc" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -983,7 +974,7 @@ export const NovaPeritagem: React.FC = () => {
                     </div>
                     <div className="vedacoes-list">
                         <div className="vedacao-row header" style={{ background: '#f8fafc', fontWeight: 'bold', fontSize: '0.7rem', display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '10px' }}>
-                            <span style={{ width: '40px' }}>N°</span>
+                            <span style={{ width: '60px' }}>N°</span>
                             <span style={{ flex: 1 }}>DESCRIÇÃO</span>
                             <span style={{ width: '60px', textAlign: 'center' }}>QTD</span>
                             <span style={{ width: '60px', textAlign: 'center' }}>UN.</span>
@@ -991,7 +982,10 @@ export const NovaPeritagem: React.FC = () => {
                         </div>
                         {vedacoes.map((item, index) => (
                             <div key={item.id} className="vedacao-row" style={{ display: 'flex', alignItems: 'center', padding: '5px 10px', borderBottom: '1px solid #f1f3f5' }}>
-                                <span style={{ width: '40px', fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
+                                <div style={{ width: '60px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div className={`status-dot-animated ${item.text.trim() !== '' ? 'verde' : 'vermelho'}`} />
+                                    <span style={{ fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
+                                </div>
                                 <input
                                     placeholder="Descrição da vedação..."
                                     value={item.text}
