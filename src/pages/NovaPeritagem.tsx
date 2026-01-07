@@ -481,7 +481,7 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
                                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                                     <div className="form-group" style={{ flex: 1 }}>
-                                        <label style={{ fontWeight: 'bold' }}>O.S *</label>
+                                        <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO *</label>
                                         <input
                                             required
                                             placeholder="Ex: 1234"
@@ -509,7 +509,7 @@ export const NovaPeritagem: React.FC = () => {
                                         />
                                     </div>
                                     <div className="form-group" style={{ flex: 1 }}>
-                                        <label style={{ fontWeight: 'bold' }}>NOTA FISCAL</label>
+                                        <label style={{ fontWeight: 'bold' }}>NF</label>
                                         <input
                                             placeholder="Ex: 9012"
                                             value={fixedData.nota_fiscal}
@@ -563,7 +563,7 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
                                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                                     <div className="form-group" style={{ flex: 1 }}>
-                                        <label style={{ fontWeight: 'bold' }}>O.S *</label>
+                                        <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO *</label>
                                         <input
                                             required
                                             placeholder="Ex: 1234"
@@ -582,7 +582,7 @@ export const NovaPeritagem: React.FC = () => {
                                         />
                                     </div>
                                     <div className="form-group" style={{ flex: 1 }}>
-                                        <label style={{ fontWeight: 'bold' }}>NOTA FISCAL</label>
+                                        <label style={{ fontWeight: 'bold' }}>NF</label>
                                         <input
                                             placeholder="Ex: 9012"
                                             value={fixedData.nota_fiscal}
@@ -675,7 +675,7 @@ export const NovaPeritagem: React.FC = () => {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>SISTEMA DE LUBRIFICAÇÃO?</label>
+                            <label>RECEBIDO COM SISTEMA DE LUBRIFICAÇÃO?</label>
                             <select
                                 value={fixedData.sistema_lubrificacao}
                                 onChange={e => setFixedData({ ...fixedData, sistema_lubrificacao: e.target.value })}
@@ -694,7 +694,7 @@ export const NovaPeritagem: React.FC = () => {
                             />
                         </div>
                         <div className="form-group full-row">
-                            <label>OBSERVAÇÕES GERAIS</label>
+                            <label>OBSERVAÇÕES</label>
                             <textarea
                                 style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '2px solid #f1f3f5' }}
                                 placeholder="Observações complementares..."
@@ -978,12 +978,12 @@ export const NovaPeritagem: React.FC = () => {
                 <section className="form-card">
                     <div className="card-header">
                         <Info size={20} color="#7f8c8d" />
-                        <h3>Vedações</h3>
+                        <h3>Materiais e Vedações</h3>
                     </div>
                     <div className="vedacoes-list">
                         <div className="vedacao-row header" style={{ background: '#f8fafc', fontWeight: 'bold', fontSize: '0.7rem', display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '10px' }}>
                             <span style={{ width: '60px' }}>N°</span>
-                            <span style={{ flex: 1 }}>DESCRIÇÃO</span>
+                            <span style={{ flex: 1 }}>DESCRIÇÃO DO MATERIAL</span>
                             <span style={{ width: '60px', textAlign: 'center' }}>QTD</span>
                             <span style={{ width: '60px', textAlign: 'center' }}>UN.</span>
                             <span style={{ flex: 1 }}>OBSERVAÇÃO</span>
@@ -995,7 +995,7 @@ export const NovaPeritagem: React.FC = () => {
                                     <span style={{ fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
                                 </div>
                                 <input
-                                    placeholder="Descrição da vedação..."
+                                    placeholder="Descrição do material..."
                                     value={item.text}
                                     onChange={e => {
                                         const newVedacoes = [...vedacoes];

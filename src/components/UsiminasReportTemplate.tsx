@@ -223,6 +223,15 @@ interface ReportData {
     parecer_tecnico: string;
     logo_trusteng: string;
     foto_frontal?: string;
+    desenho_conjunto?: string;
+    tipo_modelo?: string;
+    fabricante?: string;
+    lubrificante?: string;
+    volume?: string;
+    acoplamento_polia?: string;
+    sistema_lubrificacao?: string;
+    outros_especificar?: string;
+    observacoes_gerais?: string;
 }
 
 export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
@@ -254,7 +263,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                     <Text style={styles.label}>CLIENTE: <Text style={styles.value}>{data.cliente}</Text></Text>
                 </View>
                 <View style={styles.infoItem}>
-                    <Text style={styles.label}>O.S: <Text style={styles.value}>{data.numero_os}</Text></Text>
+                    <Text style={styles.label}>ORDEM DE SERVIÇO: <Text style={styles.value}>{data.numero_os}</Text></Text>
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.label}>NI: <Text style={styles.value}>{data.ni}</Text></Text>
@@ -263,7 +272,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                     <Text style={styles.label}>PEDIDO: <Text style={styles.value}>{data.pedido}</Text></Text>
                 </View>
                 <View style={styles.infoItem}>
-                    <Text style={styles.label}>NOTA FISCAL: <Text style={styles.value}>{data.nota_fiscal}</Text></Text>
+                    <Text style={styles.label}>NF: <Text style={styles.value}>{data.nota_fiscal}</Text></Text>
                 </View>
             </View>
 
@@ -282,6 +291,36 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                 </View>
                 <View style={{ width: '50%' }}>
                     <Text style={styles.label}>TAG: <Text style={styles.value}>{data.tag}</Text></Text>
+                </View>
+            </View>
+
+            <View style={styles.sectionTitle}>
+                <Text>INFORMAÇÕES COMPLEMENTARES</Text>
+            </View>
+            <View style={styles.infoGrid} wrap={false}>
+                <View style={{ width: '100%', marginBottom: 4 }}>
+                    <Text style={styles.label}>DESENHO DE CONJUNTO: <Text style={styles.value}>{data.desenho_conjunto}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>TIPO/MODELO: <Text style={styles.value}>{data.tipo_modelo}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>FABRICANTE: <Text style={styles.value}>{data.fabricante}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>LUBRIFICANTE: <Text style={styles.value}>{data.lubrificante}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>VOLUME: <Text style={styles.value}>{data.volume}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>ACOPLAMENTO/POLIA: <Text style={styles.value}>{data.acoplamento_polia}</Text></Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.label}>SIST. LUBRIFICAÇÃO: <Text style={styles.value}>{data.sistema_lubrificacao}</Text></Text>
+                </View>
+                <View style={{ width: '100%', marginTop: 4 }}>
+                    <Text style={styles.label}>OUTROS: <Text style={styles.value}>{data.outros_especificar}</Text></Text>
                 </View>
             </View>
 

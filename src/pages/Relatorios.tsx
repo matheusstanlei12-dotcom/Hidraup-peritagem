@@ -31,6 +31,15 @@ interface Peritagem {
     camisa_ext?: string;
     haste_comp?: string;
     foto_frontal?: string;
+    desenho_conjunto?: string;
+    tipo_modelo?: string;
+    fabricante?: string;
+    lubrificante?: string;
+    volume?: string;
+    acoplamento_polia?: string;
+    sistema_lubrificacao?: string;
+    outros_especificar?: string;
+    observacoes_gerais?: string;
     itens?: any[];
 }
 
@@ -147,7 +156,16 @@ export const Relatorios: React.FC = () => {
                     })),
                 parecer_tecnico: String(parecer || ''),
                 parecerTecnico: String(parecer || ''),
-                foto_frontal: peritagem.foto_frontal
+                foto_frontal: peritagem.foto_frontal,
+                desenho_conjunto: String(peritagem.desenho_conjunto || '-'),
+                tipo_modelo: String(peritagem.tipo_modelo || '-'),
+                fabricante: String(peritagem.fabricante || '-'),
+                lubrificante: String(peritagem.lubrificante || '-'),
+                volume: String(peritagem.volume || '-'),
+                acoplamento_polia: String(peritagem.acoplamento_polia || 'NÃO'),
+                sistema_lubrificacao: String(peritagem.sistema_lubrificacao || 'NÃO'),
+                outros_especificar: String(peritagem.outros_especificar || '-'),
+                observacoes_gerais: String(peritagem.observacoes_gerais || '-')
             };
 
             setFullReportData(reportData);
