@@ -28,8 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
     const { role, user, isAdmin } = useAuth();
 
     const isApp = Capacitor.getPlatform() !== 'web';
-    const isPerito = role === 'perito';
-    const isRestricted = isApp || isPerito;
+
+    const isRestricted = isApp;
 
     const handleLogout = async () => {
         await supabase.auth.signOut();

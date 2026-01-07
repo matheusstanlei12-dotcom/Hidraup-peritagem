@@ -21,8 +21,8 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
   const { session, role, loading } = useAuth();
 
   const isApp = Capacitor.getPlatform() !== 'web';
-  const isPerito = role === 'perito';
-  const isRestricted = isApp || isPerito;
+
+  const isRestricted = isApp;
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>Carregando...</div>;
 
@@ -44,13 +44,13 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
 };
 
 function AppRoutes() {
-  const { session, loading, role } = useAuth();
+  const { session, loading } = useAuth();
 
   if (loading) return null;
 
   const isApp = Capacitor.getPlatform() !== 'web';
-  const isPerito = role === 'perito';
-  const isRestricted = isApp || isPerito;
+
+  const isRestricted = isApp;
 
   const defaultPath = isRestricted ? "/peritagens" : "/dashboard";
 
@@ -71,9 +71,9 @@ function AppRoutes() {
       <Route path="/nova-peritagem" element={<PrivateRoute><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
 
       {/* Rotas de Fluxo PCP */}
-      <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
-      <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
-      <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
+      <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
+      <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
+      <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
 
       {/* Rota Exclusiva Gestor */}
       <Route path="/admin/usuarios" element={
