@@ -137,15 +137,40 @@ export const Dashboard: React.FC = () => {
         },
     ];
 
+    // Plugin para desenhar o texto no centro do Doughnut
+    const centerTextPlugin = {
+        id: 'centerText',
+        beforeDraw: (chart: any) => {
+            const { ctx, chartArea: { width, height } } = chart;
+            ctx.save();
+            const total = chart.config.data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+
+            ctx.font = '800 2.5rem sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#334155'; // Slate 700
+            ctx.fillText(total.toString(), width / 2, height / 2 + 10);
+
+            ctx.font = 'bold 0.7rem sans-serif';
+            ctx.fillStyle = '#94a3b8'; // Slate 400
+            ctx.fillText('TOTAL PERITAGENS', width / 2, height / 2 + 35);
+            ctx.restore();
+        }
+    };
+
     const barData = {
         labels: clientStats.length > 0 ? clientStats.map(s => s.name) : ['Sem dados'],
         datasets: [
             {
                 label: 'Peritagens',
                 data: clientStats.length > 0 ? clientStats.map(s => s.count) : [0],
-                backgroundColor: '#3b82f6',
-                borderRadius: 8,
-                hoverBackgroundColor: '#2563eb',
+                backgroundColor: (context: any) => {
+                    const index = context.dataIndex;
+                    return index === 0 ? '#1e293b' : '#3b82f6';
+                },
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: 'rgba(0,0,0,0.1)',
+                barPercentage: 0.7,
             },
         ],
     };
@@ -155,11 +180,98 @@ export const Dashboard: React.FC = () => {
         datasets: [
             {
                 data: [counts.finalizados, counts.pendentePcp, counts.aguardandoCliente, counts.manutencao, counts.conferenciaFinal],
-                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#0f172a'],
-                hoverOffset: 12,
-                borderWidth: 0,
+                backgroundColor: [
+                    '#059669', // Industrial Green
+                    '#2563eb', // Engineering Blue
+                    '#d97706', // Warning Orange
+                    '#db2777', // Workshop Pink
+                    '#1e293b'  // Dark Navy
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 10,
+                spacing: 2,
+                borderRadius: 2
             },
         ],
+    };
+
+    const barOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#ffffff',
+                bodyColor: '#cbd5e1',
+                padding: 10,
+                cornerRadius: 4,
+                displayColors: false,
+                titleFont: { size: 13, weight: 'bold' as any },
+                bodyFont: { size: 12 }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    display: true,
+                    color: '#f1f5f9',
+                    drawTicks: false
+                },
+                ticks: {
+                    stepSize: 1,
+                    font: { size: 11, weight: 'bold' as any },
+                    color: '#64748b'
+                },
+                border: { display: false }
+            },
+            x: {
+                grid: { display: false },
+                ticks: {
+                    font: { size: 11, weight: 'bold' as any },
+                    color: '#475569'
+                },
+                border: { display: false }
+            }
+        },
+        animation: {
+            duration: 800,
+            easing: 'linear' as any
+        }
+    };
+
+    const doughnutOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: {
+            legend: {
+                position: 'right' as any,
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'rect',
+                    padding: 15,
+                    font: {
+                        size: 11,
+                        weight: 'bold' as any
+                    },
+                    color: '#475569'
+                }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 10,
+                cornerRadius: 4,
+                titleFont: { weight: 'bold' as any }
+            }
+        },
+        animation: {
+            animateRotate: true,
+            animateScale: false,
+            duration: 1000
+        }
     };
 
     return (
@@ -197,11 +309,7 @@ export const Dashboard: React.FC = () => {
                     <div className="chart-wrapper">
                         <Bar
                             data={barData}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } }
-                            }}
+                            options={barOptions}
                         />
                     </div>
                 </div>
@@ -211,19 +319,8 @@ export const Dashboard: React.FC = () => {
                     <div className="doughnut-wrapper">
                         <Doughnut
                             data={doughnutData}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'right',
-                                        labels: {
-                                            usePointStyle: true,
-                                            padding: 20
-                                        }
-                                    }
-                                }
-                            }}
+                            options={doughnutOptions}
+                            plugins={[centerTextPlugin]}
                         />
                     </div>
                 </div>
