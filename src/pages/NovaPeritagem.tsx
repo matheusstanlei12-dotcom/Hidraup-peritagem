@@ -1037,6 +1037,17 @@ export const NovaPeritagem: React.FC = () => {
                                     }}
                                     style={{ flex: 1, border: 'none', borderBottom: '1px solid #edf2f7', margin: '0 5px', fontSize: '0.85rem' }}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const newVedacoes = vedacoes.filter((_, i) => i !== index);
+                                        setVedacoes(newVedacoes);
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: '#e53e3e', cursor: 'pointer', padding: '5px' }}
+                                    title="Remover vedação"
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
                         ))}
                     </div>
