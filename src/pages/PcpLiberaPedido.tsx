@@ -84,7 +84,7 @@ export const PcpLiberaPedido: React.FC = () => {
 
     return (
         <div className="peritagens-container">
-            <h1 className="page-title">2. Empenho de Materiais</h1>
+            <h1 className="page-title">2. Liberação do Pedido</h1>
 
             <div className="search-bar">
                 <div className="search-input-wrapper">

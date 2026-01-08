@@ -142,6 +142,18 @@ export const Relatorios: React.FC = () => {
                         diametro_encontrado: i.diametro_encontrado,
                         diametro_ideal: i.diametro_ideal,
                         material_faltante: i.material_faltante,
+
+                        // Novos campos dimensionais
+                        diametro_externo_encontrado: i.diametro_externo_encontrado,
+                        diametro_externo_especificado: i.diametro_externo_especificado,
+                        desvio_externo: i.desvio_externo,
+                        diametro_interno_encontrado: i.diametro_interno_encontrado,
+                        diametro_interno_especificado: i.diametro_interno_especificado,
+                        desvio_interno: i.desvio_interno,
+                        comprimento_encontrado: i.comprimento_encontrado,
+                        comprimento_especificado: i.comprimento_especificado,
+                        desvio_comprimento: i.desvio_comprimento,
+
                         anomalias: i.anomalias,
                         solucao: i.solucao,
                         fotos: i.fotos || []

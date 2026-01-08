@@ -85,6 +85,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <span>Status de Processos</span>
                         </NavLink>
 
+                        <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <FileSpreadsheet size={20} />
+                            <span>Relatórios em PDF</span>
+                        </NavLink>
+
                         <div className="sidebar-divider"></div>
 
                         {isAdmin && (
@@ -96,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
 
                                 <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <ShoppingCart size={20} />
-                                    <span>2. Empenho de Materiais</span>
+                                    <span>2. Liberação do Pedido</span>
                                 </NavLink>
 
                                 <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
@@ -111,10 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                     <span>Cilindros em Manutenção</span>
                                 </NavLink>
 
-                                <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <FileSpreadsheet size={20} />
-                                    <span>Relatórios em PDF</span>
-                                </NavLink>
+
                             </>
                         )}
 

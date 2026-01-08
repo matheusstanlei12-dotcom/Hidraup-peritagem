@@ -322,6 +322,16 @@ export const NovaPeritagem: React.FC = () => {
                     diametro_encontrado: item.diametro_encontrado,
                     diametro_ideal: item.diametro_ideal,
                     material_faltante: item.material_faltante,
+                    // Novos campos dimensionais
+                    diametro_externo_encontrado: item.diametro_externo_encontrado,
+                    diametro_externo_especificado: item.diametro_externo_especificado,
+                    desvio_externo: item.desvio_externo,
+                    diametro_interno_encontrado: item.diametro_interno_encontrado,
+                    diametro_interno_especificado: item.diametro_interno_especificado,
+                    desvio_interno: item.desvio_interno,
+                    comprimento_encontrado: item.comprimento_encontrado,
+                    comprimento_especificado: item.comprimento_especificado,
+                    desvio_comprimento: item.desvio_comprimento,
                     tipo: item.tipo || 'componente',
                     status_indicador: 'azul'
                 }));
@@ -382,7 +392,7 @@ export const NovaPeritagem: React.FC = () => {
                     <p>Inicie o formulário de peritagem escolhendo a tecnologia do equipamento.</p>
                     <div className="type-options">
                         <button className={`type-btn ${cylinderType === 'Cilindros' ? 'active' : ''}`} onClick={() => setCylinderType('Cilindros')}>
-                            Cilindros
+                            Relatório Padrão
                         </button>
                         <div className="divider-or">ou atalho rápido</div>
                         <button
@@ -393,7 +403,7 @@ export const NovaPeritagem: React.FC = () => {
                                 setStep(1);
                             }}
                         >
-                            <span className="btn-label">Cliente Usiminas</span>
+                            <span className="btn-label">Relatório Usiminas</span>
                         </button>
                     </div>
                     {cylinderType && (
@@ -592,49 +602,36 @@ export const NovaPeritagem: React.FC = () => {
                         ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', width: '100%' }}>
                                 <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>CLIENTE *</label>
+                                    <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO</label>
                                     <input
                                         required
-                                        placeholder="Nome do cliente..."
-                                        value={fixedData.cliente}
-                                        onChange={e => setFixedData({ ...fixedData, cliente: e.target.value.toUpperCase() })}
+                                        placeholder="Ex: 1234"
+                                        value={fixedData.numero_os}
+                                        onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group full-row">
+                                    <label style={{ fontWeight: 'bold' }}>NF</label>
+                                    <input
+                                        placeholder="Ex: 9012"
+                                        value={fixedData.nota_fiscal}
+                                        onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group full-row">
+                                    <label style={{ fontWeight: 'bold' }}>NI</label>
+                                    <input
+                                        placeholder="Ex: NI-99"
+                                        value={fixedData.ni}
+                                        onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
                                         style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
                                     />
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', width: '100%' }}>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO</label>
-                                        <input
-                                            required
-                                            placeholder="Ex: 1234"
-                                            value={fixedData.numero_os}
-                                            onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>NF</label>
-                                        <input
-                                            placeholder="Ex: 9012"
-                                            value={fixedData.nota_fiscal}
-                                            onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>NI</label>
-                                        <input
-                                            placeholder="Ex: NI-99"
-                                            value={fixedData.ni}
-                                            onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                </div>
-
                                 <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>DESENHO DE CONJUNTO</label>
+                                    <label style={{ fontWeight: 'bold' }}>DESENHO</label>
                                     <input
                                         placeholder="Referência do desenho..."
                                         value={fixedData.desenho_conjunto}
@@ -644,7 +641,7 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
 
                                 <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>TIPO/MODELO</label>
+                                    <label style={{ fontWeight: 'bold' }}>TIPO/ MODELO</label>
                                     <input
                                         placeholder="Ex: H-123"
                                         value={fixedData.tipo_modelo}
@@ -712,7 +709,7 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
 
                                 <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>OUTROS (ESPECIFICAR)</label>
+                                    <label style={{ fontWeight: 'bold' }}>OUTROS ( ESPECIFICAR ):</label>
                                     <input
                                         placeholder="Outros detalhes..."
                                         value={fixedData.outros_especificar}
@@ -722,18 +719,7 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
 
                                 <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>TAG DO CILINDRO *</label>
-                                    <input
-                                        required
-                                        placeholder="Digite a TAG..."
-                                        value={fixedData.tag}
-                                        onChange={e => setFixedData({ ...fixedData, tag: e.target.value.toUpperCase() })}
-                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                    />
-                                </div>
-
-                                <div className="form-group full-row">
-                                    <label style={{ fontWeight: 'bold' }}>OBSERVAÇÕES</label>
+                                    <label style={{ fontWeight: 'bold' }}>OUTRAS OBSERVAÇÕES:</label>
                                     <textarea
                                         style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '2px solid #f1f3f5' }}
                                         placeholder="Observações complementares..."
@@ -1181,7 +1167,7 @@ export const NovaPeritagem: React.FC = () => {
                 <section className="form-card">
                     <div className="card-header">
                         <Info size={20} color="#7f8c8d" />
-                        <h3>Empenho de Materiais</h3>
+                        <h3>Liberação do Pedido</h3>
                     </div>
                     <div className="vedacoes-list">
                         <div className="vedacao-row header" style={{ background: '#f8fafc', fontWeight: 'bold', fontSize: '0.7rem', display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '10px' }}>

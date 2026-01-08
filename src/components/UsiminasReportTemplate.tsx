@@ -6,8 +6,8 @@ const FONT_FAMILY = 'Helvetica';
 
 const styles = StyleSheet.create({
     page: {
-        paddingTop: 30,
-        paddingBottom: 60,
+        paddingTop: 20,
+        paddingBottom: 40,
         paddingLeft: 30,
         paddingRight: 30,
         fontSize: 10,
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#005696',
         color: '#fff',
         padding: 5,
-        marginTop: 15,
+        marginTop: 10,
         marginBottom: 8,
     },
     infoGrid: {
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     },
     // Estilos de Análise Detalhada (Similar ao App)
     analysisBlock: {
-        marginTop: 10,
+        marginTop: 5,
         borderWidth: 1,
         borderColor: '#005696',
         borderRadius: 4,
@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
         padding: 4,
         borderRadius: 3,
         minHeight: 18,
+        color: '#000000',
     },
     materialFaltanteBox: {
         backgroundColor: '#f0fff4',
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
     },
     photoContainer: {
         width: '48%', // Slightly less than 50% to ensure gap fitting
-        height: 220, // Increased height for better visibility
+        height: 160, // Increased height for better visibility
         borderWidth: 1,
         borderColor: '#eee',
         borderRadius: 4,
@@ -352,130 +353,99 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
 
 
                 {/* Tabela de Cabeçalho */}
-                <View style={{ borderWidth: 1, borderColor: '#000' }}>
-                    {/* Título */}
-                    <View style={{ borderBottomWidth: 1, borderColor: '#000', padding: 5, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 12, fontWeight: 'bold' }}>GERÊNCIA DE OFICINAS DE MANUTENÇÃO</Text>
+                {/* Tabela de Cabeçalho sem bordas */}
+                <View style={{ marginTop: 10 }}>
+                    {/* Título com faixa azul */}
+                    <View style={{ padding: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: '#005696', marginBottom: 5 }}>
+                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO DO EQUIPAMENTO</Text>
                     </View>
-                    <View style={{ borderBottomWidth: 1, borderColor: '#000', padding: 5 }}>
+
+                    <View style={{ padding: 5, marginBottom: 5 }}>
                         <Text style={{ fontSize: 10 }}>LAUDO REPARO: {data.numero_os}</Text>
                     </View>
+
                     {/* Linha 1 */}
-                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#000', height: 25 }}>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', height: 25, marginBottom: 5 }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>NOTA/LAUDO:</Text>
                             <Text style={{ fontSize: 9 }}>{data.nota_fiscal} / {data.numero_os}</Text>
                         </View>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>PROCESSO/OFICINAS:</Text>
                             <Text style={{ fontSize: 9 }}>{data.pedido}</Text>
                         </View>
-                        <View style={{ flex: 0.8, padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 0.8, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>DATA:</Text>
                             <Text style={{ fontSize: 9 }}>{data.data}</Text>
                         </View>
                     </View>
 
                     {/* Linha 2 */}
-                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#000', height: 25 }}>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', height: 25, marginBottom: 5 }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>ÁREA:</Text>
                             <Text style={{ fontSize: 9 }}>{data.area || '-'}</Text>
                         </View>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>LINHA:</Text>
                             <Text style={{ fontSize: 9 }}>{data.linha || '-'}</Text>
                         </View>
-                        <View style={{ flex: 0.8, padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 0.8, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>EQUIPAMENTO:</Text>
                             <Text style={{ fontSize: 9 }}>{data.local_equipamento}</Text>
                         </View>
                     </View>
 
                     {/* Linha 3 */}
-                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#000', height: 25 }}>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', height: 25, marginBottom: 5 }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>TIPO DE EQUIPAMENTO:</Text>
                             <Text style={{ fontSize: 9 }}>{data.tipo_modelo || 'CILINDRO HIDRÁULICO'}</Text>
                         </View>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold' }}>TAG DO EQUIPAMENTO:</Text>
-                            <Text style={{ fontSize: 9 }}>{data.tag}</Text>
-                        </View>
-                        <View style={{ flex: 0.8, padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>MATERIAL/NI:</Text>
                             <Text style={{ fontSize: 9 }}>{data.ni}</Text>
                         </View>
+                        <View style={{ flex: 0.8, padding: 4 }} />
                     </View>
 
                     {/* Linha 4 */}
                     <View style={{ flexDirection: 'row', height: 25 }}>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4, justifyContent: 'center' }}>
+                        <View style={{ flex: 1, padding: 4 }}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>DESENHO:</Text>
                             <Text style={{ fontSize: 9 }}>{data.desenho_conjunto}</Text>
                         </View>
-                        <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#000', padding: 4 }} />
+                        <View style={{ flex: 1, padding: 4 }} />
                         <View style={{ flex: 0.8, padding: 4 }} />
                     </View>
                 </View>
             </View>
 
-            <View style={styles.sectionTitle}>
-                <Text>DIMENSÕES TÉCNICAS (MM)</Text>
-            </View>
-            <View style={styles.infoGrid} wrap={false}>
-                <View style={{ width: '100%', marginBottom: 4 }}>
-                    <Text style={styles.label}>CAMISA: <Text style={styles.value}>Ø INT. {data.camisa_int} x Ø EXT. {data.camisa_ext} x COMP. {data.camisa_comp}</Text></Text>
+            {/* Tabela de Dimensões sem bordas com cabeçalho azul */}
+            <View style={{ marginTop: 15 }}>
+                <View style={{ backgroundColor: '#005696', padding: 5, marginBottom: 5 }}>
+                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>DIMENSÕES TÉCNICAS (MM)</Text>
                 </View>
-                <View style={{ width: '100%', marginBottom: 4 }}>
-                    <Text style={styles.label}>HASTE: <Text style={styles.value}>Ø {data.haste_diam} x COMP. {data.haste_comp}</Text></Text>
-                </View>
-                <View style={{ width: '50%' }}>
-                    <Text style={styles.label}>CURSO: <Text style={styles.value}>{data.curso} MM</Text></Text>
-                </View>
-                <View style={{ width: '50%' }}>
-                    <Text style={styles.label}>TAG: <Text style={styles.value}>{data.tag}</Text></Text>
-                </View>
-            </View>
-
-            <View style={styles.sectionTitle}>
-                <Text>INFORMAÇÕES COMPLEMENTARES</Text>
-            </View>
-            <View style={styles.infoGrid} wrap={false}>
-                <View style={{ width: '100%', marginBottom: 4 }}>
-                    <Text style={styles.label}>DESENHO DE CONJUNTO: <Text style={styles.value}>{data.desenho_conjunto}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>TIPO/MODELO: <Text style={styles.value}>{data.tipo_modelo}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>FABRICANTE: <Text style={styles.value}>{data.fabricante}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>LUBRIFICANTE: <Text style={styles.value}>{data.lubrificante}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>VOLUME: <Text style={styles.value}>{data.volume}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>ACOPLAMENTO/POLIA: <Text style={styles.value}>{data.acoplamento_polia}</Text></Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.label}>SIST. LUBRIFICAÇÃO: <Text style={styles.value}>{data.sistema_lubrificacao}</Text></Text>
-                    <View style={{ width: '100%', marginTop: 4 }}>
-                        <Text style={styles.label}>OUTROS: <Text style={styles.value}>{data.outros_especificar}</Text></Text>
-                    </View>
+                <View style={{ paddingLeft: 2, flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 10, marginRight: 20 }}>
+                        <Text style={{ fontWeight: 'bold' }}>CAMISA: </Text>
+                        Ø INT. {data.camisa_int} x Ø EXT. {data.camisa_ext} x COMP. {data.camisa_comp}
+                    </Text>
+                    <Text style={{ fontSize: 10, marginRight: 20 }}>
+                        <Text style={{ fontWeight: 'bold' }}>HASTE: </Text>
+                        Ø {data.haste_diam} x COMP. {data.haste_comp}
+                    </Text>
+                    <Text style={{ fontSize: 10, fontWeight: 'bold', marginRight: 5 }}>CURSO:</Text>
+                    <Text style={{ fontSize: 10 }}>{data.curso} MM</Text>
                 </View>
             </View>
 
             <View style={styles.footer} fixed>
                 <Text>Documento gerado automaticamente pela TrustEng. LTDA - Unidade Especialista em Hidráulica</Text>
             </View>
-        </Page>
 
-        {/* PÁGINA 2: Tabela de Itens (0 a 30) */}
-        <Page size="A4" style={styles.page}>
-            <View style={styles.sectionTitle}>
+            {/* Início da Tabela de Itens na mesma página */}
+            <View style={[styles.sectionTitle, { marginTop: 20 }]}>
                 <Text>DESCRIÇÃO DE PEÇAS / SERVIÇOS</Text>
             </View>
             <View style={styles.table}>
@@ -568,7 +538,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                         <Text>ANÁLISE DETALHADA DE NÃO CONFORMIDADES</Text>
                     </View>
                     {data.items.filter(i => i.selecionado).map((item, index) => (
-                        <View key={index} style={styles.analysisBlock} wrap={false}>
+                        <View key={index} style={styles.analysisBlock}>
                             <View style={styles.analysisHeader}>
                                 <Text>ITEM {item.id || (index + 1)}: {item.descricao}</Text>
                             </View>
@@ -672,7 +642,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
 
 
             <View style={styles.footer} fixed>
-                <Text>Documento gerado automaticamente pela TrustEng. LTDA - Unidade Especialista em Hidráulica</Text>
+                <Text>Documento gerado automaticamente pela TrustEng. LTDA</Text>
             </View>
         </Page>
     </Document >
