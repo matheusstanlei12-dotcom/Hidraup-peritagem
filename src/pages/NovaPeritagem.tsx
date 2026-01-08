@@ -717,7 +717,7 @@ export const NovaPeritagem: React.FC = () => {
                     <div className="card-header">
                         {renderIndicator(dimStatus)}
                         <h3>Dimensões do Cilindro</h3>
-                        <span className="auto-msg">Autoload por TAG habilitado</span>
+
                     </div>
                     <div className="dimensions-horizontal-grid">
                         <div className="dim-group-main">
