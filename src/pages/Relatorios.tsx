@@ -131,7 +131,7 @@ export const Relatorios: React.FC = () => {
                         foto: i.fotos && i.fotos.length > 0 ? i.fotos[0] : undefined
                     })),
                 items: (analise || [])
-                    .filter((i: any) => i.tipo !== 'vedação' && i.conformidade === 'não conforme')
+                    .filter((i: any) => i.tipo !== 'vedação')
                     .map((i: any, idx: number) => ({
                         id: idx + 1,
                         descricao: String(i.componente || ''),

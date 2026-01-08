@@ -255,15 +255,20 @@ export const NovaPeritagem: React.FC = () => {
             return;
         }
 
+        // Validação removida a pedido
+        /*
         if (!fixedData.cliente || !fixedData.numero_os || !fixedData.tag) {
             alert('Por favor, preencha os campos obrigatórios (*): Cliente, O.S e TAG.');
             setLoading(false);
             return;
         }
+        */
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            const numeroPeritagem = fixedData.numero_os.toUpperCase();
+
+            // Se não tiver OS, gera um ID único temporário para não dar erro de duplicidade
+            let numeroPeritagem = fixedData.numero_os ? fixedData.numero_os.toUpperCase() : `S/OS-${Date.now()}`;
 
             // 1. Salvar Peritagem
             const { data: peritagem, error: pError } = await supabase
@@ -372,7 +377,11 @@ export const NovaPeritagem: React.FC = () => {
             navigate('/peritagens');
         } catch (err: any) {
             console.error('Erro ao salvar:', err);
-            alert('Erro ao salvar peritagem: ' + (err.message || 'Erro interno'));
+            if (err.code === '23505' || err.message?.includes('duplicate key')) {
+                alert('Já existe uma peritagem com este número de OS/Laudo. Por favor, verifique ou use um número diferente.');
+            } else {
+                alert('Erro ao salvar peritagem: ' + (err.message || 'Erro interno'));
+            }
         } finally {
             setLoading(false);
         }
@@ -942,7 +951,77 @@ export const NovaPeritagem: React.FC = () => {
                                             <div className="dimensional-block" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                                                 <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#2d3748', borderBottom: '1px solid #cbd5e0', paddingBottom: '5px' }}>ANÁLISE DIMENSIONAL</div>
 
-                                                {/* 1. Diâmetro Externo */}
+                                                {/* 1. Diâmetro Interno */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Encontrado</label>
+                                                        <div style={{ position: 'relative', width: '100%' }}>
+                                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
+                                                            <input
+                                                                type="number"
+                                                                step="0.0001"
+                                                                placeholder="0.0000"
+                                                                style={{ paddingLeft: '30px', width: '100%' }}
+                                                                value={item.diametro_interno_encontrado || ''}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    const found = parseFloat(val || '0');
+                                                                    const spec = parseFloat(item.diametro_interno_especificado || '0');
+                                                                    const diff = (found - spec).toFixed(4);
+                                                                    updateItemDetails(item.id, 'diametro_interno_encontrado', val);
+                                                                    if (val && item.diametro_interno_especificado) {
+                                                                        updateItemDetails(item.id, 'desvio_interno', diff);
+                                                                    } else {
+                                                                        updateItemDetails(item.id, 'desvio_interno', '');
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Especificado</label>
+                                                        <div style={{ position: 'relative', width: '100%' }}>
+                                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
+                                                            <input
+                                                                type="number"
+                                                                step="0.0001"
+                                                                placeholder="0.0000"
+                                                                style={{ paddingLeft: '30px', width: '100%' }}
+                                                                value={item.diametro_interno_especificado || ''}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    const found = parseFloat(item.diametro_interno_encontrado || '0');
+                                                                    const spec = parseFloat(val || '0');
+                                                                    const diff = (found - spec).toFixed(4);
+                                                                    updateItemDetails(item.id, 'diametro_interno_especificado', val);
+                                                                    if (val && item.diametro_interno_encontrado) {
+                                                                        updateItemDetails(item.id, 'desvio_interno', diff);
+                                                                    } else {
+                                                                        updateItemDetails(item.id, 'desvio_interno', '');
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="input-field">
+                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Desvio</label>
+                                                        <div style={{
+                                                            height: '38px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            background: '#e2e8f0',
+                                                            borderRadius: '4px',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '13px',
+                                                            color: item.desvio_interno ? (parseFloat(item.desvio_interno) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
+                                                        }}>
+                                                            {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 2. Diâmetro Externo */}
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                                                     <div className="input-field">
                                                         <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Externo Encontrado</label>
@@ -1009,76 +1088,6 @@ export const NovaPeritagem: React.FC = () => {
                                                             color: item.desvio_externo ? (parseFloat(item.desvio_externo) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
                                                         }}>
                                                             {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* 2. Diâmetro Interno */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                                                    <div className="input-field">
-                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Encontrado</label>
-                                                        <div style={{ position: 'relative', width: '100%' }}>
-                                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
-                                                            <input
-                                                                type="number"
-                                                                step="0.0001"
-                                                                placeholder="0.0000"
-                                                                style={{ paddingLeft: '30px', width: '100%' }}
-                                                                value={item.diametro_interno_encontrado || ''}
-                                                                onChange={e => {
-                                                                    const val = e.target.value;
-                                                                    const found = parseFloat(val || '0');
-                                                                    const spec = parseFloat(item.diametro_interno_especificado || '0');
-                                                                    const diff = (found - spec).toFixed(4);
-                                                                    updateItemDetails(item.id, 'diametro_interno_encontrado', val);
-                                                                    if (val && item.diametro_interno_especificado) {
-                                                                        updateItemDetails(item.id, 'desvio_interno', diff);
-                                                                    } else {
-                                                                        updateItemDetails(item.id, 'desvio_interno', '');
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="input-field">
-                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Diâmetro Interno Especificado</label>
-                                                        <div style={{ position: 'relative', width: '100%' }}>
-                                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
-                                                            <input
-                                                                type="number"
-                                                                step="0.0001"
-                                                                placeholder="0.0000"
-                                                                style={{ paddingLeft: '30px', width: '100%' }}
-                                                                value={item.diametro_interno_especificado || ''}
-                                                                onChange={e => {
-                                                                    const val = e.target.value;
-                                                                    const found = parseFloat(item.diametro_interno_encontrado || '0');
-                                                                    const spec = parseFloat(val || '0');
-                                                                    const diff = (found - spec).toFixed(4);
-                                                                    updateItemDetails(item.id, 'diametro_interno_especificado', val);
-                                                                    if (val && item.diametro_interno_encontrado) {
-                                                                        updateItemDetails(item.id, 'desvio_interno', diff);
-                                                                    } else {
-                                                                        updateItemDetails(item.id, 'desvio_interno', '');
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="input-field">
-                                                        <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Desvio</label>
-                                                        <div style={{
-                                                            height: '38px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            background: '#e2e8f0',
-                                                            borderRadius: '4px',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '13px',
-                                                            color: item.desvio_interno ? (parseFloat(item.desvio_interno) < 0 ? '#e53e3e' : '#2f855a') : '#a0aec0'
-                                                        }}>
-                                                            {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
                                                         </div>
                                                     </div>
                                                 </div>

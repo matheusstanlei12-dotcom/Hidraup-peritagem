@@ -6,10 +6,10 @@ const FONT_FAMILY = 'Helvetica';
 
 const styles = StyleSheet.create({
     page: {
-        paddingTop: 20,
+        paddingTop: 40,
         paddingBottom: 40,
-        paddingLeft: 30,
-        paddingRight: 30,
+        paddingLeft: 40,
+        paddingRight: 40,
         fontSize: 10,
         fontFamily: FONT_FAMILY,
         color: '#333',
@@ -352,58 +352,53 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                 {/* Título Central */}
 
 
-                {/* Tabela de Cabeçalho */}
-                {/* Tabela de Cabeçalho sem bordas */}
-                <View style={{ marginTop: 10 }}>
+                {/* Tabela de Cabeçalho - Layout 2 Colunas */}
+                <View style={{ marginTop: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 10 }}>
                     {/* Título com faixa azul */}
                     <View style={{ padding: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: '#005696', marginBottom: 10 }}>
                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO DO EQUIPAMENTO</Text>
                     </View>
 
-                    {/* LAUDO / REPARO */}
-                    <View style={{ marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#333' }}>
-                            LAUDO/ REPARO: <Text style={{ fontWeight: 'normal' }}>{data.numero_os}</Text>
-                        </Text>
-                    </View>
+                    {/* Grid de 2 Colunas */}
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                        {/* Coluna 1 */}
+                        <View style={{ width: '50%', paddingRight: 10 }}>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LAUDO / REPARO:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO DE EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.tipo_modelo || '-'}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LINHA:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.linha || '-'}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.local_equipamento || '-'}</Text>
+                            </View>
+                        </View>
 
-                    {/* GRUPO 1: ÁREA | TIPO | DESENHO */}
-                    <View style={{ flexDirection: 'row', marginBottom: 10, gap: 10 }}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ÁREA:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.area || '-'}</Text>
-                        </View>
-                        <View style={{ flex: 1.5 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO DE EQUIPAMENTO:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.tipo_modelo || '-'}</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.desenho_conjunto || '-'}</Text>
-                        </View>
-                    </View>
-
-                    {/* GRUPO 2: LINHA | TAG */}
-                    <View style={{ flexDirection: 'row', marginBottom: 10, gap: 10 }}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LINHA:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.linha || '-'}</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG DO EQUIPAMENTO:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.tag || '-'}</Text>
-                        </View>
-                    </View>
-
-                    {/* GRUPO 3: EQUIPAMENTO | MATERIAL/NI */}
-                    <View style={{ flexDirection: 'row', marginBottom: 5, gap: 10 }}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>EQUIPAMENTO:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.local_equipamento || '-'}</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>MATERIAL / NI:</Text>
-                            <Text style={{ fontSize: 9, minHeight: 12 }}>{data.ni || '-'}</Text>
+                        {/* Coluna 2 */}
+                        <View style={{ width: '50%', paddingLeft: 10 }}>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ÁREA:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.area || '-'}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.desenho_conjunto || '-'}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG DO EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.tag || '-'}</Text>
+                            </View>
+                            <View style={{ marginBottom: 8 }}>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>MATERIAL / NI:</Text>
+                                <Text style={{ fontSize: 9 }}>{data.ni || '-'}</Text>
+                            </View>
                         </View>
                     </View>
                 </View>
@@ -411,39 +406,42 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
 
             {/* Tabela de Dimensões sem bordas com cabeçalho azul */}
             <View style={{ marginTop: 15 }}>
-                <View style={{ backgroundColor: '#005696', padding: 5, marginBottom: 5 }}>
+                <View style={{ backgroundColor: '#005696', padding: 5, marginBottom: 2 }}>
                     <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#fff' }}>DIMENSÕES TÉCNICAS (MM)</Text>
                 </View>
-                <View style={{ paddingLeft: 2, flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 10, marginRight: 20 }}>
-                        <Text style={{ fontWeight: 'bold' }}>CAMISA: </Text>
-                        Ø INT. {data.camisa_int} x Ø EXT. {data.camisa_ext} x COMP. {data.camisa_comp}
-                    </Text>
-                    <Text style={{ fontSize: 10, marginRight: 20 }}>
-                        <Text style={{ fontWeight: 'bold' }}>HASTE: </Text>
-                        Ø {data.haste_diam} x COMP. {data.haste_comp}
-                    </Text>
-                    <Text style={{ fontSize: 10, fontWeight: 'bold', marginRight: 5 }}>CURSO:</Text>
-                    <Text style={{ fontSize: 10 }}>{data.curso} MM</Text>
+                {/* Layout Stacked para evitar sobreposição */}
+                <View style={{ paddingLeft: 2 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <Text style={{ fontSize: 10 }}>
+                            <Text style={{ fontWeight: 'bold' }}>CAMISA: </Text>
+                            Ø INT. {data.camisa_int} x Ø EXT. {data.camisa_ext} x COMP. {data.camisa_comp}
+                        </Text>
+                        <Text style={{ fontSize: 10 }}>
+                            <Text style={{ fontWeight: 'bold' }}>HASTE: </Text>
+                            Ø {data.haste_diam} x COMP. {data.haste_comp}
+                        </Text>
+                    </View>
+                    <View style={{ marginTop: 0 }}>
+                        <Text style={{ fontSize: 10 }}>
+                            <Text style={{ fontWeight: 'bold' }}>CURSO: </Text>
+                            {data.curso} MM
+                        </Text>
+                    </View>
                 </View>
             </View>
 
-            <View style={styles.footer} fixed>
-                <Text>Documento gerado automaticamente pela TrustEng. LTDA - Unidade Especialista em Hidráulica</Text>
-            </View>
+
 
             {/* Início da Tabela de Itens na mesma página */}
-            <View style={[styles.sectionTitle, { marginTop: 20 }]}>
-                <Text>DESCRIÇÃO DE PEÇAS / SERVIÇOS</Text>
-            </View>
+
             <View style={styles.table}>
                 <View style={styles.tableHeader}>
                     <Text style={styles.colNo}>N°</Text>
-                    <Text style={{ width: '67%' }}>DESCRIÇÃO</Text>
+                    <Text style={{ width: '67%' }}>DESCRIÇÃO DE PEÇA/SERVIÇO</Text>
                     <Text style={styles.colX}>X</Text>
                     <Text style={styles.colQtd}>QTD</Text>
                 </View>
-                {data.items.slice(0, 30).map((item, index) => (
+                {data.items.map((item, index) => (
                     <View key={index} style={styles.tableRow} wrap={false}>
                         <Text style={styles.colNo}>{index + 1}</Text>
                         <Text style={{ width: '67%' }}>{item.descricao}</Text>
@@ -459,38 +457,12 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                 ))}
             </View>
 
-            <View style={styles.footer} fixed>
-                <Text>Documento gerado automaticamente pela TrustEng. LTDA - Unidade Especialista em Hidráulica</Text>
-            </View>
-        </Page>
 
-        {/* PÁGINA 3+: Continuação da Tabela se necessário, Vedações e Análise */}
-        <Page size="A4" style={styles.page}>
-            {data.items.length > 30 && (
-                <>
-                    <View style={styles.table}>
-                        {data.items.slice(30).map((item, index) => (
-                            <View key={index + 30} style={styles.tableRow} wrap={false}>
-                                <Text style={styles.colNo}>{index + 31}</Text>
-                                <Text style={{ width: '67%' }}>{item.descricao}</Text>
-                                <Text style={[styles.colX, {
-                                    color: item.selecionado ? '#e67e22' : '#27ae60',
-                                    fontSize: 7,
-                                    fontWeight: 'bold'
-                                }]}>
-                                    {item.selecionado ? 'NÃO CONFORME' : 'CONFORME'}
-                                </Text>
-                                <Text style={styles.colQtd}>{item.qtd || '-'}</Text>
-                            </View>
-                        ))}
-                    </View>
-                    <View style={{ marginBottom: 20 }} />
-                </>
-            )}
 
+            {/* Vedações - Logo após a tabela de itens */}
             {data.vedacoes && data.vedacoes.length > 0 && (
-                <>
-                    <View style={styles.sectionTitle}>
+                <View break={false}>
+                    <View style={[styles.sectionTitle, { marginTop: 15 }]}>
                         <Text>EMPENHO DE MATERIAIS</Text>
                     </View>
                     <View style={styles.table}>
@@ -517,117 +489,120 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                             </View>
                         ))}
                     </View>
-                </>
+                </View>
             )}
 
+            {/* Análise Detalhada - Fluxo contínuo */}
             {data.items.some(i => i.selecionado) && (
-                <>
-                    <View style={[styles.sectionTitle, { marginTop: 20 }]}>
-                        <Text>ANÁLISE DETALHADA DE NÃO CONFORMIDADES</Text>
-                    </View>
+                <View>
                     {data.items.filter(i => i.selecionado).map((item, index) => (
-                        <View key={index} style={styles.analysisBlock}>
-                            <View style={styles.analysisHeader}>
-                                <Text>ITEM {item.id || (index + 1)}: {item.descricao}</Text>
-                            </View>
-                            <View style={styles.analysisRow}>
-                                <View style={{ width: '100%' }}>
-                                    <Text style={styles.analysisLabel}>Qtd</Text>
-                                    <Text style={styles.analysisValue}>{item.qtd}</Text>
+                        <View key={index} wrap={false}>
+                            {index === 0 && (
+                                <View style={[styles.sectionTitle, { marginTop: 20 }]}>
+                                    <Text>ANÁLISE DETALHADA DE NÃO CONFORMIDADES</Text>
                                 </View>
-                            </View>
-                            {/* Diâmetro Externo */}
-                            {(item.diametro_externo_encontrado || item.diametro_externo_especificado) && (
+                            )}
+                            <View style={styles.analysisBlock}>
+                                <View style={styles.analysisHeader}>
+                                    <Text>ITEM {item.id || (index + 1)}: {item.descricao}</Text>
+                                </View>
+                                <View style={styles.analysisRow}>
+                                    <View style={{ width: '100%' }}>
+                                        <Text style={styles.analysisLabel}>Qtd</Text>
+                                        <Text style={styles.analysisValue}>{item.qtd}</Text>
+                                    </View>
+                                </View>
+                                {/* Diâmetro Interno */}
+                                {(item.diametro_interno_encontrado || item.diametro_interno_especificado) && (
+                                    <View style={styles.analysisRow}>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Ø Int. Enc. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.diametro_interno_encontrado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Ø Int. Espec. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.diametro_interno_especificado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
+                                            <View style={styles.materialFaltanteBox}>
+                                                <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_interno || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                    {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {/* Diâmetro Externo */}
+                                {(item.diametro_externo_encontrado || item.diametro_externo_especificado) && (
+                                    <View style={styles.analysisRow}>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Ø Ext. Enc. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.diametro_externo_encontrado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Ø Ext. Espec. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.diametro_externo_especificado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
+                                            <View style={styles.materialFaltanteBox}>
+                                                <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_externo || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                    {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {/* Comprimento */}
+                                {(item.comprimento_encontrado || item.comprimento_especificado) && (
+                                    <View style={styles.analysisRow}>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Comp. Enc. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.comprimento_encontrado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={styles.analysisLabel}>Comp. Espec. (mm)</Text>
+                                            <Text style={styles.analysisValue}>{item.comprimento_especificado || '-'}</Text>
+                                        </View>
+                                        <View style={styles.analysisField}>
+                                            <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
+                                            <View style={styles.materialFaltanteBox}>
+                                                <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_comprimento || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
+                                                    {item.desvio_comprimento ? `${parseFloat(item.desvio_comprimento) >= 0 ? '+' : ''}${item.desvio_comprimento.replace('.', ',')} mm` : '-'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
                                 <View style={styles.analysisRow}>
                                     <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Ø Ext. Espec. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_externo_especificado || '-'}</Text>
+                                        <Text style={styles.analysisLabel}>Anomalia Encontrada</Text>
+                                        <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.anomalias || '-'}</Text>
                                     </View>
                                     <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Ø Ext. Enc. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_externo_encontrado || '-'}</Text>
-                                    </View>
-                                    <View style={styles.analysisField}>
-                                        <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
-                                        <View style={styles.materialFaltanteBox}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_externo || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
-                                                {item.desvio_externo ? `${parseFloat(item.desvio_externo) >= 0 ? '+' : ''}${item.desvio_externo.replace('.', ',')} mm` : '-'}
-                                            </Text>
-                                        </View>
+                                        <Text style={styles.analysisLabel}>Solução Recomendada</Text>
+                                        <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.solucao || '-'}</Text>
                                     </View>
                                 </View>
-                            )}
 
-                            {/* Diâmetro Interno */}
-                            {(item.diametro_interno_encontrado || item.diametro_interno_especificado) && (
-                                <View style={styles.analysisRow}>
-                                    <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Ø Int. Espec. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_interno_especificado || '-'}</Text>
+                                {/* Fotos do Item */}
+                                {item.fotos && item.fotos.length > 0 && (
+                                    <View style={styles.photoGrid}>
+                                        {item.fotos.map((foto, fIdx) => (
+                                            <View key={fIdx} style={styles.photoContainer} wrap={false}>
+                                                <Image src={foto} style={styles.itemPhoto} />
+                                            </View>
+                                        ))}
                                     </View>
-                                    <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Ø Int. Enc. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.diametro_interno_encontrado || '-'}</Text>
-                                    </View>
-                                    <View style={styles.analysisField}>
-                                        <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
-                                        <View style={styles.materialFaltanteBox}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_interno || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
-                                                {item.desvio_interno ? `${parseFloat(item.desvio_interno) >= 0 ? '+' : ''}${item.desvio_interno.replace('.', ',')} mm` : '-'}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            )}
-
-                            {/* Comprimento */}
-                            {(item.comprimento_encontrado || item.comprimento_especificado) && (
-                                <View style={styles.analysisRow}>
-                                    <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Comp. Espec. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.comprimento_especificado || '-'}</Text>
-                                    </View>
-                                    <View style={styles.analysisField}>
-                                        <Text style={styles.analysisLabel}>Comp. Enc. (mm)</Text>
-                                        <Text style={styles.analysisValue}>{item.comprimento_encontrado || '-'}</Text>
-                                    </View>
-                                    <View style={styles.analysisField}>
-                                        <Text style={[styles.analysisLabel, { color: '#27ae60' }]}>Desvio</Text>
-                                        <View style={styles.materialFaltanteBox}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: parseFloat(item.desvio_comprimento || '0') < 0 ? '#e74c3c' : '#27ae60' }}>
-                                                {item.desvio_comprimento ? `${parseFloat(item.desvio_comprimento) >= 0 ? '+' : ''}${item.desvio_comprimento.replace('.', ',')} mm` : '-'}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            )}
-                            <View style={styles.analysisRow}>
-                                <View style={styles.analysisField}>
-                                    <Text style={styles.analysisLabel}>Anomalia Encontrada</Text>
-                                    <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.anomalias || '-'}</Text>
-                                </View>
-                                <View style={styles.analysisField}>
-                                    <Text style={styles.analysisLabel}>Solução Recomendada</Text>
-                                    <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.solucao || '-'}</Text>
-                                </View>
+                                )}
                             </View>
-
-                            {/* Fotos do Item */}
-                            {item.fotos && item.fotos.length > 0 && (
-                                <View style={styles.photoGrid}>
-                                    {item.fotos.map((foto, fIdx) => (
-                                        <View key={fIdx} style={styles.photoContainer} wrap={false}>
-                                            <Image src={foto} style={styles.itemPhoto} />
-                                        </View>
-                                    ))}
-                                </View>
-                            )}
                         </View>
                     ))}
-                </>
+                </View>
             )}
-
-
 
             <View style={styles.footer} fixed>
                 <Text>Documento gerado automaticamente pela TrustEng. LTDA</Text>
