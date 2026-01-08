@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     analysisLabel: {
         fontSize: 7,
         fontWeight: 'bold',
-        color: '#e74c3c',
+        color: '#000000',
         textTransform: 'uppercase',
         marginBottom: 2,
     },
