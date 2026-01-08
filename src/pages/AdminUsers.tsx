@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Trash2, Check } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import './AdminUsers.css';
 
 interface UserProfile {
@@ -14,8 +16,16 @@ interface UserProfile {
 }
 
 export const AdminUsers: React.FC = () => {
+    const { role, loading: authLoading } = useAuth();
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
+
+    if (authLoading) return <div>Carregando permissões...</div>;
+
+    // Trava de segurança extra: Apenas Gestor pode acessar
+    if (role !== 'gestor') {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     useEffect(() => {
         fetchUsers();

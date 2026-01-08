@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { USIMINAS_ITEMS } from '../constants/usiminasItems';
 import { STANDARD_ITEMS } from '../constants/standardItems';
+import { compressImage } from '../lib/imageUtils';
 import './NovaPeritagem.css';
 
 type StatusColor = 'vermelho' | 'amarelo' | 'verde' | 'azul';
@@ -74,7 +75,8 @@ export const NovaPeritagem: React.FC = () => {
         outros_especificar: '',
         observacoes_gerais: '',
         area: '',
-        linha: ''
+        linha: '',
+        os_interna: '' // Novo campo interno
     });
 
     // Dimensões
@@ -224,19 +226,20 @@ export const NovaPeritagem: React.FC = () => {
         else galleryInputRef.current?.click();
     };
 
-    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && editingItemId) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
+            try {
+                const compressed = await compressImage(file, 1024, 1024, 0.7);
                 const currentItem = checklistItems.find(i => i.id === editingItemId);
                 if (currentItem) {
-                    const newPhotos = [...currentItem.fotos, base64String];
+                    const newPhotos = [...currentItem.fotos, compressed];
                     updateItemDetails(editingItemId, 'fotos', newPhotos);
                 }
-            };
-            reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Erro ao comprimir imagem:', error);
+                alert('Erro ao processar foto.');
+            }
         }
         // Reset input
         e.target.value = '';
@@ -300,7 +303,8 @@ export const NovaPeritagem: React.FC = () => {
                     fabricante: fixedData.fabricante,
                     tipo_modelo: fixedData.tipo_modelo,
                     area: fixedData.area,
-                    linha: fixedData.linha
+                    linha: fixedData.linha,
+                    os_interna: fixedData.os_interna
                 }])
                 .select()
                 .single();
@@ -465,12 +469,16 @@ export const NovaPeritagem: React.FC = () => {
                             capture="environment"
                             ref={frontalPhotoRef}
                             style={{ display: 'none' }}
-                            onChange={(e) => {
+                            onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => setFotoFrontal(reader.result as string);
-                                    reader.readAsDataURL(file);
+                                    try {
+                                        const compressed = await compressImage(file, 1024, 1024, 0.7);
+                                        setFotoFrontal(compressed);
+                                    } catch (error) {
+                                        console.error('Erro ao comprimir foto frontal:', error);
+                                        alert('Erro ao processar foto frontal.');
+                                    }
                                 }
                             }}
                         />
@@ -486,11 +494,36 @@ export const NovaPeritagem: React.FC = () => {
                         </div>
                     </div>
                     <div className="grid-form">
+                        {/* CAMPOS INTERNOS (TELA APENAS) */}
+                        <div className="form-group full-row" style={{ marginBottom: '20px', borderBottom: '2px dashed #eee', paddingBottom: '15px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div>
+                                    <label style={{ fontWeight: 'bold', color: '#e67e22' }}>ORDEM DE SERVIÇO INTERNA (USO INTERNO)</label>
+                                    <input
+                                        placeholder="OS Interna"
+                                        value={fixedData.os_interna}
+                                        onChange={e => setFixedData({ ...fixedData, os_interna: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #e67e22', borderRadius: 0, padding: '5px', backgroundColor: '#fff8f0' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontWeight: 'bold', color: '#e67e22' }}>NOME DO CLIENTE</label>
+                                    <input
+                                        required
+                                        placeholder="Nome do Cliente"
+                                        value={fixedData.cliente}
+                                        onChange={e => setFixedData({ ...fixedData, cliente: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #e67e22', borderRadius: 0, padding: '5px', backgroundColor: '#fff8f0' }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         {fixedData.cliente === 'USIMINAS' ? (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', width: '100%' }}>
                                 {/* HEADER: LAUDO REPARO */}
                                 <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                                    <label style={{ fontWeight: 'bold' }}>LAUDO REPARO (OS)</label>
+                                    <label style={{ fontWeight: 'bold' }}>LAUDO/ REPARO</label>
                                     <input
                                         required
                                         placeholder="OS"
