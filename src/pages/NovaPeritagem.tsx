@@ -489,7 +489,7 @@ export const NovaPeritagem: React.FC = () => {
                                         style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
                                     />
                                 </div>
-                                <div className="form-group">
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
                                     <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO *</label>
                                     <input
                                         required
@@ -499,7 +499,7 @@ export const NovaPeritagem: React.FC = () => {
                                         style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px', textAlign: 'center' }}
                                     />
                                 </div>
-                                <div className="form-group">
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
                                     <label style={{ fontWeight: 'bold' }}>NF</label>
                                     <input
                                         placeholder="Ex: 9012"
@@ -508,7 +508,7 @@ export const NovaPeritagem: React.FC = () => {
                                         style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px', textAlign: 'center' }}
                                     />
                                 </div>
-                                <div className="form-group">
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
                                     <label style={{ fontWeight: 'bold' }}>NI</label>
                                     <input
                                         placeholder="Ex: NI-99"
