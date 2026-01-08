@@ -193,9 +193,18 @@ export const Relatorios: React.FC = () => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = type === 'peritagem'
-                ? `PERITAGEM_${data.laudoNum}.pdf`
-                : `LAUDO_${data.laudoNum}.pdf`;
+            let fileName = '';
+            if (type === 'peritagem') {
+                if (data.cliente && data.cliente.toUpperCase().includes('USIMINAS')) {
+                    fileName = `Peritagem Usiminas_${data.laudoNum}.pdf`;
+                } else {
+                    fileName = `PERITAGEM_${data.laudoNum}.pdf`;
+                }
+            } else {
+                fileName = `LAUDO_${data.laudoNum}.pdf`;
+            }
+
+            link.download = fileName;
 
             document.body.appendChild(link);
             link.click();
