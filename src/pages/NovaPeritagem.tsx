@@ -478,8 +478,8 @@ export const NovaPeritagem: React.FC = () => {
                     </div>
                     <div className="grid-form">
                         {fixedData.cliente === 'USIMINAS' ? (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', width: '100%' }}>
-                                <div className="form-group full-row">
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', width: '100%' }}>
+                                <div className="form-group" style={{ gridColumn: 'span 3' }}>
                                     <label style={{ fontWeight: 'bold' }}>CLIENTE *</label>
                                     <input
                                         required
@@ -489,74 +489,70 @@ export const NovaPeritagem: React.FC = () => {
                                         style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
                                     />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', width: '100%' }}>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO *</label>
-                                        <input
-                                            required
-                                            placeholder="Ex: 1234"
-                                            value={fixedData.numero_os}
-                                            onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>NI</label>
-                                        <input
-                                            placeholder="Ex: NI-99"
-                                            value={fixedData.ni}
-                                            onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>PEDIDO</label>
-                                        <input
-                                            placeholder="Ex: P-123"
-                                            value={fixedData.pedido}
-                                            onChange={e => setFixedData({ ...fixedData, pedido: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>NF</label>
-                                        <input
-                                            placeholder="Ex: 9012"
-                                            value={fixedData.nota_fiscal}
-                                            onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>ORDEM DE SERVIÇO *</label>
+                                    <input
+                                        required
+                                        placeholder="Ex: 1234"
+                                        value={fixedData.numero_os}
+                                        onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', width: '100%' }}>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>TAG DO CILINDRO *</label>
-                                        <input
-                                            required
-                                            placeholder="Digite a TAG..."
-                                            value={fixedData.tag}
-                                            onChange={e => setFixedData({ ...fixedData, tag: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>LOCAL / EQUIPAMENTO</label>
-                                        <input
-                                            placeholder="Ex: Prensa 01"
-                                            value={fixedData.local_equipamento}
-                                            onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value.toUpperCase() })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ fontWeight: 'bold' }}>RESPONSÁVEL TÉCNICO</label>
-                                        <input
-                                            placeholder="Nome do Responsável"
-                                            value={fixedData.responsavel_tecnico}
-                                            onChange={e => setFixedData({ ...fixedData, responsavel_tecnico: e.target.value })}
-                                            style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
-                                        />
-                                    </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>NI</label>
+                                    <input
+                                        placeholder="Ex: NI-99"
+                                        value={fixedData.ni}
+                                        onChange={e => setFixedData({ ...fixedData, ni: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>PEDIDO</label>
+                                    <input
+                                        placeholder="Ex: P-123"
+                                        value={fixedData.pedido}
+                                        onChange={e => setFixedData({ ...fixedData, pedido: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>NF</label>
+                                    <input
+                                        placeholder="Ex: 9012"
+                                        value={fixedData.nota_fiscal}
+                                        onChange={e => setFixedData({ ...fixedData, nota_fiscal: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>TAG DO CILINDRO *</label>
+                                    <input
+                                        required
+                                        placeholder="Digite a TAG..."
+                                        value={fixedData.tag}
+                                        onChange={e => setFixedData({ ...fixedData, tag: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontWeight: 'bold' }}>LOCAL / EQUIPAMENTO</label>
+                                    <input
+                                        placeholder="Ex: Prensa 01"
+                                        value={fixedData.local_equipamento}
+                                        onChange={e => setFixedData({ ...fixedData, local_equipamento: e.target.value.toUpperCase() })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
+                                </div>
+                                <div className="form-group" style={{ gridColumn: 'span 3' }}>
+                                    <label style={{ fontWeight: 'bold' }}>RESPONSÁVEL TÉCNICO</label>
+                                    <input
+                                        placeholder="Nome do Responsável"
+                                        value={fixedData.responsavel_tecnico}
+                                        onChange={e => setFixedData({ ...fixedData, responsavel_tecnico: e.target.value })}
+                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '8px 5px' }}
+                                    />
                                 </div>
                             </div>
                         ) : (
