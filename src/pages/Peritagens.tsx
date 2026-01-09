@@ -130,28 +130,33 @@ export const Peritagens: React.FC = () => {
                                     </td>
                                     <td data-label="Prioridade">{p.prioridade}</td>
                                     <td>
-                                        <button
-                                            className={`btn-action ${p.status === 'REVISÃO NECESSÁRIA' ? 'btn-edit' : ''}`}
-                                            onClick={() => {
-                                                if (p.status === 'REVISÃO NECESSÁRIA') {
-                                                    navigate(`/nova-peritagem?id=${p.id}`);
-                                                } else {
-                                                    navigate(`/monitoramento?id=${p.id}`);
-                                                }
-                                            }}
-                                        >
-                                            {p.status === 'REVISÃO NECESSÁRIA' ? (
-                                                <>
-                                                    <span>EDITAR</span>
-                                                    <ExternalLink size={16} />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>VER DETALHES</span>
-                                                    <ExternalLink size={16} />
-                                                </>
-                                            )}
-                                        </button>
+                                        {(() => {
+                                            const isRejection = p.status?.trim().toUpperCase() === 'REVISÃO NECESSÁRIA';
+                                            return (
+                                                <button
+                                                    className={`btn-action ${isRejection ? 'btn-edit' : ''}`}
+                                                    onClick={() => {
+                                                        if (isRejection) {
+                                                            navigate(`/nova-peritagem?id=${p.id}`);
+                                                        } else {
+                                                            navigate(`/monitoramento?id=${p.id}`);
+                                                        }
+                                                    }}
+                                                >
+                                                    {isRejection ? (
+                                                        <>
+                                                            <span>EDITAR</span>
+                                                            <ExternalLink size={16} />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <span>VER DETALHES</span>
+                                                            <ExternalLink size={16} />
+                                                        </>
+                                                    )}
+                                                </button>
+                                            );
+                                        })()}
                                     </td>
                                 </tr>
                             ))}

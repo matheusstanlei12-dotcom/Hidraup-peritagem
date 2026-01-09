@@ -618,6 +618,16 @@ export const NovaPeritagem: React.FC = () => {
     };
 
     if (step === 0) {
+        if (loading) {
+            return (
+                <div className="nova-peritagem-container start-screen" style={{ flexDirection: 'column', gap: '20px' }}>
+                    <div className="loader" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #3498db', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                    <p style={{ color: '#666', fontWeight: 600 }}>Carregando dados da peritagem...</p>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            );
+        }
+
         return (
             <div className="nova-peritagem-container start-screen">
                 <div className="selection-card">

@@ -77,8 +77,7 @@ export const Dashboard: React.FC = () => {
 
                 const sortedClients = Object.entries(clientCounts)
                     .map(([name, count]) => ({ name, count }))
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 5);
+                    .sort((a, b) => b.count - a.count);
 
                 setClientStats(sortedClients);
             }
@@ -157,17 +156,38 @@ export const Dashboard: React.FC = () => {
         }
     };
 
+    // Plugin para desenhar valores no topo das barras
+    const valueOnTopPlugin = {
+        id: 'valueOnTop',
+        afterDatasetsDraw: (chart: any) => {
+            const { ctx } = chart;
+            chart.data.datasets.forEach((dataset: any, i: number) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar: any, index: number) => {
+                    const value = dataset.data[index];
+                    ctx.save();
+                    ctx.fillStyle = '#64748b'; // Slate 500
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    // Desenha o valor 5px acima da barra
+                    ctx.fillText(value, bar.x, bar.y - 5);
+                    ctx.restore();
+                });
+            });
+        }
+    };
+
     const barData = {
         labels: clientStats.length > 0 ? clientStats.map(s => s.name) : ['Sem dados'],
         datasets: [
             {
                 label: 'Peritagens',
                 data: clientStats.length > 0 ? clientStats.map(s => s.count) : [0],
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#3b82f6', // Corporate Blue
                 borderRadius: 4,
-                borderWidth: 1,
-                borderColor: 'rgba(59, 130, 246, 0.2)',
-                barPercentage: 0.45,
+                borderWidth: 0, // No border for cleaner look
+                barPercentage: 0.6, // Slightly wider bars but balanced
                 categoryPercentage: 0.8,
             },
         ],
@@ -197,17 +217,28 @@ export const Dashboard: React.FC = () => {
     const barOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+            padding: {
+                top: 20 // Extra space for labels on top
+            }
+        },
         plugins: {
             legend: { display: false },
             tooltip: {
                 backgroundColor: '#1e293b',
                 titleColor: '#ffffff',
                 bodyColor: '#cbd5e1',
-                padding: 10,
-                cornerRadius: 4,
+                padding: 12,
+                cornerRadius: 8,
                 displayColors: false,
                 titleFont: { size: 13, weight: 'bold' as any },
-                bodyFont: { size: 12 }
+                bodyFont: { size: 13 },
+                callbacks: {
+                    title: (tooltipItems: any[]) => {
+                        // Show full name in tooltip
+                        return tooltipItems[0].label;
+                    }
+                }
             }
         },
         scales: {
@@ -219,7 +250,7 @@ export const Dashboard: React.FC = () => {
                     drawTicks: false
                 },
                 ticks: {
-                    stepSize: 1,
+                    stepSize: 1, // Integer steps
                     font: { size: 11, weight: 'bold' as any },
                     color: '#64748b'
                 },
@@ -228,15 +259,29 @@ export const Dashboard: React.FC = () => {
             x: {
                 grid: { display: false },
                 ticks: {
-                    font: { size: 11, weight: 'bold' as any },
-                    color: '#475569'
+                    maxRotation: 0,
+                    minRotation: 0,
+                    autoSkip: false,
+                    font: { size: 11, weight: '600' as any },
+                    color: '#475569',
+                    callback: function (val: any) {
+                        const index = val as number;
+                        if (clientStats[index]) {
+                            const label = clientStats[index].name;
+                            if (label.length > 15) {
+                                return label.split(/\s+/);
+                            }
+                            return label;
+                        }
+                        return '';
+                    }
                 },
                 border: { display: false }
             }
         },
         animation: {
             duration: 800,
-            easing: 'linear' as any
+            easing: 'easeOutQuart' as any
         }
     };
 
@@ -249,19 +294,19 @@ export const Dashboard: React.FC = () => {
                 position: 'right' as any,
                 labels: {
                     usePointStyle: true,
-                    pointStyle: 'rect',
+                    pointStyle: 'rectRounded', // Softer feel
                     padding: 15,
                     font: {
                         size: 11,
-                        weight: 'bold' as any
+                        weight: '600' as any
                     },
                     color: '#475569'
                 }
             },
             tooltip: {
                 backgroundColor: '#1e293b',
-                padding: 10,
-                cornerRadius: 4,
+                padding: 12,
+                cornerRadius: 8,
                 titleFont: { weight: 'bold' as any }
             }
         },
@@ -303,12 +348,15 @@ export const Dashboard: React.FC = () => {
 
             <div className="charts-grid">
                 <div className="chart-card">
-                    <h3>Peritagens por Cliente (Top 5)</h3>
-                    <div className="chart-wrapper">
-                        <Bar
-                            data={barData}
-                            options={barOptions}
-                        />
+                    <h3>Quantidade de Peritagens por Cliente</h3>
+                    <div className="chart-wrapper" style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+                        <div style={{ height: '320px', width: clientStats.length > 4 ? `${clientStats.length * 140}px` : '100%' }}>
+                            <Bar
+                                data={barData}
+                                options={barOptions}
+                                plugins={[valueOnTopPlugin]}
+                            />
+                        </div>
                     </div>
                 </div>
 
