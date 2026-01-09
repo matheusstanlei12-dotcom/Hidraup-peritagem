@@ -31,6 +31,8 @@ export const AdminUsers: React.FC = () => {
         fetchUsers();
     }, []);
 
+    const HIDDEN_EMAILS = ['matheus.stanley12@gmail.com'];
+
     const fetchUsers = async () => {
         try {
             const { data, error } = await supabase
@@ -38,7 +40,10 @@ export const AdminUsers: React.FC = () => {
                 .select('*');
 
             if (error) throw error;
-            setUsers(data || []);
+
+            // Filtra usuários ocultos
+            const visibleUsers = (data || []).filter(u => !HIDDEN_EMAILS.includes(u.email));
+            setUsers(visibleUsers);
         } catch (error: any) {
             console.error('Erro ao buscar usuários:', error);
             alert('Não foi possível carregar os usuários.');
