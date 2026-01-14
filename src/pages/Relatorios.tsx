@@ -270,7 +270,7 @@ export const Relatorios: React.FC = () => {
                         <div key={p.id} className="report-card">
                             <div className="report-info">
                                 <h3 className="report-title">
-                                    {p.cliente} <span className="report-id">O.S: {p.numero_peritagem}</span>
+                                    {p.cliente} <span className="report-id">O.S: {p.os_interna || p.numero_peritagem}</span>
                                 </h3>
                                 <span className="report-details">Data: {new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
                                 <span className={`status-badge small ${p.status.toLowerCase().replace(/ /g, '-')}`}>{p.status}</span>
