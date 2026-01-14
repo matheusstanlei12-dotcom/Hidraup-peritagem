@@ -269,7 +269,7 @@ export const Monitoramento: React.FC = () => {
                             <Loader2 size={14} className="spinning-icon" /> MONITORAMENTO DE PROCESSO
                         </span>
                         <h2 className="current-step-title">
-                            {selectedProcess.os} - <span className="highlight-status">{selectedProcess.cliente}</span>
+                            {selectedProcess.os_interna || selectedProcess.os} - <span className="highlight-status">{selectedProcess.cliente}</span>
                         </h2>
                     </div>
                 </div>
@@ -335,7 +335,7 @@ export const Monitoramento: React.FC = () => {
                     </div>
 
                     <div className="process-id-display">
-                        O.S: {selectedProcess.os}
+                        O.S: {selectedProcess.os_interna || selectedProcess.os}
                     </div>
                 </div>
 
@@ -430,7 +430,7 @@ export const Monitoramento: React.FC = () => {
                                 <div key={processo.id} className="process-card">
                                     <div className="process-main-info" onClick={() => setSelectedProcess(processo)}>
                                         <div className="process-info">
-                                            <span className="process-tag">{processo.os}</span>
+                                            <span className="process-tag">{processo.os_interna || processo.os}</span>
                                             <h3 className="process-title">{processo.cliente}</h3>
                                             <span className="process-client">{processo.equipamento}</span>
                                         </div>
