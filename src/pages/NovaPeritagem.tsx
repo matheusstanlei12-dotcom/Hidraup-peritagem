@@ -1228,6 +1228,10 @@ export const NovaPeritagem: React.FC = () => {
                                                             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
                                                             <input
                                                                 type="number"
+                                                                className="no-spinner"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                                }}
                                                                 step="0.0001"
                                                                 placeholder="0.0000"
                                                                 style={{ paddingLeft: '30px', width: '100%' }}
@@ -1253,6 +1257,10 @@ export const NovaPeritagem: React.FC = () => {
                                                             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
                                                             <input
                                                                 type="number"
+                                                                className="no-spinner"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                                }}
                                                                 step="0.0001"
                                                                 placeholder="0.0000"
                                                                 style={{ paddingLeft: '30px', width: '100%' }}
@@ -1298,6 +1306,10 @@ export const NovaPeritagem: React.FC = () => {
                                                             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
                                                             <input
                                                                 type="number"
+                                                                className="no-spinner"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                                }}
                                                                 step="0.0001"
                                                                 placeholder="0.0000"
                                                                 style={{ paddingLeft: '30px', width: '100%' }}
@@ -1324,6 +1336,10 @@ export const NovaPeritagem: React.FC = () => {
                                                             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4a5568', fontWeight: 'bold' }}>Ø</span>
                                                             <input
                                                                 type="number"
+                                                                className="no-spinner"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                                }}
                                                                 step="0.0001"
                                                                 placeholder="0.0000"
                                                                 style={{ paddingLeft: '30px', width: '100%' }}
@@ -1367,6 +1383,10 @@ export const NovaPeritagem: React.FC = () => {
                                                         <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Comprimento Encontrado</label>
                                                         <input
                                                             type="number"
+                                                            className="no-spinner"
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                            }}
                                                             step="0.0001"
                                                             placeholder="0.0000"
                                                             value={item.comprimento_encontrado || ''}
@@ -1388,6 +1408,10 @@ export const NovaPeritagem: React.FC = () => {
                                                         <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Comprimento Especificado</label>
                                                         <input
                                                             type="number"
+                                                            className="no-spinner"
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                                                            }}
                                                             step="0.0001"
                                                             placeholder="0.0000"
                                                             value={item.comprimento_especificado || ''}
