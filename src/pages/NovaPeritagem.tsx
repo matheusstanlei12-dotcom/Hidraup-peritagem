@@ -799,17 +799,7 @@ export const NovaPeritagem: React.FC = () => {
 
                         {fixedData.cliente === 'USIMINAS' ? (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', width: '100%' }}>
-                                {/* HEADER: LAUDO REPARO */}
-                                <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                                    <label style={{ fontWeight: 'bold' }}>LAUDO/ REPARO</label>
-                                    <input
-                                        required
-                                        placeholder="OS"
-                                        value={fixedData.numero_os}
-                                        onChange={e => setFixedData({ ...fixedData, numero_os: e.target.value.toUpperCase() })}
-                                        style={{ width: '100%', borderBottom: '1px solid #000', borderRadius: 0, padding: '5px' }}
-                                    />
-                                </div>
+
 
                                 {/* LINHA 1: NOTA/LAUDO | PROCESSO | DATA */}
                                 <div className="form-group">
