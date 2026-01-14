@@ -681,7 +681,7 @@ export const NovaPeritagem: React.FC = () => {
                 </div>
             </header>
 
-            <form className="peritagem-dynamic-form" onSubmit={handleSubmit}>
+            <form className="peritagem-dynamic-form" onSubmit={(e) => e.preventDefault()}>
                 {/* FOTO FRONTAL OBRIGATÓRIA */}
                 <section className="form-card frontal-photo-section">
                     <div className="card-header">
@@ -1592,7 +1592,7 @@ export const NovaPeritagem: React.FC = () => {
                 </section>
 
                 <div className="footer-actions">
-                    <button type="submit" className="btn-finalize" disabled={loading}>
+                    <button type="button" className="btn-finalize" onClick={handleSubmit} disabled={loading}>
                         {loading ? 'Processando...' : 'Finalizar e Registrar Peritagem'}
                     </button>
                 </div>
