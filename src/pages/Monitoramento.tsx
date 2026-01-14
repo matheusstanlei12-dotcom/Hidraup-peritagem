@@ -54,6 +54,7 @@ interface Processo {
     ordem?: string;
     tag?: string;
     tipo_cilindro?: string;
+    os_interna?: string;
 }
 
 interface Historico {
@@ -228,8 +229,9 @@ export const Monitoramento: React.FC = () => {
     const filteredProcessos = processos.filter(p => {
         const cValue = (p.cliente || "").toLowerCase();
         const osValue = (p.os || "").toLowerCase();
+        const osInternaValue = (p.os_interna || "").toLowerCase();
         const search = searchTerm.toLowerCase();
-        const matchesSearch = cValue.includes(search) || osValue.includes(search);
+        const matchesSearch = cValue.includes(search) || osValue.includes(search) || osInternaValue.includes(search);
 
         if (!filterParams) return matchesSearch;
 

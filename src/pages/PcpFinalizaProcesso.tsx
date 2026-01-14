@@ -11,6 +11,7 @@ interface Peritagem {
     cliente: string;
     status: string;
     numero_pedido?: string;
+    os_interna?: string;
 }
 
 export const PcpFinalizaProcesso: React.FC = () => {
@@ -66,7 +67,8 @@ export const PcpFinalizaProcesso: React.FC = () => {
 
     const filtered = peritagens.filter(p =>
         p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase())
+        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (

@@ -11,6 +11,7 @@ interface Peritagem {
     data_execucao: string;
     status: string;
     prioridade: string;
+    os_interna?: string;
 }
 
 export const Manutencao: React.FC = () => {
@@ -42,7 +43,8 @@ export const Manutencao: React.FC = () => {
 
     const filteredPeritagens = peritagens.filter(p =>
         p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase())
+        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (

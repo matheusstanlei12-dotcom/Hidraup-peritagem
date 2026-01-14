@@ -22,6 +22,7 @@ interface Peritagem {
     fabricante_modelo?: string;
     foto_frontal?: string;
     status: string;
+    os_interna?: string;
 }
 
 interface AnaliseTecnica {
@@ -143,7 +144,8 @@ export const PcpAprovaPeritagem: React.FC = () => {
 
     const filtered = peritagens.filter(p =>
         p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase())
+        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (
