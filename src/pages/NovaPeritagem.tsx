@@ -870,9 +870,8 @@ export const NovaPeritagem: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label style={{ fontWeight: 'bold' }}>TAG DO EQUIPAMENTO *</label>
+                                    <label style={{ fontWeight: 'bold' }}>TAG DO EQUIPAMENTO</label>
                                     <input
-                                        required
                                         placeholder="TAG"
                                         value={fixedData.tag}
                                         onChange={e => setFixedData({ ...fixedData, tag: e.target.value.toUpperCase() })}
