@@ -1159,3 +1159,76 @@ textarea {
         padding-left: 0;
     }
 }
+
+/* Photo Selection Buttons (Placeholder) */
+.photo-selection-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.btn-photo-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-main);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-photo-select:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-photo-select span {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Photo Actions (Overlay) */
+.change-photo-actions {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.frontal-preview:hover .change-photo-actions {
+    opacity: 1;
+}
+
+.btn-photo-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: white;
+    border: none;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    color: var(--text-main);
+}
+
+.btn-photo-action:hover {
+    transform: scale(1.05);
+    background: var(--primary);
+    color: white;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Camera, X, CheckCircle, AlertCircle, Save, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Camera, Image as ImageIcon, X, CheckCircle, AlertCircle, Save, Info } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { USIMINAS_ITEMS } from '../constants/usiminasItems';
@@ -95,7 +95,9 @@ export const NovaPeritagem: React.FC = () => {
     });
     const [dimStatus, setDimStatus] = useState<StatusColor>('vermelho');
     const [fotoFrontal, setFotoFrontal] = useState<string>('');
-    const frontalPhotoRef = React.useRef<HTMLInputElement>(null);
+
+    const frontalCameraRef = React.useRef<HTMLInputElement>(null);
+    const frontalGalleryRef = React.useRef<HTMLInputElement>(null);
 
     // Checklist
     const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
@@ -686,27 +688,64 @@ export const NovaPeritagem: React.FC = () => {
                         <Camera size={20} color="#2980b9" />
                         <h3>Foto Frontal do Equipamento *</h3>
                     </div>
-                    <div className="frontal-photo-upload" onClick={() => frontalPhotoRef.current?.click()}>
+                    <div className="frontal-photo-upload" style={{ cursor: 'default' }}>
                         {fotoFrontal ? (
                             <div className="frontal-preview">
                                 <img src={fotoFrontal} alt="Foto Frontal" />
-                                <div className="change-photo-overlay">
-                                    <Camera size={24} />
-                                    <span>Alterar Foto</span>
+                                <div className="change-photo-actions">
+                                    <button type="button" className="btn-photo-action" onClick={() => frontalCameraRef.current?.click()}>
+                                        <Camera size={20} />
+                                        <span>Câmera</span>
+                                    </button>
+                                    <button type="button" className="btn-photo-action" onClick={() => frontalGalleryRef.current?.click()}>
+                                        <ImageIcon size={20} />
+                                        <span>Galeria</span>
+                                    </button>
                                 </div>
                             </div>
                         ) : (
                             <div className="frontal-placeholder">
-                                <Camera size={48} color="#bdc3c7" />
-                                <p>Clique para capturar ou anexar a foto frontal</p>
-                                <span>(Obrigatório)</span>
+                                <p style={{ marginBottom: '1rem' }}>Selecione uma opção:</p>
+                                <div className="photo-selection-buttons">
+                                    <button type="button" className="btn-photo-select" onClick={() => frontalCameraRef.current?.click()}>
+                                        <Camera size={32} />
+                                        <span>Tirar Foto</span>
+                                    </button>
+                                    <button type="button" className="btn-photo-select" onClick={() => frontalGalleryRef.current?.click()}>
+                                        <ImageIcon size={32} />
+                                        <span>Galeria</span>
+                                    </button>
+                                </div>
+                                <span style={{ marginTop: '1rem', display: 'block' }}>(Obrigatório)</span>
                             </div>
                         )}
+
+                        {/* Input Câmera */}
                         <input
                             type="file"
                             accept="image/*"
                             capture="environment"
-                            ref={frontalPhotoRef}
+                            ref={frontalCameraRef}
+                            style={{ display: 'none' }}
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    try {
+                                        const compressed = await compressImage(file, 1024, 1024, 0.7);
+                                        setFotoFrontal(compressed);
+                                    } catch (error) {
+                                        console.error('Erro ao comprimir foto frontal:', error);
+                                        alert('Erro ao processar foto frontal.');
+                                    }
+                                }
+                            }}
+                        />
+
+                        {/* Input Galeria */}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={frontalGalleryRef}
                             style={{ display: 'none' }}
                             onChange={async (e) => {
                                 const file = e.target.files?.[0];
