@@ -285,7 +285,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
                                     <div className="pcp-card-header">
                                         <div>
                                             <h3 className="pcp-card-client">{p.cliente}</h3>
-                                            <span className="pcp-card-id">ID: {p.numero_peritagem}</span>
+                                            <span className="pcp-card-id">O.S.: {p.os_interna || p.numero_peritagem}</span>
                                         </div>
                                         <span className="status-badge peritagem-criada">{p.status}</span>
                                     </div>
