@@ -23,6 +23,7 @@ interface Peritagem {
     foto_frontal?: string;
     status: string;
     os_interna?: string;
+    numero_os?: string;
 }
 
 interface AnaliseTecnica {
@@ -290,7 +291,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
                                     </div>
 
                                     <div className="pcp-details-mini-grid">
-                                        <div className="pcp-detail-item"><small>O.S.</small><strong>{p.ordem_servico || '---'}</strong></div>
+                                        <div className="pcp-detail-item"><small>O.S.</small><strong>{p.os_interna || p.numero_os || '---'}</strong></div>
                                         <div className="pcp-detail-item"><small>C. INT/EXT</small><strong>{p.camisa_int || '---'}/{p.camisa_ext || '---'}</strong></div>
                                         <div className="pcp-detail-item"><small>H. DIÂMETRO</small><strong>{p.haste_diam || '---'}</strong></div>
                                         <div className="pcp-detail-item"><small>CURSO</small><strong>{p.curso || '---'}</strong></div>
