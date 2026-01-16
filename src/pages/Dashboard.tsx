@@ -3,12 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
-    FileText,
-    DollarSign,
-    Wrench,
-    CheckCircle2
-} from 'lucide-react';
-import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
@@ -16,9 +10,18 @@ import {
     Title,
     Tooltip,
     Legend,
-    ArcElement
+    ArcElement,
+    PointElement,
+    LineElement
 } from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+    FileText,
+    DollarSign,
+    Wrench,
+    CheckCircle2,
+    Timer
+} from 'lucide-react';
 import './Dashboard.css';
 
 ChartJS.register(
@@ -28,12 +31,14 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend,
-    ArcElement
+    ArcElement,
+    PointElement,
+    LineElement
 );
 
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
-    const { isAdmin } = useAuth();
+    const { isAdmin, user } = useAuth();
     const [counts, setCounts] = React.useState({
         total: 0,
         aguardando: 0,
@@ -41,37 +46,94 @@ export const Dashboard: React.FC = () => {
         finalizados: 0,
         pendentePcp: 0,
         aguardandoCliente: 0,
-        conferenciaFinal: 0
+        conferenciaFinal: 0,
+        avgLeadTime: 0
     });
     const [clientStats, setClientStats] = React.useState<{ name: string; count: number }[]>([]);
+    const [monthlyAvgData, setMonthlyAvgData] = React.useState<{ month: string; avg: number }[]>([]);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        fetchCounts();
-    }, []);
+        if (user) fetchCounts();
+    }, [user]);
+
+    interface DashboardData {
+        status: string;
+        cliente: string;
+        created_at?: string;
+        updated_at?: string;
+    }
 
     const fetchCounts = async () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('status, cliente');
+                .select('*')
+                .returns<DashboardData[]>();
 
             if (error) throw error;
 
             if (data) {
                 const total = data.length;
-                const pendentePcp = data.filter(p => p.status === 'AGUARDANDO APROVAÇÃO DO PCP' || p.status === 'PERITAGEM CRIADA').length;
-                const aguardandoCliente = data.filter(p => p.status === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || p.status === 'Aguardando Clientes').length;
-                const manutencao = data.filter(p => p.status === 'EM MANUTENÇÃO' || p.status === 'Cilindros em Manutenção').length;
-                const conferenciaFinal = data.filter(p => p.status === 'AGUARDANDO CONFERÊNCIA FINAL').length;
-                const finalizados = data.filter(p => p.status === 'PROCESSO FINALIZADO' || p.status === 'Finalizados' || p.status === 'ORÇAMENTO FINALIZADO').length;
+                const pendentePcp = data.filter((p: DashboardData) => p.status === 'AGUARDANDO APROVAÇÃO DO PCP' || p.status === 'PERITAGEM CRIADA').length;
+                const aguardandoCliente = data.filter((p: DashboardData) => p.status === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || p.status === 'Aguardando Clientes').length;
+                const manutencao = data.filter((p: DashboardData) => p.status === 'EM MANUTENÇÃO' || p.status === 'Cilindros em Manutenção').length;
+                const conferenciaFinal = data.filter((p: DashboardData) => p.status === 'AGUARDANDO CONFERÊNCIA FINAL').length;
 
-                setCounts({ total, aguardando: aguardandoCliente, manutencao, finalizados, pendentePcp, aguardandoCliente, conferenciaFinal });
+                // Identify finished items
+                const finishedItems = data.filter((p: DashboardData) =>
+                    p.status === 'PROCESSO FINALIZADO' ||
+                    p.status === 'Finalizados' ||
+                    p.status === 'ORÇAMENTO FINALIZADO'
+                );
+                const finalizados = finishedItems.length;
+
+                // Calculate Global Average Lead Time
+                let totalDays = 0;
+                let validItems = 0;
+
+                // Calculate Monthly Averages
+                const monthGroups: { [key: string]: { total: number, count: number } } = {};
+
+                finishedItems.forEach((item: DashboardData) => {
+                    if (item.created_at && item.updated_at) {
+                        const start = new Date(item.created_at);
+                        const end = new Date(item.updated_at);
+                        const diffTime = Math.abs(end.getTime() - start.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        totalDays += diffDays;
+                        validItems++;
+
+                        // Group by Month (Format: MM/YYYY)
+                        const monthKey = end.toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' });
+                        if (!monthGroups[monthKey]) {
+                            monthGroups[monthKey] = { total: 0, count: 0 };
+                        }
+                        monthGroups[monthKey].total += diffDays;
+                        monthGroups[monthKey].count += 1;
+                    }
+                });
+
+                const avgLeadTime = validItems > 0 ? Math.round(totalDays / validItems) : 0;
+
+                // Sort columns by date
+                const sortedMonths = Object.keys(monthGroups).sort((a, b) => {
+                    const [ma, ya] = a.split('/').map(Number);
+                    const [mb, yb] = b.split('/').map(Number);
+                    return new Date(ya, ma - 1).getTime() - new Date(yb, mb - 1).getTime();
+                }).map(month => ({
+                    month,
+                    avg: Math.round(monthGroups[month].total / monthGroups[month].count)
+                }));
+
+                setMonthlyAvgData(sortedMonths);
+                setCounts({ total, aguardando: aguardandoCliente, manutencao, finalizados, pendentePcp, aguardandoCliente, conferenciaFinal, avgLeadTime });
 
                 // Processar estatísticas por cliente
-                const clients = data.map(p => p.cliente || 'Sem Cliente');
+                const clients = data.map((p: DashboardData) => p.cliente || 'Sem Cliente');
                 const clientCounts: { [key: string]: number } = {};
-                clients.forEach(c => {
+                clients.forEach((c: string) => {
                     clientCounts[c] = (clientCounts[c] || 0) + 1;
                 });
 
@@ -111,7 +173,7 @@ export const Dashboard: React.FC = () => {
             label: '3. Conferência Final',
             value: counts.conferenciaFinal,
             icon: <CheckCircle2 size={24} />,
-            color: 'rgba(15, 23, 42, 0.1)',
+            color: 'rgba(15, 17, 42, 0.1)',
             iconColor: '#0f172a',
             link: '/pcp/finalizar',
             show: isAdmin
@@ -132,6 +194,15 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(16, 185, 129, 0.15)',
             iconColor: '#10b981',
             link: '/monitoramento',
+            show: true
+        },
+        {
+            label: 'Tempo Médio (Dias)',
+            value: counts.avgLeadTime,
+            icon: <Timer size={24} />,
+            color: 'rgba(99, 102, 241, 0.15)',
+            iconColor: '#6366f1',
+            link: '#',
             show: true
         },
     ];
@@ -212,6 +283,23 @@ export const Dashboard: React.FC = () => {
                 borderRadius: 2
             },
         ],
+    };
+
+    const lineData = {
+        labels: monthlyAvgData.length > 0 ? monthlyAvgData.map(d => d.month) : ['Sem dados'],
+        datasets: [
+            {
+                label: 'Tempo Médio (Dias)',
+                data: monthlyAvgData.length > 0 ? monthlyAvgData.map(d => d.avg) : [0],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                tension: 0.4,
+                fill: true,
+                pointStyle: 'circle',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }
+        ]
     };
 
     const barOptions = {
@@ -317,6 +405,31 @@ export const Dashboard: React.FC = () => {
         }
     };
 
+    const lineOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 12,
+                cornerRadius: 8,
+                titleFont: { weight: 'bold' as any }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#64748b' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#475569' }
+            }
+        }
+    };
+
     return (
         <div className="dashboard-container">
             <h1 className="page-title">Painel de Controle</h1>
@@ -349,8 +462,8 @@ export const Dashboard: React.FC = () => {
             <div className="charts-grid">
                 <div className="chart-card">
                     <h3>Quantidade de Peritagens por Cliente</h3>
-                    <div className="chart-wrapper" style={{ overflowX: 'auto', overflowY: 'hidden' }}>
-                        <div style={{ height: '320px', width: clientStats.length > 4 ? `${clientStats.length * 140}px` : '100%' }}>
+                    <div className="chart-wrapper">
+                        <div style={{ height: '320px', width: '100%' }}>
                             <Bar
                                 data={barData}
                                 options={barOptions}
@@ -368,6 +481,13 @@ export const Dashboard: React.FC = () => {
                             options={doughnutOptions}
                             plugins={[centerTextPlugin]}
                         />
+                    </div>
+                </div>
+
+                <div className="chart-card">
+                    <h3>Tempo Médio de Liberação (Mensal)</h3>
+                    <div className="chart-wrapper">
+                        <Line data={lineData} options={lineOptions} />
                     </div>
                 </div>
             </div>

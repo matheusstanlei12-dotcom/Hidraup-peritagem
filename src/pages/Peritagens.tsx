@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ExternalLink, Loader2 } from 'lucide-react';
+import { Search, Plus, ExternalLink, Loader2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,6 +53,25 @@ export const Peritagens: React.FC = () => {
             console.error('Erro ao buscar peritagens:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir esta peritagem? Esta ação não pode ser desfeita.')) return;
+
+        try {
+            const { error } = await supabase
+                .from('peritagens')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setPeritagens(prev => prev.filter(p => p.id !== id));
+            alert('Peritagem excluída com sucesso.');
+        } catch (error) {
+            console.error('Erro ao excluir peritagem:', error);
+            alert('Erro ao excluir peritagem. Verifique se existem registros vinculados.');
         }
     };
 
@@ -122,7 +141,14 @@ export const Peritagens: React.FC = () => {
                         <tbody>
                             {filteredPeritagens.map((p) => (
                                 <tr key={p.id}>
-                                    <td className="peritagem-id" data-label="O.S">{p.numero_peritagem}</td>
+                                    <td className="peritagem-id" data-label="O.S">
+                                        {p.numero_peritagem}
+                                        {p.os_interna && (
+                                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096', marginTop: '2px' }}>
+                                                Int: {p.os_interna}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td data-label="Cliente">{p.cliente}</td>
                                     <td data-label="Data">{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
                                     <td data-label="Status">
@@ -143,28 +169,50 @@ export const Peritagens: React.FC = () => {
                                             const canEdit = role === 'perito' ? !isApproved : true;
 
                                             return (
-                                                <button
-                                                    className={`btn-action ${isRejection ? 'btn-edit' : ''}`}
-                                                    onClick={() => {
-                                                        if (canEdit) {
-                                                            navigate(`/nova-peritagem?id=${p.id}`);
-                                                        } else {
-                                                            navigate(`/monitoramento?id=${p.id}`);
-                                                        }
-                                                    }}
-                                                >
-                                                    {canEdit ? (
-                                                        <>
-                                                            <span>{isRejection ? 'CORRIGIR' : 'EDITAR'}</span>
-                                                            <ExternalLink size={16} />
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <span>VER DETALHES</span>
-                                                            <ExternalLink size={16} />
-                                                        </>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                    <button
+                                                        className={`btn-action ${isRejection ? 'btn-edit' : ''}`}
+                                                        onClick={() => {
+                                                            if (canEdit) {
+                                                                navigate(`/nova-peritagem?id=${p.id}`);
+                                                            } else {
+                                                                navigate(`/monitoramento?id=${p.id}`);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {canEdit ? (
+                                                            <>
+                                                                <span>{isRejection ? 'CORRIGIR' : 'EDITAR'}</span>
+                                                                <ExternalLink size={16} />
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span>VER DETALHES</span>
+                                                                <ExternalLink size={16} />
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    {role === 'gestor' && (
+                                                        <button
+                                                            className="btn-icon-danger"
+                                                            onClick={() => handleDelete(p.id)}
+                                                            title="Excluir Peritagem"
+                                                            style={{
+                                                                background: '#fee2e2',
+                                                                border: 'none',
+                                                                padding: '8px',
+                                                                borderRadius: '6px',
+                                                                color: '#e53e3e',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
                                                     )}
-                                                </button>
+                                                </div>
                                             );
                                         })()}
                                     </td>
