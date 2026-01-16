@@ -133,21 +133,29 @@ export const Peritagens: React.FC = () => {
                                     <td data-label="Prioridade">{p.prioridade}</td>
                                     <td>
                                         {(() => {
-                                            const isRejection = p.status?.trim().toUpperCase() === 'REVISÃO NECESSÁRIA';
+                                            const statusUpper = p.status?.trim().toUpperCase() || '';
+                                            const isRejection = statusUpper === 'REVISÃO NECESSÁRIA';
+                                            const isApproved = statusUpper === 'APROVADO';
+
+                                            // Lógica de Permissão de Edição
+                                            // Perito pode editar qualquer coisa que NÃO esteja APROVADA
+                                            // PCP/Gestor podem editar/visualizar tudo (mantendo comportamento padrão por enquanto)
+                                            const canEdit = role === 'perito' ? !isApproved : true;
+
                                             return (
                                                 <button
                                                     className={`btn-action ${isRejection ? 'btn-edit' : ''}`}
                                                     onClick={() => {
-                                                        if (isRejection) {
+                                                        if (canEdit) {
                                                             navigate(`/nova-peritagem?id=${p.id}`);
                                                         } else {
                                                             navigate(`/monitoramento?id=${p.id}`);
                                                         }
                                                     }}
                                                 >
-                                                    {isRejection ? (
+                                                    {canEdit ? (
                                                         <>
-                                                            <span>EDITAR</span>
+                                                            <span>{isRejection ? 'CORRIGIR' : 'EDITAR'}</span>
                                                             <ExternalLink size={16} />
                                                         </>
                                                     ) : (

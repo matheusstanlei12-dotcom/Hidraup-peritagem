@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
         borderColor: '#fee2e2',
         padding: 4,
         borderRadius: 3,
-        minHeight: 18,
+        minHeight: 40, // Aumentado para acomodar textos "Outros"
         color: '#000000',
     },
     materialFaltanteBox: {
@@ -587,11 +587,11 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                                 <View style={styles.analysisRow}>
                                     <View style={styles.analysisField}>
                                         <Text style={styles.analysisLabel}>Anomalia Encontrada</Text>
-                                        <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.anomalias || '-'}</Text>
+                                        <Text style={styles.analysisValue}>{item.anomalias || '-'}</Text>
                                     </View>
                                     <View style={styles.analysisField}>
                                         <Text style={styles.analysisLabel}>Solução Recomendada</Text>
-                                        <Text style={[styles.analysisValue, { minHeight: 30 }]}>{item.solucao || '-'}</Text>
+                                        <Text style={styles.analysisValue}>{item.solucao || '-'}</Text>
                                     </View>
                                 </View>
 

@@ -775,3 +775,232 @@
 .review-section p {
     white-space: pre-wrap;
 }
+
+/* MODAL DE HISTÓRICO - ESTILO EXECUTIVO PREMIUM */
+.history-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.history-modal-content {
+    background: white;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 50px 100px -20px rgba(50, 50, 93, 0.25),
+        0 30px 60px -30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header-exec {
+    background: #f8fafc;
+    padding: 24px 32px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-exec::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: #3182ce;
+}
+
+.header-content-exec h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1a202c;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.header-content-exec span {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #718096;
+}
+
+.modal-close-exec {
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close-exec:hover {
+    background: #edf2f7;
+    color: #2d3748;
+}
+
+.modal-body-exec {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.exec-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.exec-info-item label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #a0aec0;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.exec-info-item strong {
+    font-size: 1.1rem;
+    color: #2d3748;
+    font-weight: 600;
+    display: block;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.exec-user-card {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid #edf2f7;
+}
+
+.user-avatar-initials {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 6px rgba(66, 153, 225, 0.3);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1.2;
+}
+
+.user-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+    align-self: flex-start;
+}
+
+.role-perito {
+    background: #ebf8ff;
+    color: #3182ce;
+}
+
+.role-pcp {
+    background: #f0fff4;
+    color: #38a169;
+}
+
+.role-gestor {
+    background: #fffaf0;
+    color: #d69e2e;
+}
+
+.role-sistema {
+    background: #edf2f7;
+    color: #718096;
+}
+
+.role-oficina {
+    background: #fff5f5;
+    color: #e53e3e;
+}
+
+.role-comercial {
+    background: #faf5ff;
+    color: #805ad5;
+}
+
+.modal-footer-exec {
+    padding: 24px 32px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    background: #fcfcfc;
+}
+
+.btn-close-exec {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-close-exec:hover {
+    background: #edf2f7;
+    color: #2d3748;
+    border-color: #cbd5e0;
+}

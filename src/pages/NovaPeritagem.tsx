@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Camera, Image as ImageIcon, X, CheckCircle, AlertCircle, Save, Info } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { USIMINAS_ITEMS } from '../constants/usiminasItems';
 import { STANDARD_ITEMS } from '../constants/standardItems';
 import { compressImage } from '../lib/imageUtils';
+import { DIMENSIONAL_ANOMALIES_SERVICES } from '../constants/dimensionalItems';
 import './NovaPeritagem.css';
 
 type StatusColor = 'vermelho' | 'amarelo' | 'verde' | 'azul';
@@ -36,12 +38,15 @@ interface ChecklistItem {
     comprimento_especificado?: string;
     desvio_comprimento?: string;
     isCustom?: boolean;
+    isCustomAnomaly?: boolean;
+    isCustomSolucao?: boolean;
 }
 
 
 
 export const NovaPeritagem: React.FC = () => {
     const navigate = useNavigate();
+    const { role } = useAuth();
     const [searchParams] = useSearchParams();
     const editId = searchParams.get('id');
     const [loading, setLoading] = useState(false);
@@ -132,7 +137,17 @@ export const NovaPeritagem: React.FC = () => {
             // Populate States
             setStep(1);
             setCylinderType(pData.tipo_cilindro || 'Cilindros');
+            setStep(1);
+            setCylinderType(pData.tipo_cilindro || 'Cilindros');
             setFotoFrontal(pData.foto_frontal || '');
+
+            // Validação de Segurança para Perito
+            if (role === 'perito' && pData.status === 'APROVADO') {
+                alert('Esta peritagem já foi aprovada pelo PCP e não pode ser editada.');
+                // Redireciona para visualização ou lista
+                navigate('/peritagens');
+                return;
+            }
 
             setFixedData({
                 tag: pData.tag || '',
@@ -380,11 +395,36 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
-    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante' | 'diametro_externo_encontrado' | 'diametro_externo_especificado' | 'desvio_externo' | 'diametro_interno_encontrado' | 'diametro_interno_especificado' | 'desvio_interno' | 'comprimento_encontrado' | 'comprimento_especificado' | 'desvio_comprimento', value: any) => {
+    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante' | 'diametro_externo_encontrado' | 'diametro_externo_especificado' | 'desvio_externo' | 'diametro_interno_encontrado' | 'diametro_interno_especificado' | 'desvio_interno' | 'comprimento_encontrado' | 'comprimento_especificado' | 'desvio_comprimento' | 'isCustomAnomaly' | 'isCustomSolucao', value: any) => {
         setChecklistItems(prev => prev.map(item => {
             if (item.id === itemId) {
                 // Se estiver alterando o texto de um componente novo, vira amarelo
                 const newStatus = field === 'text' && item.status === 'vermelho' ? 'amarelo' : item.status;
+
+                // Resetar Anomalia, Solução e Flags se o Componente mudar
+                if (field === 'text') {
+                    return {
+                        ...item,
+                        [field]: value,
+                        status: newStatus,
+                        anomalia: '',
+                        solucao: '',
+                        isCustomAnomaly: false,
+                        isCustomSolucao: false
+                    };
+                }
+
+                // Resetar Solução e Flag de Solução se a Anomalia mudar
+                if (field === 'anomalia') {
+                    return {
+                        ...item,
+                        [field]: value,
+                        status: newStatus,
+                        solucao: '',
+                        isCustomSolucao: false
+                    };
+                }
+
                 return { ...item, [field]: value, status: newStatus };
             }
             return item;
@@ -1090,10 +1130,8 @@ export const NovaPeritagem: React.FC = () => {
                                         </div>
                                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             {item.isCustom || item.text === 'Selecione o componente...' ? (
-                                                <input
-                                                    type="text"
+                                                <select
                                                     value={item.text === 'Selecione o componente...' ? '' : item.text}
-                                                    placeholder="Digite o nome do componente..."
                                                     onChange={e => updateItemDetails(item.id, 'text', e.target.value)}
                                                     onClick={e => e.stopPropagation()}
                                                     style={{
@@ -1106,7 +1144,12 @@ export const NovaPeritagem: React.FC = () => {
                                                         outline: 'none',
                                                         background: '#fff'
                                                     }}
-                                                />
+                                                >
+                                                    <option value="" disabled>Selecione o componente...</option>
+                                                    {Object.keys(DIMENSIONAL_ANOMALIES_SERVICES).map(comp => (
+                                                        <option key={comp} value={comp}>{comp}</option>
+                                                    ))}
+                                                </select>
                                             ) : (
                                                 <span>{item.text}</span>
                                             )}
@@ -1438,22 +1481,181 @@ export const NovaPeritagem: React.FC = () => {
                                             </div>
 
                                             <div className="analysis-inputs">
-                                                <div className="input-field">
-                                                    <label>Anomalia encontrada</label>
-                                                    <textarea
-                                                        placeholder="Descreva o defeito..."
-                                                        value={item.anomalia}
-                                                        onChange={(e) => updateItemDetails(item.id, 'anomalia', e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="input-field">
-                                                    <label>Solução recomendada</label>
-                                                    <textarea
-                                                        placeholder="O que deve ser feito?"
-                                                        value={item.solucao}
-                                                        onChange={(e) => updateItemDetails(item.id, 'solucao', e.target.value)}
-                                                    />
-                                                </div>
+                                                {(() => {
+                                                    // Determinar qual é o componente para filtrar as listas
+                                                    // Para itens customizados, o texto é exatamente o componente (pois agora é um select)
+                                                    // Para itens padrão, tentamos encontrar a chave correspondente no texto
+                                                    const availableComponents = Object.keys(DIMENSIONAL_ANOMALIES_SERVICES);
+
+                                                    // Mapeamento manual para casos onde o texto padrão não bate exatamente com a chave
+                                                    // Mapeamento manual para casos onde o texto padrão não bate exatamente com a chave
+                                                    // As chaves são partes do texto do item ou o nome exato que queremos mapear para o Componente oficial
+                                                    // Mapeamento manual otimizado para padrões Usiminas
+                                                    // ORDEM IMPORTA: Termos mais específicos devem vir antes
+                                                    const manualMapping: Record<string, string> = {
+                                                        "Tirante": "Tirantes",
+                                                        "Kit Vedação": "Kit de Vedação",
+                                                        "Vedação": "Kit de Vedação",
+                                                        "Sanfonada": "Proteção Sanfonada",
+                                                        "Bucha olhal": "Olhais",
+                                                        "Olhal": "Olhais",
+                                                        "Rótula": "Olhais",
+                                                        "Sobreposta": "Sobrepostas",
+                                                        "Sede Amortecedor": "Buchas Amortecedoras",
+                                                        "Amortecedor": "Buchas Amortecedoras",
+                                                        "Fixação por Munhão": "Munhão",
+                                                        "Munhão": "Munhão",
+                                                        "Parafusos": "Fixadores",
+                                                        "Aleta": "Flanges",
+                                                        "Base": "Flanges",
+                                                        "Fix.": "Flanges", // Assume Fix. (Aleta/Base) como Flanges/Estrutural
+                                                        "Embolo": "Êmbolo",
+                                                        "Êmbolo": "Êmbolo",
+                                                        "Bucha Guia": "Bucha Guia",
+                                                        "Cabeçote Dianteiro": "Cabeçote Dianteiro",
+                                                        "Cabeçote Traseiro": "Cabeçote Traseiro",
+                                                        "Camisa": "Camisa",
+                                                        "Haste": "Haste"
+                                                    };
+
+                                                    let detectedComponent = availableComponents.find(c => item.text === c);
+
+                                                    if (!detectedComponent) {
+                                                        // Tenta achar via includes (case insensitive)
+                                                        detectedComponent = availableComponents.find(c => item.text.toLowerCase().includes(c.toLowerCase()));
+                                                    }
+
+                                                    if (!detectedComponent) {
+                                                        // Tenta mapeamento manual
+                                                        for (const [key, val] of Object.entries(manualMapping)) {
+                                                            if (item.text.includes(key)) {
+                                                                detectedComponent = val;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    const anomaliesList = detectedComponent ? DIMENSIONAL_ANOMALIES_SERVICES[detectedComponent]?.anomalies : [];
+                                                    const servicesList = detectedComponent ? DIMENSIONAL_ANOMALIES_SERVICES[detectedComponent]?.services : [];
+
+                                                    const hasDropdowns = anomaliesList && anomaliesList.length > 0;
+
+                                                    // Lógica para Anomalia
+                                                    const isAnomalyCustomSelected = item.isCustomAnomaly || (item.anomalia && !anomaliesList.includes(item.anomalia));
+                                                    const anomalyDropdownValue = isAnomalyCustomSelected ? '__CUSTOM__' : (item.anomalia || '');
+
+                                                    // Lógica para Solução
+                                                    const isSolucaoCustomSelected = item.isCustomSolucao || (item.solucao && !servicesList.includes(item.solucao));
+                                                    const solucaoDropdownValue = isSolucaoCustomSelected ? '__CUSTOM__' : (item.solucao || '');
+
+
+                                                    return (
+                                                        <>
+                                                            <div className="input-field">
+                                                                <label>Anomalia encontrada</label>
+                                                                {hasDropdowns ? (
+                                                                    <>
+                                                                        <select
+                                                                            value={anomalyDropdownValue}
+                                                                            onChange={(e) => {
+                                                                                const val = e.target.value;
+                                                                                // Regra 5: Resetar Solução ao alterar Anomalia
+                                                                                updateItemDetails(item.id, 'solucao', '');
+                                                                                updateItemDetails(item.id, 'isCustomSolucao', false);
+
+                                                                                if (val === '__CUSTOM__') {
+                                                                                    updateItemDetails(item.id, 'isCustomAnomaly', true);
+                                                                                    updateItemDetails(item.id, 'anomalia', '');
+                                                                                } else {
+                                                                                    updateItemDetails(item.id, 'isCustomAnomaly', false);
+                                                                                    updateItemDetails(item.id, 'anomalia', val);
+                                                                                }
+                                                                            }}
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                padding: '8px',
+                                                                                borderRadius: '4px',
+                                                                                border: '1px solid #cbd5e0',
+                                                                                backgroundColor: '#fff',
+                                                                                marginBottom: anomalyDropdownValue === '__CUSTOM__' ? '8px' : '0'
+                                                                            }}
+                                                                        >
+                                                                            <option value="">Selecione a anomalia...</option>
+                                                                            {anomaliesList.map((anom, idx) => (
+                                                                                <option key={idx} value={anom}>{anom}</option>
+                                                                            ))}
+                                                                            <option value="__CUSTOM__">Outros</option>
+                                                                        </select>
+                                                                        {anomalyDropdownValue === '__CUSTOM__' && (
+                                                                            <textarea
+                                                                                placeholder="Descreva a anomalia (Outros)..."
+                                                                                value={item.anomalia}
+                                                                                onChange={(e) => updateItemDetails(item.id, 'anomalia', e.target.value)}
+                                                                                className="slide-in"
+                                                                                style={{ minHeight: '80px' }}
+                                                                            />
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    <textarea
+                                                                        placeholder="Descreva o defeito..."
+                                                                        value={item.anomalia}
+                                                                        onChange={(e) => updateItemDetails(item.id, 'anomalia', e.target.value)}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <div className="input-field">
+                                                                <label>Solução recomendada</label>
+                                                                {hasDropdowns ? (
+                                                                    <>
+                                                                        <select
+                                                                            value={solucaoDropdownValue}
+                                                                            onChange={(e) => {
+                                                                                const val = e.target.value;
+                                                                                if (val === '__CUSTOM__') {
+                                                                                    updateItemDetails(item.id, 'isCustomSolucao', true);
+                                                                                    updateItemDetails(item.id, 'solucao', '');
+                                                                                } else {
+                                                                                    updateItemDetails(item.id, 'isCustomSolucao', false);
+                                                                                    updateItemDetails(item.id, 'solucao', val);
+                                                                                }
+                                                                            }}
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                padding: '8px',
+                                                                                borderRadius: '4px',
+                                                                                border: '1px solid #cbd5e0',
+                                                                                backgroundColor: '#fff',
+                                                                                marginBottom: solucaoDropdownValue === '__CUSTOM__' ? '8px' : '0'
+                                                                            }}
+                                                                        >
+                                                                            <option value="">Selecione a solução...</option>
+                                                                            {servicesList.map((serv, idx) => (
+                                                                                <option key={idx} value={serv}>{serv}</option>
+                                                                            ))}
+                                                                            <option value="__CUSTOM__">Outros</option>
+                                                                        </select>
+                                                                        {solucaoDropdownValue === '__CUSTOM__' && (
+                                                                            <textarea
+                                                                                placeholder="Descreva a solução (Outros)..."
+                                                                                value={item.solucao}
+                                                                                onChange={(e) => updateItemDetails(item.id, 'solucao', e.target.value)}
+                                                                                className="slide-in"
+                                                                                style={{ minHeight: '80px' }}
+                                                                            />
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    <textarea
+                                                                        placeholder="O que deve ser feito?"
+                                                                        value={item.solucao}
+                                                                        onChange={(e) => updateItemDetails(item.id, 'solucao', e.target.value)}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
                                     )

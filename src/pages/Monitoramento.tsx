@@ -12,7 +12,8 @@ import {
     XCircle,
     Check,
     FilePlus,
-    CheckSquare
+    CheckSquare,
+    Clock
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -40,7 +41,9 @@ interface Processo {
     fabricante_modelo?: string;
     foto_frontal?: string;
     created_at?: string;
+    updated_at?: string;
     criado_por_nome?: string;
+    criado_por_role?: string;
     desenho_conjunto?: string;
     lubrificante?: string;
     volume?: string;
@@ -105,7 +108,8 @@ export const Monitoramento: React.FC = () => {
                 .from('peritagens')
                 .select(`
                     *,
-                    criador: profiles!criado_por(full_name)
+                    *,
+                    criador: profiles!criado_por(full_name, role)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -119,7 +123,9 @@ export const Monitoramento: React.FC = () => {
                 statusTexto: p.status,
                 etapaAtual: getEtapaIndex(p.status),
                 ...p,
-                criado_por_nome: p.criador?.full_name || 'Usuário do Sistema'
+                ...p,
+                criado_por_nome: p.criador?.full_name || 'Usuário do Sistema',
+                criado_por_role: p.criador?.role || 'SISTEMA'
             }));
 
             setProcessos(mappedData);
@@ -288,7 +294,18 @@ export const Monitoramento: React.FC = () => {
                                 status_novo: 'PERITAGEM CRIADA',
                                 created_at: selectedProcess.created_at || '',
                                 responsavel_nome: selectedProcess.criado_por_nome || 'Sistema (Criação)',
-                                responsavel_cargo: 'SISTEMA'
+                                responsavel_cargo: selectedProcess.criado_por_role || 'SISTEMA'
+                            };
+                        }
+
+                        // Fallback para o card ATIVO caso não tenha histórico registrado (ex: transição direta)
+                        if (isActive && !stageHistory && selectedProcess) {
+                            stageHistory = {
+                                id: 'active-fallback',
+                                status_novo: selectedProcess.statusTexto,
+                                created_at: selectedProcess.updated_at || selectedProcess.created_at || '',
+                                responsavel_nome: selectedProcess.criado_por_nome || 'Sistema',
+                                responsavel_cargo: selectedProcess.criado_por_role || 'SISTEMA'
                             };
                         }
 
@@ -342,51 +359,86 @@ export const Monitoramento: React.FC = () => {
                 {selectedStepInfo && (
                     <div className="history-modal-overlay" onClick={() => setSelectedStepInfo(null)}>
                         <div className="history-modal-content" onClick={e => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <div className="modal-icon-container">
-                                    {ETAPAS.find(e => getEtapaIndex(selectedStepInfo.status_novo) === e.id)?.icone || <ClipboardCheck size={24} />}
-                                </div>
-                                <div className="modal-header-text">
+
+                            <div className="modal-header-exec">
+                                <div className="header-content-exec">
                                     <h3>{selectedStepInfo.status_novo}</h3>
-                                    <span>INFORMAÇÕES DE EXECUÇÃO</span>
+                                    <span>Informações de Execução</span>
                                 </div>
-                                <button className="modal-close-x" onClick={() => setSelectedStepInfo(null)}>
-                                    <XCircle size={20} />
+                                <button className="modal-close-exec" onClick={() => setSelectedStepInfo(null)}>
+                                    <XCircle size={24} />
                                 </button>
                             </div>
 
-                            <div className="modal-body">
-                                <div className="info-row">
-                                    <div className="info-icon-box"><CheckCircle2 size={20} color="#3182ce" /></div>
-                                    <div className="info-text-box">
-                                        <label>EXECUTADO EM</label>
+                            <div className="modal-body-exec">
+                                <div className="exec-info-grid">
+                                    <div className="exec-info-item">
+                                        <label><CheckSquare size={14} /> DATA</label>
                                         <strong>{selectedStepInfo.created_at ? new Date(selectedStepInfo.created_at).toLocaleDateString('pt-BR') : '---'}</strong>
                                     </div>
-                                </div>
-
-                                <div className="info-row">
-                                    <div className="info-icon-box"><Loader2 size={20} color="#3182ce" /></div>
-                                    <div className="info-text-box">
-                                        <label>HORÁRIO</label>
+                                    <div className="exec-info-item">
+                                        <label><Loader2 size={14} /> HORÁRIO</label>
                                         <strong>{selectedStepInfo.created_at ? new Date(selectedStepInfo.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '---'}</strong>
                                     </div>
+
+                                    {(() => {
+                                        if (!selectedStepInfo.created_at) return null;
+
+                                        const now = new Date();
+                                        const date = new Date(selectedStepInfo.created_at);
+                                        const diffTime = Math.abs(now.getTime() - date.getTime());
+                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                        return (
+                                            <div className="exec-info-item" style={{ gridColumn: '1 / -1', marginTop: '8px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+                                                <label style={{ color: '#d69e2e' }}><Clock size={14} /> AGUARDANDO LIBERAÇÃO</label>
+                                                <strong style={{ fontSize: '0.9rem', color: '#744210' }}>
+                                                    Há {diffDays} {diffDays === 1 ? 'dia' : 'dias'}
+                                                </strong>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
 
-                                <div className="info-row">
-                                    <div className="info-icon-box"><User size={20} color="#3182ce" /></div>
-                                    <div className="info-text-box">
-                                        <label>RESPONSÁVEL</label>
-                                        <strong>{selectedStepInfo.responsavel_nome}</strong>
-                                        <span className="sub-role" style={{ fontSize: '0.75rem', marginTop: '2px', opacity: 0.8 }}>
-                                            {selectedStepInfo.responsavel_cargo}
-                                        </span>
+                                <div className="exec-user-card">
+                                    <div className="user-avatar-initials">
+                                        {(() => {
+                                            const name = selectedStepInfo.responsavel_nome || 'S';
+                                            const parts = name.split(' ');
+                                            const initials = parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : name.substring(0, 2);
+                                            return initials.toUpperCase();
+                                        })()}
+                                    </div>
+                                    <div className="user-details">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                            <label style={{ fontSize: '0.65rem', color: '#a0aec0', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase' }}>RESPONSÁVEL</label>
+                                            <span className="user-name" style={{ fontSize: '1rem', fontWeight: '700', color: '#2d3748' }}>{selectedStepInfo.responsavel_nome}</span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+                                            <label style={{ fontSize: '0.65rem', color: '#a0aec0', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase' }}>FUNÇÃO</label>
+                                            <span className={`user-role-badge role-${selectedStepInfo.responsavel_cargo?.toLowerCase() || 'sistema'}`}>
+                                                {(() => {
+                                                    const r = (selectedStepInfo.responsavel_cargo || '').toLowerCase();
+                                                    if (r === 'perito') return 'Perito';
+                                                    if (r === 'pcp') return 'PCP';
+                                                    if (r === 'gestor') return 'Gestor';
+                                                    if (r === 'oficina') return 'Oficina';
+                                                    if (r === 'comercial') return 'Comercial';
+                                                    return r ? r.charAt(0).toUpperCase() + r.slice(1) : 'Sistema';
+                                                })()}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <button className="modal-close-btn" onClick={() => setSelectedStepInfo(null)}>
-                                FECHAR DETALHES
-                            </button>
+                            <div className="modal-footer-exec">
+                                <button className="btn-close-exec" onClick={() => setSelectedStepInfo(null)}>
+                                    Fechar Detalhes
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 )}
