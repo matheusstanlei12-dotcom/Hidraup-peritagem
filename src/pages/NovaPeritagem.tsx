@@ -1115,35 +1115,26 @@ export const NovaPeritagem: React.FC = () => {
                     </div>
                     <div className="checklist-items">
                         <div className="checklist-header-row">
-                            <span className="cl-num" style={{ width: '60px' }}>N°</span>
+                            <span className="cl-col-num">N°</span>
                             <span className="cl-desc">DESCRIÇÃO DE PEÇAS / SERVIÇOS</span>
-                            <span className="cl-x" style={{ width: '30px', textAlign: 'center' }}></span>
-                            <span className="cl-qtd" style={{ width: '60px', textAlign: 'center' }}></span>
+                            <span className="cl-col-x"></span>
+                            <span className="cl-col-qtd">QTD</span>
                         </div>
                         {checklistItems.map((item, index) => (
                             <div key={item.id} className="checklist-row" onClick={() => handleChecklistItemClick(item.id)}>
                                 <div className="row-main">
                                     <div className="item-info">
-                                        <div style={{ width: '60px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div className="cl-col-num-row">
                                             <div className={`status-dot-animated ${item.conformidade ? 'verde' : 'vermelho'}`} />
                                             <span style={{ fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
                                         </div>
-                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div className="cl-col-desc-row">
                                             {item.isCustom || item.text === 'Selecione o componente...' ? (
                                                 <select
                                                     value={item.text === 'Selecione o componente...' ? '' : item.text}
                                                     onChange={e => updateItemDetails(item.id, 'text', e.target.value)}
                                                     onClick={e => e.stopPropagation()}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '6px 10px',
-                                                        borderRadius: '6px',
-                                                        border: '1px solid #e2e8f0',
-                                                        fontSize: '0.9rem',
-                                                        color: '#2d3748',
-                                                        outline: 'none',
-                                                        background: '#fff'
-                                                    }}
+                                                    className="cl-select-custom"
                                                 >
                                                     <option value="" disabled>Selecione o componente...</option>
                                                     {Object.keys(DIMENSIONAL_ANOMALIES_SERVICES).map(comp => (
@@ -1155,17 +1146,17 @@ export const NovaPeritagem: React.FC = () => {
                                             )}
                                         </div>
 
-                                        {/* Coluna X (Vazia para manter estrutura do cabeçalho se necessário) */}
-                                        <div style={{ width: '30px' }} />
+                                        {/* Coluna X - Spacer oculto no mobile */}
+                                        <div className="cl-col-x-row" />
 
                                         {/* Coluna QTD */}
-                                        <div style={{ width: '60px', textAlign: 'center' }}>
+                                        <div className="cl-col-qtd-row">
                                             <input
                                                 className="inline-input"
                                                 value={item.qtd || ''}
                                                 onChange={e => updateItemDetails(item.id, 'qtd', e.target.value)}
                                                 onClick={e => e.stopPropagation()}
-                                                style={{ width: '100%', textAlign: 'center', border: 'none', background: 'transparent' }}
+                                                placeholder="QTD"
                                             />
                                         </div>
                                     </div>

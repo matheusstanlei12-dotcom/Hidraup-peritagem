@@ -1243,3 +1243,120 @@ input.no-spinner::-webkit-inner-spin-button {
 input.no-spinner {
     -moz-appearance: textfield;
 }
+
+/* Responsive Checklist Column Classes */
+.cl-col-num,
+.cl-col-num-row {
+    width: 60px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.cl-col-num-row {
+    justify-content: flex-start;
+    /* Align number to left slightly in row */
+}
+
+.cl-col-desc,
+.cl-col-desc-row {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    /* Ensure text wraps nicely */
+    min-width: 0;
+}
+
+.cl-col-desc-row span {
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.25;
+}
+
+.cl-col-x,
+.cl-col-x-row {
+    width: 30px;
+}
+
+.cl-col-qtd,
+.cl-col-qtd-row {
+    width: 60px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.cl-select-custom {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #2d3748;
+    outline: none;
+    background: #fff;
+    /* Prevent text cut-off in select */
+    text-overflow: ellipsis;
+}
+
+.inline-input {
+    width: 100%;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    color: var(--primary);
+    border-bottom: 1px dashed #cbd5e0;
+    /* Add visual cue for input */
+}
+
+/* Mobile Adjustments (< 480px) */
+@media (max-width: 480px) {
+
+    .cl-col-num,
+    .cl-col-num-row {
+        width: 35px !important;
+        gap: 4px !important;
+    }
+
+    .cl-col-num-row .status-dot-animated {
+        width: 10px;
+        height: 10px;
+    }
+
+    .cl-col-x,
+    .cl-col-x-row {
+        width: 0 !important;
+        display: none !important;
+    }
+
+    .cl-col-qtd,
+    .cl-col-qtd-row {
+        width: 45px !important;
+    }
+
+    .checklist-row .item-info {
+        gap: 0.5rem !important;
+        /* Reduce gap between columns */
+        align-items: center;
+    }
+
+    /* Improve button appearance on mobile */
+    .conformity-toggle {
+        gap: 0.75rem;
+    }
+
+    .conf-btn {
+        font-size: 0.75rem;
+        padding: 0 0.5rem;
+        height: 40px;
+        /* Slightly smaller height */
+    }
+
+    /* Ensure selection box fits */
+    .cl-select-custom {
+        padding: 6px 4px;
+        font-size: 0.85rem;
+    }
+}
