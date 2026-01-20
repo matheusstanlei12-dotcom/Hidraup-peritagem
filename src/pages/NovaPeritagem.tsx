@@ -19,6 +19,10 @@ interface ChecklistItem {
     anomalia: string;
     solucao: string;
     fotos: string[];
+    // Suporte a múltiplas anomalias/soluções
+    anomaliasSet?: { value: string; isCustom: boolean }[];
+    solucoesSet?: { value: string; isCustom: boolean }[];
+
     dimensoes?: string;
     qtd?: string;
     tipo?: 'componente' | 'vedação';
@@ -205,7 +209,13 @@ export const NovaPeritagem: React.FC = () => {
                         status: 'azul' as StatusColor,
                         conformidade: existing.conformidade,
                         anomalia: existing.anomalias || '',
+                        anomaliasSet: existing.anomalias
+                            ? existing.anomalias.split('\n').map((t: string) => ({ value: t, isCustom: false }))
+                            : [{ value: '', isCustom: false }],
                         solucao: existing.solucao || '',
+                        solucoesSet: existing.solucao
+                            ? existing.solucao.split('\n').map((t: string) => ({ value: t, isCustom: false }))
+                            : [{ value: '', isCustom: false }],
                         fotos: existing.fotos || [],
                         dimensoes: existing.dimensoes || '',
                         qtd: existing.qtd || '',
@@ -230,7 +240,9 @@ export const NovaPeritagem: React.FC = () => {
                     status: 'vermelho' as StatusColor,
                     conformidade: null as any,
                     anomalia: '',
+                    anomaliasSet: [{ value: '', isCustom: false }],
                     solucao: '',
+                    solucoesSet: [{ value: '', isCustom: false }],
                     fotos: [],
                     dimensoes: '',
                     qtd: '',
@@ -302,7 +314,9 @@ export const NovaPeritagem: React.FC = () => {
                     status: 'vermelho',
                     conformidade: null,
                     anomalia: '',
+                    anomaliasSet: [{ value: '', isCustom: false }],
                     solucao: '',
+                    solucoesSet: [{ value: '', isCustom: false }],
                     fotos: [],
                     dimensoes: '',
                     qtd: '',
@@ -431,7 +445,89 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
+    // Helpers para Sets de Anomalia/Solução
+    const updateAnomalySet = (itemId: string, index: number, value: string, isCustom: boolean) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.anomaliasSet ? [...item.anomaliasSet] : [{ value: item.anomalia || '', isCustom: false }];
+                while (newSet.length <= index) newSet.push({ value: '', isCustom: false });
+                newSet[index] = { value, isCustom };
+                const joined = newSet.map(x => x.value).filter(x => x && x.trim() !== '').join('\n');
+                return { ...item, anomaliasSet: newSet, anomalia: joined, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
+    const addAnomaly = (itemId: string) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.anomaliasSet ? [...item.anomaliasSet] : [{ value: item.anomalia || '', isCustom: false }];
+                newSet.push({ value: '', isCustom: false });
+                return { ...item, anomaliasSet: newSet, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
+    const removeAnomaly = (itemId: string, index: number) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.anomaliasSet ? [...item.anomaliasSet] : [{ value: item.anomalia || '', isCustom: false }];
+                if (newSet.length > 1) {
+                    newSet.splice(index, 1);
+                } else {
+                    newSet[0] = { value: '', isCustom: false };
+                }
+                const joined = newSet.map(x => x.value).filter(x => x && x.trim() !== '').join('\n');
+                return { ...item, anomaliasSet: newSet, anomalia: joined, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
+    const updateSolucaoSet = (itemId: string, index: number, value: string, isCustom: boolean) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.solucoesSet ? [...item.solucoesSet] : [{ value: item.solucao || '', isCustom: false }];
+                while (newSet.length <= index) newSet.push({ value: '', isCustom: false });
+                newSet[index] = { value, isCustom };
+                const joined = newSet.map(x => x.value).filter(x => x && x.trim() !== '').join('\n');
+                return { ...item, solucoesSet: newSet, solucao: joined, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
+    const addSolucao = (itemId: string) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.solucoesSet ? [...item.solucoesSet] : [{ value: item.solucao || '', isCustom: false }];
+                newSet.push({ value: '', isCustom: false });
+                return { ...item, solucoesSet: newSet, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
+    const removeSolucao = (itemId: string, index: number) => {
+        setChecklistItems(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const newSet = item.solucoesSet ? [...item.solucoesSet] : [{ value: item.solucao || '', isCustom: false }];
+                if (newSet.length > 1) {
+                    newSet.splice(index, 1);
+                } else {
+                    newSet[0] = { value: '', isCustom: false };
+                }
+                const joined = newSet.map(x => x.value).filter(x => x && x.trim() !== '').join('\n');
+                return { ...item, solucoesSet: newSet, solucao: joined, status: 'amarelo' };
+            }
+            return item;
+        }));
+    };
+
     const handlePhotoUpload = (itemId: string, mode: 'cam' | 'gallery') => {
+
         setEditingItemId(itemId);
         if (mode === 'cam') camInputRef.current?.click();
         else galleryInputRef.current?.click();
@@ -1540,109 +1636,150 @@ export const NovaPeritagem: React.FC = () => {
                                                     const solucaoDropdownValue = isSolucaoCustomSelected ? '__CUSTOM__' : (item.solucao || '');
 
 
+                                                    const activeAnomalies = item.anomaliasSet || [{ value: item.anomalia || '', isCustom: false }];
+                                                    const activeSolucoes = item.solucoesSet || [{ value: item.solucao || '', isCustom: false }];
+
                                                     return (
                                                         <>
                                                             <div className="input-field">
-                                                                <label>Anomalia encontrada</label>
-                                                                {hasDropdowns ? (
-                                                                    <>
-                                                                        <select
-                                                                            value={anomalyDropdownValue}
-                                                                            onChange={(e) => {
-                                                                                const val = e.target.value;
-                                                                                // Regra 5: Resetar Solução ao alterar Anomalia
-                                                                                updateItemDetails(item.id, 'solucao', '');
-                                                                                updateItemDetails(item.id, 'isCustomSolucao', false);
+                                                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    Anomalia Encontrada
+                                                                </label>
+                                                                <div className="multi-list-container">
+                                                                    {activeAnomalies.map((anomItem, idx) => {
+                                                                        // Check custom status logic per item
+                                                                        const isCustomSelected = anomItem.isCustom || (anomItem.value && !anomaliesList.includes(anomItem.value));
+                                                                        const dropdownValue = isCustomSelected ? '__CUSTOM__' : (anomItem.value || '');
 
-                                                                                if (val === '__CUSTOM__') {
-                                                                                    updateItemDetails(item.id, 'isCustomAnomaly', true);
-                                                                                    updateItemDetails(item.id, 'anomalia', '');
-                                                                                } else {
-                                                                                    updateItemDetails(item.id, 'isCustomAnomaly', false);
-                                                                                    updateItemDetails(item.id, 'anomalia', val);
-                                                                                }
-                                                                            }}
-                                                                            style={{
-                                                                                width: '100%',
-                                                                                padding: '8px',
-                                                                                borderRadius: '4px',
-                                                                                border: '1px solid #cbd5e0',
-                                                                                backgroundColor: '#fff',
-                                                                                marginBottom: anomalyDropdownValue === '__CUSTOM__' ? '8px' : '0'
-                                                                            }}
-                                                                        >
-                                                                            <option value="">Selecione a anomalia...</option>
-                                                                            {anomaliesList.map((anom, idx) => (
-                                                                                <option key={idx} value={anom}>{anom}</option>
-                                                                            ))}
-                                                                            <option value="__CUSTOM__">Outros</option>
-                                                                        </select>
-                                                                        {anomalyDropdownValue === '__CUSTOM__' && (
-                                                                            <textarea
-                                                                                placeholder="Descreva a anomalia (Outros)..."
-                                                                                value={item.anomalia}
-                                                                                onChange={(e) => updateItemDetails(item.id, 'anomalia', e.target.value)}
-                                                                                className="slide-in"
-                                                                                style={{ minHeight: '80px' }}
-                                                                            />
-                                                                        )}
-                                                                    </>
-                                                                ) : (
-                                                                    <textarea
-                                                                        placeholder="Descreva o defeito..."
-                                                                        value={item.anomalia}
-                                                                        onChange={(e) => updateItemDetails(item.id, 'anomalia', e.target.value)}
-                                                                    />
-                                                                )}
+                                                                        return (
+                                                                            <div key={idx} className="multi-list-item" style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px dashed #eee' }}>
+                                                                                <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-start' }}>
+                                                                                    <div style={{ flex: 1 }}>
+                                                                                        {hasDropdowns ? (
+                                                                                            <>
+                                                                                                <select
+                                                                                                    value={dropdownValue}
+                                                                                                    onChange={(e) => {
+                                                                                                        const val = e.target.value;
+                                                                                                        if (val === '__CUSTOM__') {
+                                                                                                            updateAnomalySet(item.id, idx, '', true);
+                                                                                                        } else {
+                                                                                                            updateAnomalySet(item.id, idx, val, false);
+                                                                                                        }
+                                                                                                    }}
+                                                                                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0', backgroundColor: '#fff', marginBottom: dropdownValue === '__CUSTOM__' ? '8px' : '0' }}
+                                                                                                >
+                                                                                                    <option value="">Selecione a anomalia...</option>
+                                                                                                    {anomaliesList.map((anom, i) => (
+                                                                                                        <option key={i} value={anom}>{anom}</option>
+                                                                                                    ))}
+                                                                                                    <option value="__CUSTOM__">Outros</option>
+                                                                                                </select>
+                                                                                                {dropdownValue === '__CUSTOM__' && (
+                                                                                                    <textarea
+                                                                                                        placeholder="Descreva a anomalia..."
+                                                                                                        value={anomItem.value}
+                                                                                                        onChange={(e) => updateAnomalySet(item.id, idx, e.target.value, true)}
+                                                                                                        style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0' }}
+                                                                                                    />
+                                                                                                )}
+                                                                                            </>
+                                                                                        ) : (
+                                                                                            <textarea
+                                                                                                placeholder="Descreva o defeito..."
+                                                                                                value={anomItem.value}
+                                                                                                onChange={(e) => updateAnomalySet(item.id, idx, e.target.value, true)}
+                                                                                                style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0' }}
+                                                                                            />
+                                                                                        )}
+                                                                                    </div>
+                                                                                    {activeAnomalies.length > 1 && (
+                                                                                        <button type="button" onClick={() => removeAnomaly(item.id, idx)} style={{ color: '#e74c3c', background: 'none', border: 'none', padding: '5px' }}>
+                                                                                            <X size={18} />
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => addAnomaly(item.id)}
+                                                                        style={{ fontSize: '12px', color: '#2980b9', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '5px' }}
+                                                                    >
+                                                                        <Plus size={14} /> Adicionar Anomalia
+                                                                    </button>
+                                                                </div>
                                                             </div>
+
                                                             <div className="input-field">
-                                                                <label>Solução recomendada</label>
-                                                                {hasDropdowns ? (
-                                                                    <>
-                                                                        <select
-                                                                            value={solucaoDropdownValue}
-                                                                            onChange={(e) => {
-                                                                                const val = e.target.value;
-                                                                                if (val === '__CUSTOM__') {
-                                                                                    updateItemDetails(item.id, 'isCustomSolucao', true);
-                                                                                    updateItemDetails(item.id, 'solucao', '');
-                                                                                } else {
-                                                                                    updateItemDetails(item.id, 'isCustomSolucao', false);
-                                                                                    updateItemDetails(item.id, 'solucao', val);
-                                                                                }
-                                                                            }}
-                                                                            style={{
-                                                                                width: '100%',
-                                                                                padding: '8px',
-                                                                                borderRadius: '4px',
-                                                                                border: '1px solid #cbd5e0',
-                                                                                backgroundColor: '#fff',
-                                                                                marginBottom: solucaoDropdownValue === '__CUSTOM__' ? '8px' : '0'
-                                                                            }}
-                                                                        >
-                                                                            <option value="">Selecione a solução...</option>
-                                                                            {servicesList.map((serv, idx) => (
-                                                                                <option key={idx} value={serv}>{serv}</option>
-                                                                            ))}
-                                                                            <option value="__CUSTOM__">Outros</option>
-                                                                        </select>
-                                                                        {solucaoDropdownValue === '__CUSTOM__' && (
-                                                                            <textarea
-                                                                                placeholder="Descreva a solução (Outros)..."
-                                                                                value={item.solucao}
-                                                                                onChange={(e) => updateItemDetails(item.id, 'solucao', e.target.value)}
-                                                                                className="slide-in"
-                                                                                style={{ minHeight: '80px' }}
-                                                                            />
-                                                                        )}
-                                                                    </>
-                                                                ) : (
-                                                                    <textarea
-                                                                        placeholder="O que deve ser feito?"
-                                                                        value={item.solucao}
-                                                                        onChange={(e) => updateItemDetails(item.id, 'solucao', e.target.value)}
-                                                                    />
-                                                                )}
+                                                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    Solução Recomendada
+                                                                </label>
+                                                                <div className="multi-list-container">
+                                                                    {activeSolucoes.map((solItem, idx) => {
+                                                                        const isCustomSelected = solItem.isCustom || (solItem.value && !servicesList.includes(solItem.value));
+                                                                        const dropdownValue = isCustomSelected ? '__CUSTOM__' : (solItem.value || '');
+
+                                                                        return (
+                                                                            <div key={idx} className="multi-list-item" style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px dashed #eee' }}>
+                                                                                <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-start' }}>
+                                                                                    <div style={{ flex: 1 }}>
+                                                                                        {hasDropdowns ? (
+                                                                                            <>
+                                                                                                <select
+                                                                                                    value={dropdownValue}
+                                                                                                    onChange={(e) => {
+                                                                                                        const val = e.target.value;
+                                                                                                        if (val === '__CUSTOM__') {
+                                                                                                            updateSolucaoSet(item.id, idx, '', true);
+                                                                                                        } else {
+                                                                                                            updateSolucaoSet(item.id, idx, val, false);
+                                                                                                        }
+                                                                                                    }}
+                                                                                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0', backgroundColor: '#fff', marginBottom: dropdownValue === '__CUSTOM__' ? '8px' : '0' }}
+                                                                                                >
+                                                                                                    <option value="">Selecione a solução...</option>
+                                                                                                    {servicesList.map((serv, i) => (
+                                                                                                        <option key={i} value={serv}>{serv}</option>
+                                                                                                    ))}
+                                                                                                    <option value="__CUSTOM__">Outros</option>
+                                                                                                </select>
+                                                                                                {dropdownValue === '__CUSTOM__' && (
+                                                                                                    <textarea
+                                                                                                        placeholder="Descreva a solução..."
+                                                                                                        value={solItem.value}
+                                                                                                        onChange={(e) => updateSolucaoSet(item.id, idx, e.target.value, true)}
+                                                                                                        style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0' }}
+                                                                                                    />
+                                                                                                )}
+                                                                                            </>
+                                                                                        ) : (
+                                                                                            <textarea
+                                                                                                placeholder="O que deve ser feito?"
+                                                                                                value={solItem.value}
+                                                                                                onChange={(e) => updateSolucaoSet(item.id, idx, e.target.value, true)}
+                                                                                                style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0' }}
+                                                                                            />
+                                                                                        )}
+                                                                                    </div>
+                                                                                    {activeSolucoes.length > 1 && (
+                                                                                        <button type="button" onClick={() => removeSolucao(item.id, idx)} style={{ color: '#e74c3c', background: 'none', border: 'none', padding: '5px' }}>
+                                                                                            <X size={18} />
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => addSolucao(item.id)}
+                                                                        style={{ fontSize: '12px', color: '#27ae60', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '5px' }}
+                                                                    >
+                                                                        <Plus size={14} /> Adicionar Solução
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </>
                                                     );
