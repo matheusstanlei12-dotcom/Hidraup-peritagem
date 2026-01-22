@@ -1941,7 +1941,7 @@ export const NovaPeritagem: React.FC = () => {
                             tipo: 'vedação'
                         }]);
                     }}>
-                        <Plus size={18} /> Adicionar Vedação
+                        <Plus size={18} /> Adicionar Material
                     </button>
                 </section>
 
