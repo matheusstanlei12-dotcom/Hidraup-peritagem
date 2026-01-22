@@ -42,6 +42,7 @@ interface ChecklistItem {
     comprimento_especificado?: string;
     desvio_comprimento?: string;
     isCustom?: boolean;
+    isManualInput?: boolean;
     isCustomAnomaly?: boolean;
     isCustomSolucao?: boolean;
 }
@@ -409,7 +410,7 @@ export const NovaPeritagem: React.FC = () => {
         }));
     };
 
-    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante' | 'diametro_externo_encontrado' | 'diametro_externo_especificado' | 'desvio_externo' | 'diametro_interno_encontrado' | 'diametro_interno_especificado' | 'desvio_interno' | 'comprimento_encontrado' | 'comprimento_especificado' | 'desvio_comprimento' | 'isCustomAnomaly' | 'isCustomSolucao', value: any) => {
+    const updateItemDetails = (itemId: string, field: 'anomalia' | 'solucao' | 'fotos' | 'text' | 'dimensoes' | 'qtd' | 'diametro_encontrado' | 'diametro_ideal' | 'material_faltante' | 'diametro_externo_encontrado' | 'diametro_externo_especificado' | 'desvio_externo' | 'diametro_interno_encontrado' | 'diametro_interno_especificado' | 'desvio_interno' | 'comprimento_encontrado' | 'comprimento_especificado' | 'desvio_comprimento' | 'isCustomAnomaly' | 'isCustomSolucao' | 'isManualInput', value: any) => {
         setChecklistItems(prev => prev.map(item => {
             if (item.id === itemId) {
                 // Se estiver alterando o texto de um componente novo, vira amarelo
@@ -437,6 +438,10 @@ export const NovaPeritagem: React.FC = () => {
                         solucao: '',
                         isCustomSolucao: false
                     };
+                }
+
+                if (field === 'isManualInput') {
+                    return { ...item, isManualInput: value, text: value ? '' : item.text };
                 }
 
                 return { ...item, [field]: value, status: newStatus };
@@ -1214,7 +1219,6 @@ export const NovaPeritagem: React.FC = () => {
                             <span className="cl-col-num">N°</span>
                             <span className="cl-desc">DESCRIÇÃO DE PEÇAS / SERVIÇOS</span>
                             <span className="cl-col-x"></span>
-                            <span className="cl-col-qtd">QTD</span>
                         </div>
                         {checklistItems.map((item, index) => (
                             <div key={item.id} className="checklist-row" onClick={() => handleChecklistItemClick(item.id)}>
@@ -1225,18 +1229,66 @@ export const NovaPeritagem: React.FC = () => {
                                             <span style={{ fontSize: '0.8rem', color: '#7f8c8d' }}>{index + 1}</span>
                                         </div>
                                         <div className="cl-col-desc-row">
-                                            {item.isCustom || item.text === 'Selecione o componente...' ? (
-                                                <select
-                                                    value={item.text === 'Selecione o componente...' ? '' : item.text}
-                                                    onChange={e => updateItemDetails(item.id, 'text', e.target.value)}
-                                                    onClick={e => e.stopPropagation()}
-                                                    className="cl-select-custom"
-                                                >
-                                                    <option value="" disabled>Selecione o componente...</option>
-                                                    {Object.keys(DIMENSIONAL_ANOMALIES_SERVICES).map(comp => (
-                                                        <option key={comp} value={comp}>{comp}</option>
-                                                    ))}
-                                                </select>
+                                            {item.isCustom || item.text === 'Selecione o componente...' || item.isManualInput ? (
+                                                <>
+                                                    {!item.isManualInput ? (
+                                                        <select
+                                                            value={item.text === 'Selecione o componente...' ? '' : item.text}
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                if (val === '__CUSTOM__') {
+                                                                    updateItemDetails(item.id, 'isManualInput', true);
+                                                                    updateItemDetails(item.id, 'text', '');
+                                                                } else {
+                                                                    updateItemDetails(item.id, 'isManualInput', false);
+                                                                    updateItemDetails(item.id, 'text', val);
+                                                                }
+                                                            }}
+                                                            onClick={e => e.stopPropagation()}
+                                                            className="cl-select-custom"
+                                                        >
+                                                            <option value="" disabled>Selecione o componente...</option>
+                                                            {Object.keys(DIMENSIONAL_ANOMALIES_SERVICES).map(comp => (
+                                                                <option key={comp} value={comp}>{comp}</option>
+                                                            ))}
+                                                            <option value="__CUSTOM__">Outros (Digitar manual)</option>
+                                                        </select>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', width: '100%' }}>
+                                                            <input
+                                                                autoFocus
+                                                                placeholder="Digite o nome do componente..."
+                                                                value={item.text}
+                                                                onChange={e => updateItemDetails(item.id, 'text', e.target.value.toUpperCase())}
+                                                                onClick={e => e.stopPropagation()}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    padding: '8px',
+                                                                    borderRadius: '4px',
+                                                                    border: '1px solid #cbd5e0'
+                                                                }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    updateItemDetails(item.id, 'isManualInput', false);
+                                                                    updateItemDetails(item.id, 'text', 'Selecione o componente...');
+                                                                }}
+                                                                title="Voltar para lista"
+                                                                style={{
+                                                                    background: 'none',
+                                                                    border: 'none',
+                                                                    cursor: 'pointer',
+                                                                    padding: '5px',
+                                                                    color: '#e53e3e'
+                                                                }}
+                                                            >
+                                                                <X size={20} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </>
                                             ) : (
                                                 <span>{item.text}</span>
                                             )}
@@ -1246,15 +1298,6 @@ export const NovaPeritagem: React.FC = () => {
                                         <div className="cl-col-x-row" />
 
                                         {/* Coluna QTD */}
-                                        <div className="cl-col-qtd-row">
-                                            <input
-                                                className="inline-input"
-                                                value={item.qtd || ''}
-                                                onChange={e => updateItemDetails(item.id, 'qtd', e.target.value)}
-                                                onClick={e => e.stopPropagation()}
-                                                placeholder="QTD"
-                                            />
-                                        </div>
                                     </div>
 
 
@@ -1626,14 +1669,6 @@ export const NovaPeritagem: React.FC = () => {
                                                     const servicesList = detectedComponent ? DIMENSIONAL_ANOMALIES_SERVICES[detectedComponent]?.services : [];
 
                                                     const hasDropdowns = anomaliesList && anomaliesList.length > 0;
-
-                                                    // Lógica para Anomalia
-                                                    const isAnomalyCustomSelected = item.isCustomAnomaly || (item.anomalia && !anomaliesList.includes(item.anomalia));
-                                                    const anomalyDropdownValue = isAnomalyCustomSelected ? '__CUSTOM__' : (item.anomalia || '');
-
-                                                    // Lógica para Solução
-                                                    const isSolucaoCustomSelected = item.isCustomSolucao || (item.solucao && !servicesList.includes(item.solucao));
-                                                    const solucaoDropdownValue = isSolucaoCustomSelected ? '__CUSTOM__' : (item.solucao || '');
 
 
                                                     const activeAnomalies = item.anomaliasSet || [{ value: item.anomalia || '', isCustom: false }];
