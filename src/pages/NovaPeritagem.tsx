@@ -1856,7 +1856,7 @@ export const NovaPeritagem: React.FC = () => {
                 <section className="form-card">
                     <div className="card-header">
                         <Info size={20} color="#7f8c8d" />
-                        <h3>Liberação do Pedido</h3>
+                        <h3>Material</h3>
                     </div>
                     <div className="vedacoes-list">
                         <div className="vedacao-row header" style={{ background: '#f8fafc', fontWeight: 'bold', fontSize: '0.7rem', display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '10px' }}>
