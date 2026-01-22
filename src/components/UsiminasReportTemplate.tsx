@@ -470,7 +470,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
             {data.vedacoes && data.vedacoes.length > 0 && (
                 <View break={false}>
                     <View style={[styles.sectionTitle, { marginTop: 15 }]}>
-                        <Text>EMPENHO DE MATERIAIS</Text>
+                        <Text>MATERIAL</Text>
                     </View>
                     <View style={styles.table}>
                         <View style={styles.tableHeader}>
