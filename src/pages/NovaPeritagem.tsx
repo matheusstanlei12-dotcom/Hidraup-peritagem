@@ -325,25 +325,21 @@ export const NovaPeritagem: React.FC = () => {
                 };
             }));
 
-            // Inicializa 10 linhas de vedações para padrão, vazio para USIMINAS
-            if (fixedData.cliente !== 'USIMINAS') {
-                const emptyVedacoes = Array.from({ length: 10 }).map(() => ({
-                    id: crypto.randomUUID(),
-                    text: '',
-                    qtd: '',
-                    unidade: 'PC',
-                    status: 'azul' as StatusColor,
-                    conformidade: 'não conforme' as 'não conforme',
-                    anomalia: '',
-                    solucao: '',
-                    fotos: [],
-                    observacao: '',
-                    tipo: 'vedação' as 'vedação'
-                }));
-                setVedacoes(emptyVedacoes);
-            } else {
-                setVedacoes([]);
-            }
+            // Inicializa 10 linhas de vedações para padrão e Usiminas
+            const emptyVedacoes = Array.from({ length: 10 }).map(() => ({
+                id: crypto.randomUUID(),
+                text: '',
+                qtd: '',
+                unidade: 'PC',
+                status: 'azul' as StatusColor,
+                conformidade: 'não conforme' as 'não conforme',
+                anomalia: '',
+                solucao: '',
+                fotos: [],
+                observacao: '',
+                tipo: 'vedação' as 'vedação'
+            }));
+            setVedacoes(emptyVedacoes);
         }
     }, [cylinderType, fixedData.cliente, editId]);
 
