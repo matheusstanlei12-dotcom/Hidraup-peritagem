@@ -10,7 +10,9 @@ import {
     CheckCircle,
     ShoppingCart,
     ClipboardSignature,
-    ClipboardList
+    ClipboardList,
+    Folder,
+    QrCode
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
@@ -90,6 +92,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <span>Relatórios em PDF</span>
                         </NavLink>
 
+                        <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Folder size={20} />
+                            <span>Armazenamento de fotos e videos</span>
+                        </NavLink>
+
                         <div className="sidebar-divider"></div>
 
                         {isAdmin && (
@@ -107,6 +114,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                 <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <CheckCircle size={20} />
                                     <span>3. Conferência Final</span>
+                                </NavLink>
+
+                                <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <QrCode size={20} />
+                                    <span>Gerar QR code</span>
                                 </NavLink>
 
                                 <div className="sidebar-divider"></div>
