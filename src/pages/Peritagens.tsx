@@ -142,11 +142,15 @@ export const Peritagens: React.FC = () => {
                             {filteredPeritagens.map((p) => (
                                 <tr key={p.id}>
                                     <td className="peritagem-id" data-label="O.S">
-                                        {p.numero_peritagem}
-                                        {p.os_interna && (
-                                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096', marginTop: '2px' }}>
-                                                Int: {p.os_interna}
-                                            </span>
+                                        {p.os_interna ? (
+                                            <>
+                                                <span style={{ fontWeight: 'bold', display: 'block' }}>{p.os_interna}</span>
+                                                <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096', marginTop: '2px' }}>
+                                                    Ref: {p.numero_peritagem}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span style={{ fontWeight: 'bold' }}>{p.numero_peritagem}</span>
                                         )}
                                     </td>
                                     <td data-label="Cliente">{p.cliente}</td>

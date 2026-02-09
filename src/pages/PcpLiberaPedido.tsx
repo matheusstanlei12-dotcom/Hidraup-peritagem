@@ -109,7 +109,8 @@ export const PcpLiberaPedido: React.FC = () => {
                             <div className="pcp-card-header">
                                 <div>
                                     <h3 className="pcp-card-client">{p.cliente}</h3>
-                                    <span className="pcp-card-id">ID: {p.numero_peritagem}</span>
+                                    <span style={{ fontWeight: '900', color: '#1a202c', display: 'block' }}>O.S. Int: {p.os_interna || '---'}</span>
+                                    <span className="pcp-card-id">Ref: {p.numero_peritagem}</span>
                                 </div>
                                 <span className="status-badge warning">{p.status}</span>
                             </div>

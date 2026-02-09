@@ -94,7 +94,7 @@ export const Relatorios: React.FC = () => {
 
             const reportData = {
                 laudoNum: String(peritagem.numero_peritagem || ''),
-                numero_os: String(peritagem.numero_peritagem || ''),
+                numero_os: String(peritagem.os_interna || peritagem.numero_peritagem || ''),
                 data: new Date().toLocaleDateString('pt-BR'),
                 hora: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
                 area: String(peritagem.area || '-'),
@@ -271,6 +271,11 @@ export const Relatorios: React.FC = () => {
                             <div className="report-info">
                                 <h3 className="report-title">
                                     {p.cliente} <span className="report-id">O.S: {p.os_interna || p.numero_peritagem}</span>
+                                    {p.os_interna && p.numero_peritagem !== p.os_interna && (
+                                        <span style={{ fontSize: '0.7rem', color: '#718096', display: 'block', fontWeight: 'normal', marginTop: '2px' }}>
+                                            Ref: {p.numero_peritagem}
+                                        </span>
+                                    )}
                                 </h3>
                                 <span className="report-details">Data: {new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
                                 <span className={`status-badge small ${p.status.toLowerCase().replace(/ /g, '-')}`}>{p.status}</span>

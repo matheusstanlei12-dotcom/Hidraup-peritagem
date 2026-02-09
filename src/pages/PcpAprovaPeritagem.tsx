@@ -194,8 +194,9 @@ export const PcpAprovaPeritagem: React.FC = () => {
                                         <h4 className="review-subtitle">Identificação e Dimensões</h4>
                                         <div className="review-details-grid">
                                             <div className="review-detail-item"><label>CLIENTE</label> <strong>{selectedPeritagem.cliente}</strong></div>
+                                            <div className="review-detail-item"><label>O.S. INTERNA</label> <strong style={{ color: '#2d3748', fontSize: '1.2rem' }}>{selectedPeritagem.os_interna || '---'}</strong></div>
                                             <div className="review-detail-item"><label>ID PERITAGEM</label> <strong>{selectedPeritagem.numero_peritagem}</strong></div>
-                                            <div className="review-detail-item"><label>ORDEM DE SERVIÇO</label> <strong>{selectedPeritagem.ordem_servico || '---'}</strong></div>
+                                            <div className="review-detail-item"><label>ORDEM DE SERVIÇO (CLIENTE)</label> <strong>{selectedPeritagem.ordem_servico || '---'}</strong></div>
                                             <div className="review-detail-item"><label>NOTA FISCAL</label> <strong>{selectedPeritagem.nota_fiscal || '---'}</strong></div>
                                             <div className="review-detail-item"><label>Ø INTERNO</label> <strong>{selectedPeritagem.camisa_int || '---'} mm</strong></div>
                                             <div className="review-detail-item"><label>Ø HASTE</label> <strong>{selectedPeritagem.haste_diam || '---'} mm</strong></div>
@@ -285,7 +286,8 @@ export const PcpAprovaPeritagem: React.FC = () => {
                                     <div className="pcp-card-header">
                                         <div>
                                             <h3 className="pcp-card-client">{p.cliente}</h3>
-                                            <span className="pcp-card-id">O.S.: {p.os_interna || p.numero_peritagem}</span>
+                                            <span className="pcp-card-id" style={{ fontWeight: '900', color: '#1a202c', fontSize: '1.1rem' }}>O.S. Int: {p.os_interna || '---'}</span>
+                                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096' }}>Ref: {p.numero_peritagem}</span>
                                         </div>
                                         <span className="status-badge peritagem-criada">{p.status}</span>
                                     </div>

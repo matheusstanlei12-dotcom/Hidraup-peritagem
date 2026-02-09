@@ -629,7 +629,7 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
             )}
 
             <View style={styles.footer} fixed>
-                <Text>Documento gerado automaticamente pela TrustEng. LTDA</Text>
+                <Text>Documento gerado automaticamente pela TrustTecnologia.LTDA</Text>
             </View>
         </Page>
     </Document >
