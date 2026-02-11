@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
-type UserRole = 'perito' | 'pcp' | 'gestor' | null;
+type UserRole = 'perito' | 'pcp' | 'gestor' | 'cliente' | null;
 
 interface AuthContextType {
     session: Session | null;
