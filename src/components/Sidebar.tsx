@@ -51,35 +51,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
             </div>
 
             <nav className="sidebar-nav">
-                {/* ACESSO MOBILE OU PERITO: Apenas 'Nova Peritagem' e 'Minhas Peritagens' */}
-                {isRestricted ? (
-                    <>
-                        <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <PlusCircle size={20} />
-                            <span>Nova Peritagem</span>
-                        </NavLink>
+                {/* ACESSO COMUM: Sempre visível para todos (incluindo Peritos e Mobile) */}
+                <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                    <PlusCircle size={20} />
+                    <span>Nova Peritagem</span>
+                </NavLink>
 
-                        <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <FileText size={20} />
-                            <span>Minhas Peritagens</span>
-                        </NavLink>
-                    </>
-                ) : (
-                    /* ACESSO WEB (COMUM/GESTOR/PCP): Total */
+                <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                    <FileText size={20} />
+                    <span>Peritagens</span>
+                </NavLink>
+
+                {/* Itens que antes eram apenas WEB, mas são úteis no mobile também */}
+                {!isRestricted && (
                     <>
                         <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <LayoutDashboard size={20} />
                             <span>Painel</span>
-                        </NavLink>
-
-                        <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <PlusCircle size={20} />
-                            <span>Nova Peritagem</span>
-                        </NavLink>
-
-                        <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <FileText size={20} />
-                            <span>Peritagens</span>
                         </NavLink>
 
                         <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
@@ -91,15 +79,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <FileSpreadsheet size={20} />
                             <span>Relatórios em PDF</span>
                         </NavLink>
+                    </>
+                )}
 
-                        <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Folder size={20} />
-                            <span>Armazenamento de fotos e videos</span>
-                        </NavLink>
+                <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                    <Folder size={20} />
+                    <span>Armazenamento de fotos e videos</span>
+                </NavLink>
 
-                        <div className="sidebar-divider"></div>
+                <div className="sidebar-divider"></div>
 
-                        {isAdmin && (
+                {isAdmin && (
+                    <>
+                        {!isRestricted && (
                             <>
                                 <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <ClipboardSignature size={20} />
@@ -115,30 +107,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                     <CheckCircle size={20} />
                                     <span>3. Conferência Final</span>
                                 </NavLink>
-
-                                <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <QrCode size={20} />
-                                    <span>Gerar QR code</span>
-                                </NavLink>
-
-                                <div className="sidebar-divider"></div>
-
-                                <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <Wrench size={20} />
-                                    <span>Cilindros em Manutenção</span>
-                                </NavLink>
-
-
                             </>
                         )}
 
-                        {role === 'gestor' && (
-                            <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                <Settings size={20} />
-                                <span>Gestão de Usuários</span>
-                            </NavLink>
-                        )}
+                        <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <QrCode size={20} />
+                            <span>Gerar QR code</span>
+                        </NavLink>
+
+                        <div className="sidebar-divider"></div>
+
+                        <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Wrench size={20} />
+                            <span>Cilindros em Manutenção</span>
+                        </NavLink>
                     </>
+                )}
+
+                {role === 'gestor' && !isRestricted && (
+                    <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                        <Settings size={20} />
+                        <span>Gestão de Usuários</span>
+                    </NavLink>
                 )}
             </nav>
 
