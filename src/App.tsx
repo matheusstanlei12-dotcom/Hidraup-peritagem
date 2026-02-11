@@ -18,9 +18,9 @@ const Manutencao = React.lazy(() => import('./pages/Manutencao').then(module => 
 const PcpAprovaPeritagem = React.lazy(() => import('./pages/PcpAprovaPeritagem').then(module => ({ default: module.PcpAprovaPeritagem })));
 const PcpLiberaPedido = React.lazy(() => import('./pages/PcpLiberaPedido').then(module => ({ default: module.PcpLiberaPedido })));
 const PcpFinalizaProcesso = React.lazy(() => import('./pages/PcpFinalizaProcesso').then(module => ({ default: module.PcpFinalizaProcesso })));
-const RegistroFotos = React.lazy(() => import('./pages/RegistroFotos').then(module => ({ default: module.RegistroFotos })));
+// const RegistroFotos = React.lazy(() => import('./pages/RegistroFotos').then(module => ({ default: module.RegistroFotos })));
 const AdminUsers = React.lazy(() => import('./pages/AdminUsers').then(module => ({ default: module.AdminUsers })));
-const QrCodePage = React.lazy(() => import('./pages/QrCodePage').then(module => ({ default: module.QrCodePage })));
+// const QrCodePage = React.lazy(() => import('./pages/QrCodePage').then(module => ({ default: module.QrCodePage })));
 
 const LoadingSpinner = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -93,14 +93,14 @@ function AppRoutes() {
         <Route path="/clientes" element={<PrivateRoute><Layout><Clientes /></Layout></PrivateRoute>} />
         <Route path="/manutencao" element={<PrivateRoute><Layout><Manutencao /></Layout></PrivateRoute>} />
         <Route path="/relatorios" element={<PrivateRoute><Layout><Relatorios /></Layout></PrivateRoute>} />
-        <Route path="/registro-fotos" element={<PrivateRoute><Layout><RegistroFotos /></Layout></PrivateRoute>} />
+        {/* <Route path="/registro-fotos" element={<PrivateRoute><Layout><RegistroFotos /></Layout></PrivateRoute>} /> */}
         <Route path="/nova-peritagem" element={<PrivateRoute><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
 
         {/* Rotas de Fluxo PCP */}
         <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
         <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
         <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
-        <Route path="/qrcode" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><QrCodePage /></Layout></PrivateRoute>} />
+        {/* <Route path="/qrcode" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><QrCodePage /></Layout></PrivateRoute>} /> */}
 
         {/* Rota Exclusiva Gestor */}
         <Route path="/admin/usuarios" element={
