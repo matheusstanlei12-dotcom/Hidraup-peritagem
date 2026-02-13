@@ -1,7 +1,7 @@
 .pcp-approval-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
     animation: fadeIn 0.4s ease-out;
 }
 
@@ -18,18 +18,20 @@
 }
 
 .pcp-action-card {
-    background: var(--bg-card);
-    padding: 1.5rem;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    cursor: pointer;
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.2s ease;
 }
 
 .pcp-action-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
     border-color: var(--primary);
 }
 
@@ -81,23 +83,22 @@
 }
 
 .btn-pcp-action {
-    /* width: 100%; Removed to allow flex sizing */
-    flex: 1;
-    max-width: 260px;
-    /* Limit width */
-    height: 40px;
+    width: 100%;
+    height: 44px;
     padding: 0 20px;
     background: var(--primary);
     color: white;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9375rem;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.625rem;
     transition: var(--transition);
-    box-shadow: 0 4px 12px rgba(0, 97, 255, 0.2);
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
 }
 
 .btn-pcp-action:hover {

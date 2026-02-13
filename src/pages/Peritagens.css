@@ -83,191 +83,205 @@
     background: transparent;
 }
 
-.table-card {
+.peritagens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.peritagem-card {
     background: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
-.peritagens-table {
-    width: 100%;
-    border-collapse: collapse;
+.peritagem-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary);
 }
 
-.peritagens-table th {
-    text-align: left;
-    padding: 1.25rem 1.5rem;
-    background-color: #f8fafc;
-    color: var(--text-secondary);
-    font-weight: 800;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.os-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.peritagens-table td {
-    padding: 1.25rem 1.5rem;
-    color: var(--text-main);
-    font-size: 0.925rem;
-    border-bottom: 1px solid #f8fafc;
-    transition: var(--transition);
-}
-
-.peritagens-table tr:hover td {
-    background-color: #fcfdfe;
-}
-
-.peritagem-id {
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.status-badge {
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 0.7rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
     display: inline-block;
+    margin-bottom: 8px;
 }
 
-/* Generic Status Colors */
-.status-badge {
+.ref-text {
+    display: block;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.client-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.info-row svg {
+    color: #94a3b8;
+}
+
+.priority-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.priority-normal {
     background: #f1f5f9;
     color: #475569;
 }
 
-.status-badge.peritagem-criada {
-    background: #e0f2fe;
-    color: #0369a1;
-}
-
-.status-badge.aguardando-aprovação-do-pcp {
-    background: #e0f2fe;
-    color: #0369a1;
-}
-
-.status-badge.aguardando-aprovação-do-cliente {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-badge.em-manutenção {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-badge.aguardando-conferência-final {
-    background: #f1f5f9;
-    color: #334155;
-}
-
-.status-badge.processo-finalizado {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-badge.revisão-necessária {
+.priority-urgente {
     background: #fee2e2;
     color: #b91c1c;
 }
 
-.btn-action {
-    display: inline-flex;
+.card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #f1f5f9;
+}
+
+.btn-main-action {
+    flex: 1;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    color: var(--primary);
-    font-weight: 700;
-    background: var(--primary-light);
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 10px;
+    border-radius: 10px;
     font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
 }
 
-.btn-action:hover {
-    background: var(--primary);
+.btn-main-edit {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.btn-main-edit:hover {
+    background: #2563eb;
     color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 97, 255, 0.2);
 }
 
-.btn-edit {
-    background-color: var(--warning) !important;
-    color: white !important;
-    border: none !important;
+.btn-main-view {
+    background: #f8fafc;
+    color: #64748b;
 }
 
-.btn-edit:hover {
-    opacity: 0.9;
-    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+.btn-main-view:hover {
+    background: #64748b;
+    color: white;
+}
+
+.btn-main-danger {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.btn-main-danger:hover {
+    background: #ef4444;
+    color: white;
 }
 
 .loading-state {
-    padding: 4rem;
+    padding: 5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    color: var(--text-muted);
+    gap: 1.5rem;
+    color: #94a3b8;
 }
 
-@media (max-width: 768px) {
-    .header-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+.status-pill {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
 
-    .peritagens-table thead {
-        display: none;
-    }
+/* Status colors */
+.status-finalizado {
+    background: #dcfce7;
+    color: #166534;
+}
 
-    .peritagens-table tr {
-        margin: 1rem;
-        background: white;
-        border: 1px solid #f1f5f9;
-        border-radius: 12px;
-        padding: 1.25rem;
-        display: block;
-        box-shadow: var(--shadow-sm);
-    }
+.status-manutencao {
+    background: #fef9c3;
+    color: #854d0e;
+}
 
-    .peritagens-table td {
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f8fafc;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.status-aprovacao {
+    background: #e0f2fe;
+    color: #0369a1;
+}
 
-    .peritagens-table td:last-child {
-        border-bottom: none;
-        padding-top: 1rem;
-    }
+.status-aguardando {
+    background: #f1f5f9;
+    color: #475569;
+}
 
-    .peritagens-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-    }
+.status-revisao {
+    background: #fee2e2;
+    color: #991b1b;
+}
 
-    .peritagem-id {
-        font-size: 1.125rem;
-        justify-content: flex-start !important;
-    }
+.revisao-border {
+    border: 2px solid #ef4444 !important;
+}
 
-    .peritagem-id::before {
-        display: none;
-    }
-
-    .btn-action {
-        width: 100%;
-        justify-content: center;
+@media (max-width: 640px) {
+    .peritagens-grid {
+        grid-template-columns: 1fr;
     }
 }

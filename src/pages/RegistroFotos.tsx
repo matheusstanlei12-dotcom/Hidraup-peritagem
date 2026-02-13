@@ -143,6 +143,7 @@ export const RegistroFotos: React.FC = () => {
 
     const handleCreateFolder = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (loading) return;
 
         // Validation: Ensure minimal data is present if needed. Let's make Cliente mandatory.
         if (!formData.cliente) {
@@ -358,7 +359,11 @@ export const RegistroFotos: React.FC = () => {
 
                 <div className="header-actions">
                     {!currentFolder && (
-                        <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+                        <button
+                            className="btn-primary"
+                            onClick={() => setIsCreateModalOpen(true)}
+                            disabled={loading}
+                        >
                             <Plus size={20} />
                             <span>Novo Arquivo</span>
                         </button>
@@ -625,10 +630,19 @@ export const RegistroFotos: React.FC = () => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn-secondary" onClick={() => setIsCreateModalOpen(false)}>Cancelar</button>
-                                <button type="submit" className="btn-primary">
-                                    <Save size={18} />
-                                    <span>Salvar Tudo</span>
+                                <button type="button" className="btn-secondary" onClick={() => setIsCreateModalOpen(false)} disabled={loading}>Cancelar</button>
+                                <button type="submit" className="btn-primary" disabled={loading}>
+                                    {loading ? (
+                                        <>
+                                            <div className="loader-mini" style={{ width: '16px', height: '16px', border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite', marginRight: '8px' }}></div>
+                                            <span>Salvando...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={18} />
+                                            <span>Salvar Tudo</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>

@@ -97,21 +97,59 @@ export const Monitoramento: React.FC = () => {
     const [historico, setHistorico] = useState<Historico[]>([]);
     const [selectedStepInfo, setSelectedStepInfo] = useState<Historico | null>(null);
 
+    const { user, role, isAdmin } = useAuth();
+    const [empresaId, setEmpresaId] = useState<string | null>(null);
+
     useEffect(() => {
-        fetchProcessos();
-    }, []);
+        if (user && role === 'cliente') {
+            fetchUserEmpresa();
+        } else {
+            fetchProcessos();
+        }
+    }, [user, role]);
+
+    useEffect(() => {
+        if (role === 'cliente' && empresaId) {
+            fetchProcessos();
+        }
+    }, [empresaId]);
+
+    const fetchUserEmpresa = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('empresa_id')
+                .eq('id', user.id)
+                .single();
+            if (error) throw error;
+            setEmpresaId(data?.empresa_id || null);
+        } catch (err) {
+            console.error('Erro ao buscar empresa do usuário:', err);
+            setLoading(false);
+        }
+    };
 
     const fetchProcessos = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase
+            let query = supabase
                 .from('peritagens')
                 .select(`
                     *,
-                    *,
                     criador: profiles!criado_por(full_name, role)
-                `)
-                .order('created_at', { ascending: false });
+                `);
+
+            if (role === 'cliente') {
+                if (empresaId) {
+                    query = query.eq('empresa_id', empresaId);
+                } else {
+                    setProcessos([]);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) throw error;
 
@@ -184,8 +222,6 @@ export const Monitoramento: React.FC = () => {
             setSelectedStepInfo(null);
         }
     }, [selectedProcess]);
-
-    const { user, role, isAdmin } = useAuth();
 
     const handleUpdateStatus = async (targetProcess: any, newStatus: string, additionalData: any = {}) => {
         if (!targetProcess || !user) return;

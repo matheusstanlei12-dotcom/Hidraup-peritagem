@@ -92,6 +92,16 @@ export const NovaPeritagem: React.FC = () => {
     });
 
     const [isCustomClient, setIsCustomClient] = useState(false);
+    const [empresas, setEmpresas] = useState<{ id: string, nome: string }[]>([]);
+
+    const fetchEmpresas = async () => {
+        const { data } = await supabase.from('empresas').select('id, nome').eq('ativo', true).order('nome');
+        if (data) setEmpresas(data);
+    };
+
+    useEffect(() => {
+        fetchEmpresas();
+    }, []);
 
     const PREDEFINED_CLIENTS = [
         'GERDAU AÇOMINAS',
@@ -593,12 +603,14 @@ export const NovaPeritagem: React.FC = () => {
 
             // 1. Salvar ou Atualizar Peritagem
             let peritagemId = editId;
+            const empresa_id = !isCustomClient ? empresas.find(e => e.nome.toUpperCase().includes(fixedData.cliente.toUpperCase()))?.id : null;
 
             if (editId) {
                 // UPDATE
                 const { error: uError } = await supabase
                     .from('peritagens')
                     .update({
+                        empresa_id,
                         tag: fixedData.tag,
                         cliente: fixedData.cliente,
                         local_equipamento: fixedData.local_equipamento,
@@ -644,6 +656,7 @@ export const NovaPeritagem: React.FC = () => {
                 const { data: peritagem, error: pError } = await supabase
                     .from('peritagens')
                     .insert([{
+                        empresa_id,
                         numero_peritagem: numeroPeritagem,
                         os: numeroPeritagem,
                         tag: fixedData.tag,
@@ -744,6 +757,14 @@ export const NovaPeritagem: React.FC = () => {
             // Atualizar status local para azul
             setChecklistItems(prev => prev.map(item => ({ ...item, status: 'azul' })));
             setDimStatus('azul');
+
+            // 3. Atualizar status na tabela 'aguardando_peritagem' se existir
+            if (fixedData.os_interna) {
+                await supabase
+                    .from('aguardando_peritagem')
+                    .update({ status: 'PERITADO' })
+                    .eq('os_interna', fixedData.os_interna);
+            }
 
             alert('Peritagem salva e registrada no histórico!');
             navigate('/peritagens');

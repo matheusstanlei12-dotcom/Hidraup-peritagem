@@ -165,23 +165,23 @@ export const AdminEmpresas: React.FC = () => {
             <div className="page-header">
                 <h1 className="page-title">
                     <Building2 size={32} />
-                    Gestão de Empresas
+                    Gestão de Clientes
                 </h1>
                 <button className="btn-add-empresa" onClick={() => handleOpenModal()}>
                     <Plus size={20} />
-                    Nova Empresa
+                    Novo Cliente
                 </button>
             </div>
 
             {loading && (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>Carregando empresas...</p>
+                    <p>Carregando clientes...</p>
                 </div>
             )}
 
             {!loading && empresas.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>Nenhuma empresa cadastrada.</p>
+                    <p>Nenhum cliente cadastrado.</p>
                 </div>
             )}
 
@@ -225,10 +225,10 @@ export const AdminEmpresas: React.FC = () => {
             {showModal && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editingEmpresa ? 'Editar Empresa' : 'Nova Empresa'}</h2>
+                        <h2>{editingEmpresa ? 'Editar Cliente' : 'Novo Cliente'}</h2>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label htmlFor="nome">Nome da Empresa *</label>
+                                <label htmlFor="nome">Nome do Cliente *</label>
                                 <input
                                     type="text"
                                     id="nome"
@@ -287,7 +287,7 @@ export const AdminEmpresas: React.FC = () => {
                                         checked={formData.ativo}
                                         onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
                                     />
-                                    Empresa Ativa
+                                    Cliente Ativo
                                 </label>
                             </div>
 

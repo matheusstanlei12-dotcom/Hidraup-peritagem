@@ -95,30 +95,44 @@ export const PcpFinalizaProcesso: React.FC = () => {
                         <div key={p.id} className="pcp-action-card">
                             <div className="pcp-card-header">
                                 <div>
-                                    <h3 className="pcp-card-client">{p.cliente}</h3>
-                                    <span style={{ fontWeight: '900', color: '#1a202c', display: 'block' }}>O.S. Int: {p.os_interna || '---'}</span>
-                                    <span className="pcp-card-id">Ref: {p.numero_peritagem}</span>
+                                    <span className="report-id-badge" style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                        {p.os_interna || 'SEM O.S'}
+                                    </span>
+                                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', fontWeight: '600' }}>
+                                        Ref: {p.numero_peritagem}
+                                    </span>
                                 </div>
-                                <span className="status-badge" style={{ background: '#2d3748', color: 'white' }}>AGUARDANDO PCP</span>
+                                <span className="status-pill" style={{ padding: '5px 10px', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: '800', textTransform: 'uppercase', background: '#e0f2fe', color: '#0369a1' }}>
+                                    AGUARDANDO PCP
+                                </span>
                             </div>
 
-                            <div style={{
-                                padding: '1rem',
-                                background: '#f8fafc',
-                                borderRadius: '12px',
-                                marginBottom: '1.5rem',
-                                borderLeft: '4px solid var(--primary)'
-                            }}>
-                                <span style={{ fontSize: '0.9rem', color: '#4a5568' }}>Pedido Liberado:</span>
-                                <h2 style={{ margin: '0.5rem 0', color: 'var(--primary)' }}>#{p.numero_pedido || 'NÃO INFORMADO'}</h2>
+                            <div className="pcp-body">
+                                <h3 className="pcp-card-client" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>
+                                    {p.cliente}
+                                </h3>
+
+                                <div style={{
+                                    padding: '12px',
+                                    background: '#f8fafc',
+                                    borderRadius: '12px',
+                                    marginBottom: '1.5rem',
+                                    border: '1px solid #f1f5f9'
+                                }}>
+                                    <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Pedido Liberado:</span>
+                                    <h2 style={{ margin: '4px 0', color: '#2563eb', fontSize: '1.2rem', fontWeight: '800' }}>#{p.numero_pedido || '---'}</h2>
+                                </div>
                             </div>
 
-                            <button
-                                className="btn-pcp-action"
-                                onClick={() => handleFinalize(p.id)}
-                            >
-                                <CheckCircle2 size={18} /> Aprovar e Finalizar Processo
-                            </button>
+                            <div className="pcp-footer">
+                                <button
+                                    className="btn-pcp-action"
+                                    onClick={() => handleFinalize(p.id)}
+                                    style={{ background: '#16a34a' }}
+                                >
+                                    <CheckCircle2 size={18} /> Finalizar Processo
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}

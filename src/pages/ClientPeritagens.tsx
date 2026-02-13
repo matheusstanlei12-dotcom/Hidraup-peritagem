@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Loader2, Search } from 'lucide-react';
-
+import { Download, Loader2, Search, FileText, Wrench, CheckCircle, Calendar, ShoppingCart } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import { UsiminasReportTemplate } from '../components/UsiminasReportTemplate';
 import { ReportTemplate } from '../components/ReportTemplate';
 import { supabase } from '../lib/supabase';
 import { generateTechnicalOpinion } from '../lib/reportUtils';
 import { useAuth } from '../contexts/AuthContext';
-import './ClientPeritagens.css';
+import './ClientPortal.css';
 
 interface Peritagem {
     id: string;
@@ -16,6 +15,8 @@ interface Peritagem {
     data_execucao: string;
     status: string;
     os_interna?: string;
+    numero_pedido?: string;
+    created_at: string;
 }
 
 export const ClientPeritagens: React.FC = () => {
@@ -27,6 +28,7 @@ export const ClientPeritagens: React.FC = () => {
     const [clienteNome, setClienteNome] = useState<string>('');
     const [empresaId, setEmpresaId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'aprovacao' | 'manutencao' | 'finalizado'>('all');
 
     useEffect(() => {
         fetchClienteData();
@@ -40,7 +42,6 @@ export const ClientPeritagens: React.FC = () => {
 
     const fetchClienteData = async () => {
         if (!user) return;
-
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -59,11 +60,8 @@ export const ClientPeritagens: React.FC = () => {
         }
     };
 
-
-
     const fetchPeritagens = async () => {
         if (!empresaId) return;
-
         try {
             setLoading(true);
             const { data, error } = await supabase
@@ -188,97 +186,179 @@ export const ClientPeritagens: React.FC = () => {
         }
     };
 
-    const filteredPeritagens = peritagens.filter(p =>
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredPeritagens = peritagens.filter(p => {
+        const matchesSearch =
+            p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (p.numero_pedido && p.numero_pedido.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (!matchesSearch) return false;
+
+        if (activeFilter === 'all') return true;
+
+        const s = p.status?.toUpperCase() || '';
+        if (activeFilter === 'finalizado') return s.includes('FINALIZADO');
+        if (activeFilter === 'manutencao') return s.includes('MANUTENÇÃO') || s.includes('ABERTO') || s.includes('OFICINA');
+        if (activeFilter === 'aprovacao') return s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE');
+
+        return true;
+    });
+
+    const statsCounts = {
+        total: peritagens.length,
+        finalizados: peritagens.filter(p => {
+            const s = p.status?.toUpperCase() || '';
+            return s.includes('FINALIZADO');
+        }).length,
+        manutencao: peritagens.filter(p => {
+            const s = p.status?.toUpperCase() || '';
+            return s.includes('MANUTENÇÃO') || s.includes('ABERTO') || s.includes('OFICINA');
+        }).length,
+        aguardandoAprovacao: peritagens.filter(p => {
+            const s = p.status?.toUpperCase() || '';
+            return s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE');
+        }).length,
+    };
+
+    const getStatusClass = (status: string) => {
+        const s = (status || "").toUpperCase();
+        if (s.includes('FINALIZADO')) return 'status-finalizado';
+        if (s.includes('MANUTENÇÃO') || s.includes('ABERTO') || s.includes('OFICINA')) return 'status-manutencao';
+        if (s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE')) return 'status-aprovacao';
+        return 'status-aguardando';
+    };
 
     if (loading) {
         return (
-            <div className="client-peritagens-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Loader2 className="animate-spin" size={48} color="#2d3748" />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f8fafc' }}>
+                <Loader2 className="animate-spin" size={48} color="#2563eb" />
             </div>
         );
     }
 
     return (
-        <div className="peritagens-container">
-            <div className="header-actions">
-                <h1 className="page-title">Relatórios</h1>
-                <p className="page-subtitle" style={{ color: '#64748b', marginTop: '-1rem', marginBottom: '1.5rem' }}>
-                    {clienteNome || 'Sua Empresa'}
-                </p>
+        <div className="client-portal-container">
+            <header className="welcome-hero">
+                <h1>Acompanhamento em Tempo Real — {clienteNome || 'Hidraup'}</h1>
+                <p>Transparência total no processo de manutenção e reparo dos seus equipamentos.</p>
+            </header>
+
+            <div className="stats-grid">
+                <div
+                    className={`stat-card ${activeFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setActiveFilter('all')}
+                >
+                    <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb' }}>
+                        <FileText size={28} />
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-value">{statsCounts.total}</span>
+                        <span className="stat-label">Total de Relatórios</span>
+                    </div>
+                </div>
+                <div
+                    className={`stat-card ${activeFilter === 'aprovacao' ? 'active' : ''}`}
+                    onClick={() => setActiveFilter('aprovacao')}
+                >
+                    <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#0ea5e9' }}>
+                        <ShoppingCart size={28} />
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-value">{statsCounts.aguardandoAprovacao}</span>
+                        <span className="stat-label">Aprov. Pedido de Compra</span>
+                    </div>
+                </div>
+                <div
+                    className={`stat-card ${activeFilter === 'manutencao' ? 'active' : ''}`}
+                    onClick={() => setActiveFilter('manutencao')}
+                >
+                    <div className="stat-icon" style={{ background: 'rgba(214, 158, 46, 0.1)', color: '#d69e2e' }}>
+                        <Wrench size={28} />
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-value">{statsCounts.manutencao}</span>
+                        <span className="stat-label">Em Manutenção</span>
+                    </div>
+                </div>
+                <div
+                    className={`stat-card ${activeFilter === 'finalizado' ? 'active' : ''}`}
+                    onClick={() => setActiveFilter('finalizado')}
+                >
+                    <div className="stat-icon" style={{ background: 'rgba(56, 161, 105, 0.1)', color: '#38a169' }}>
+                        <CheckCircle size={28} />
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-value">{statsCounts.finalizados}</span>
+                        <span className="stat-label">Finalizados</span>
+                    </div>
+                </div>
             </div>
 
-            <div className="search-bar" style={{ marginBottom: '1.5rem' }}>
-                <div className="search-input-wrapper">
-                    <Search size={20} color="#718096" />
+            <div className="reports-section-header">
+                <h2>Seus Relatórios</h2>
+                <div className="search-input-wrapper" style={{ width: '300px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+                    <Search size={18} color="#94a3b8" />
                     <input
                         type="text"
-                        placeholder="Buscar por O.S ou Número..."
+                        placeholder="Buscar por Pedido ou O.S..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ border: 'none', background: 'transparent' }}
                     />
                 </div>
             </div>
 
-            <div className="table-card" style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-                <table className="peritagens-table">
-                    <thead>
-                        <tr>
-                            <th>O.S / Referência</th>
-                            <th>Data da Execução</th>
-                            <th>Status</th>
-                            <th style={{ textAlign: 'center' }}>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredPeritagens.map((p) => (
-                            <tr key={p.id}>
-                                <td className="peritagem-id">
-                                    <span style={{ fontWeight: 'bold', display: 'block' }}>{p.os_interna || 'SEM O.S'}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#718096' }}>Ref: {p.numero_peritagem}</span>
-                                </td>
-                                <td>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
-                                <td>
-                                    <span className={`status-badge ${p.status.toLowerCase().replace(/ /g, '-')}`}>
-                                        {p.status}
-                                    </span>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <button
-                                        className="btn-download-client"
-                                        onClick={() => handleDownloadPdf(p)}
-                                        disabled={generatingPdf && selectedId === p.id}
-                                        style={{
-                                            padding: '8px 16px',
-                                            fontSize: '0.8rem',
-                                            width: 'auto',
-                                            margin: '0 auto',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}
-                                    >
-                                        {generatingPdf && selectedId === p.id ? (
-                                            <Loader2 className="animate-spin" size={16} />
-                                        ) : (
-                                            <Download size={16} />
-                                        )}
-                                        {generatingPdf && selectedId === p.id ? 'GERANDO...' : 'BAIXAR PDF'}
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {peritagens.length === 0 && (
-                            <tr>
-                                <td colSpan={4} style={{ textAlign: 'center', padding: '3rem', color: '#718096' }}>
-                                    Nenhuma peritagem encontrada para sua empresa.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+            <div className="client-reports-grid">
+                {filteredPeritagens.map((p) => (
+                    <div key={p.id} className="report-item-card">
+                        <div className="card-header">
+                            <div>
+                                <span className="os-badge">{p.os_interna || 'SEM O.S'}</span>
+                                <span className="ref-text">Ref: {p.numero_peritagem}</span>
+                            </div>
+                            <span className={`report-status-pill ${getStatusClass(p.status)}`}>
+                                {(p.status.toUpperCase().includes('AGUARDANDO APROVAÇÃO') ||
+                                    p.status.toUpperCase().includes('AGUARDANDO PEDIDO') ||
+                                    p.status.toUpperCase().includes('ORÇAMENTO ENVIADO') ||
+                                    p.status.toUpperCase().includes('AGUARDANDO CLIENTE'))
+                                    ? 'AGUARDANDO PEDIDO DE COMPRA'
+                                    : p.status}
+                            </span>
+                        </div>
+
+                        <div className="card-body">
+                            <div className="info-row">
+                                <Calendar size={16} />
+                                <span>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                            <div className="info-row" style={{ marginTop: '4px' }}>
+                                <FileText size={16} />
+                                <span>Relatório Técnico Disponível</span>
+                            </div>
+                        </div>
+
+                        <button
+                            className="btn-download-premium"
+                            onClick={() => handleDownloadPdf(p)}
+                            disabled={generatingPdf && selectedId === p.id}
+                        >
+                            {generatingPdf && selectedId === p.id ? (
+                                <Loader2 className="animate-spin" size={18} />
+                            ) : (
+                                <Download size={18} />
+                            )}
+                            {generatingPdf && selectedId === p.id ? 'Gerando...' : 'BAIXAR RELATÓRIO PDF'}
+                        </button>
+                    </div>
+                ))}
+
+                {filteredPeritagens.length === 0 && (
+                    <div className="empty-state" style={{ width: '100%', gridColumn: '1/-1' }}>
+                        <FileText size={48} color="#cbd5e1" style={{ marginBottom: '16px' }} />
+                        <h3>Nenhum relatório encontrado</h3>
+                        <p>Tente ajustar sua busca ou aguarde novos registros.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

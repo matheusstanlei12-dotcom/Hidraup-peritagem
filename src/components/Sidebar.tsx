@@ -13,6 +13,8 @@ import {
     Folder,
     QrCode,
     Building2,
+    Book,
+    Clock,
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
@@ -34,8 +36,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
     const isRestricted = isApp;
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate('/login');
+        try {
+            await supabase.auth.signOut();
+            // Limpa o estado local redirecionando e recarregando para garantir
+            navigate('/login');
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Erro ao sair:', error);
+            window.location.href = '/login';
+        }
     };
 
     const handleLinkClick = () => {
@@ -51,8 +60,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
             </div>
 
             <nav className="sidebar-nav">
-                {/* ACESSO COMUM: Painel visível para todos exceto Perito no mobile */}
-                {!isRestricted && (
+                {/* ACESSO COMUM: Painel visível para todos exceto Perito no mobile e Clientes */}
+                {!isRestricted && role !== 'cliente' && (
                     <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                         <LayoutDashboard size={20} />
                         <span>Painel</span>
@@ -65,6 +74,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/meus-relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
                             <span>Relatórios</span>
+                        </NavLink>
+                        <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Book size={20} />
+                            <span>Data Books</span>
                         </NavLink>
                     </>
                 ) : (
@@ -89,48 +102,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                 </NavLink>
                             </>
                         )}
-
-                        <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Folder size={20} />
-                            <span>Armazenamento de fotos e videos</span>
-                        </NavLink>
-
-                        <div className="sidebar-divider"></div>
-
                         {isAdmin && (
                             <>
-                                {!isRestricted && (
-                                    <>
-                                        <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                            <ClipboardSignature size={20} />
-                                            <span>1. Aprovação de Peritagem</span>
-                                        </NavLink>
+                                <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Clock size={20} />
+                                    <span>Aguardando Peritagem</span>
+                                </NavLink>
 
-                                        <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                            <ShoppingCart size={20} />
-                                            <span>2. Liberação do Pedido</span>
-                                        </NavLink>
+                                <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <ClipboardSignature size={20} />
+                                    <span>1. Aprovação de Peritagem</span>
+                                </NavLink>
 
-                                        <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                            <CheckCircle size={20} />
-                                            <span>3. Conferência Final</span>
-                                        </NavLink>
-                                    </>
-                                )}
+                                <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <ShoppingCart size={20} />
+                                    <span>2. Liberação do Pedido</span>
+                                </NavLink>
+
+                                <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Wrench size={20} />
+                                    <span>3. Cilindros em Manutenção</span>
+                                </NavLink>
+
+                                <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <CheckCircle size={20} />
+                                    <span>4. Conferência Final</span>
+                                </NavLink>
+
+                                <div className="sidebar-divider"></div>
+
+                                <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Folder size={20} />
+                                    <span>Armazenamento de Fotos e Vídeos</span>
+                                </NavLink>
+
+                                <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Book size={20} />
+                                    <span>Data Books</span>
+                                </NavLink>
 
                                 <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <QrCode size={20} />
                                     <span>Gerar QR code</span>
                                 </NavLink>
-
-                                <div className="sidebar-divider"></div>
-
-                                <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <Wrench size={20} />
-                                    <span>Cilindros em Manutenção</span>
-                                </NavLink>
                             </>
                         )}
+
 
                         {role === 'gestor' && !isRestricted && (
                             <>
@@ -140,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                 </NavLink>
                                 <NavLink to="/admin/empresas" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <Building2 size={20} />
-                                    <span>Gestão de Empresas</span>
+                                    <span>Gestão de Clientes</span>
                                 </NavLink>
                             </>
                         )}

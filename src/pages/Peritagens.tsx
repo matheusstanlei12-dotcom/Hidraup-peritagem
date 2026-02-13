@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ExternalLink, Loader2, Trash2 } from 'lucide-react';
+import { Search, Plus, ExternalLink, Loader2, Trash2, Calendar, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,11 +22,39 @@ export const Peritagens: React.FC = () => {
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<'all' | 'recusadas'>('all'); // Filtro para Perito
+    const [empresaId, setEmpresaId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) fetchPeritagens();
+        if (user) {
+            if (role === 'cliente') {
+                fetchUserEmpresa();
+            } else {
+                fetchPeritagens();
+            }
+        }
     }, [user, role, filterStatus]);
+
+    useEffect(() => {
+        if (role === 'cliente' && empresaId) {
+            fetchPeritagens();
+        }
+    }, [empresaId]);
+
+    const fetchUserEmpresa = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('empresa_id')
+                .eq('id', user.id)
+                .single();
+            if (error) throw error;
+            setEmpresaId(data?.empresa_id || null);
+        } catch (err) {
+            console.error('Erro ao buscar empresa do usuário:', err);
+            setLoading(false);
+        }
+    };
 
     const fetchPeritagens = async () => {
         try {
@@ -42,6 +70,16 @@ export const Peritagens: React.FC = () => {
                 // Se estiver vendo recusadas
                 if (filterStatus === 'recusadas') {
                     query = query.eq('status', 'REVISÃO NECESSÁRIA');
+                }
+            }
+
+            if (role === 'cliente') {
+                if (empresaId) {
+                    query = query.eq('empresa_id', empresaId);
+                } else {
+                    setPeritagens([]);
+                    setLoading(false);
+                    return;
                 }
             }
 
@@ -120,117 +158,92 @@ export const Peritagens: React.FC = () => {
                 </div>
             </div>
 
-            <div className="table-card">
+            <div className="grid-container">
                 {loading ? (
                     <div className="loading-state">
-                        <Loader2 className="animate-spin" size={40} color="#3182ce" />
+                        <Loader2 className="animate-spin" size={40} color="#2563eb" />
                         <p>Carregando peritagens...</p>
                     </div>
                 ) : (
-                    <table className="peritagens-table">
-                        <thead>
-                            <tr>
-                                <th>Número da Ordem de Serviço</th>
-                                <th>Cliente</th>
-                                <th>Data da Execução</th>
-                                <th>Status</th>
-                                <th>Prioridade</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPeritagens.map((p) => (
-                                <tr key={p.id}>
-                                    <td className="peritagem-id" data-label="O.S">
-                                        {p.os_interna ? (
-                                            <>
-                                                <span style={{ fontWeight: 'bold', display: 'block' }}>{p.os_interna}</span>
-                                                <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096', marginTop: '2px' }}>
-                                                    Ref: {p.numero_peritagem}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <span style={{ fontWeight: 'bold' }}>{p.numero_peritagem}</span>
-                                        )}
-                                    </td>
-                                    <td data-label="Cliente">{p.cliente}</td>
-                                    <td data-label="Data">{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
-                                    <td data-label="Status">
-                                        <span className={`status-badge ${p.status.toLowerCase().replace(/ /g, '-')}`}>
+                    <div className="peritagens-grid">
+                        {filteredPeritagens.map((p) => {
+                            const statusUpper = p.status?.trim().toUpperCase() || '';
+                            const isRejection = statusUpper === 'REVISÃO NECESSÁRIA';
+                            const isApproved = statusUpper === 'APROVADO';
+                            const canEdit = role === 'perito' ? !isApproved : true;
+
+                            const getStatusColorClass = (status: string) => {
+                                const s = status.toUpperCase();
+                                if (s.includes('FINALIZADO')) return 'status-finalizado';
+                                if (s.includes('MANUTENÇÃO') || s.includes('ABERTO') || s.includes('OFICINA')) return 'status-manutencao';
+                                if (s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE')) return 'status-aprovacao';
+                                if (s.includes('REVISÃO')) return 'status-revisao';
+                                return 'status-aguardando';
+                            };
+
+                            return (
+                                <div key={p.id} className={`peritagem-card ${isRejection ? 'revisao-border' : ''}`}>
+                                    <div className="card-header">
+                                        <div>
+                                            <span className="os-badge">{p.os_interna || 'SEM O.S'}</span>
+                                            <span className="ref-text">Ref: {p.numero_peritagem}</span>
+                                        </div>
+                                        <span className={`status-pill ${getStatusColorClass(p.status)}`}>
                                             {p.status}
                                         </span>
-                                    </td>
-                                    <td data-label="Prioridade">{p.prioridade}</td>
-                                    <td>
-                                        {(() => {
-                                            const statusUpper = p.status?.trim().toUpperCase() || '';
-                                            const isRejection = statusUpper === 'REVISÃO NECESSÁRIA';
-                                            const isApproved = statusUpper === 'APROVADO';
+                                    </div>
 
-                                            // Lógica de Permissão de Edição
-                                            // Perito pode editar qualquer coisa que NÃO esteja APROVADA
-                                            // PCP/Gestor podem editar/visualizar tudo (mantendo comportamento padrão por enquanto)
-                                            const canEdit = role === 'perito' ? !isApproved : true;
+                                    <div className="card-body">
+                                        <h3 className="client-name">{p.cliente}</h3>
 
-                                            return (
-                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                                    <button
-                                                        className={`btn-action ${isRejection ? 'btn-edit' : ''}`}
-                                                        onClick={() => {
-                                                            if (canEdit) {
-                                                                navigate(`/nova-peritagem?id=${p.id}`);
-                                                            } else {
-                                                                navigate(`/monitoramento?id=${p.id}`);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {canEdit ? (
-                                                            <>
-                                                                <span>{isRejection ? 'CORRIGIR' : 'EDITAR'}</span>
-                                                                <ExternalLink size={16} />
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <span>VER DETALHES</span>
-                                                                <ExternalLink size={16} />
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                    {role === 'gestor' && (
-                                                        <button
-                                                            className="btn-icon-danger"
-                                                            onClick={() => handleDelete(p.id)}
-                                                            title="Excluir Peritagem"
-                                                            style={{
-                                                                background: '#fee2e2',
-                                                                border: 'none',
-                                                                padding: '8px',
-                                                                borderRadius: '6px',
-                                                                color: '#e53e3e',
-                                                                cursor: 'pointer',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center'
-                                                            }}
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            );
-                                        })()}
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredPeritagens.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>
-                                        Nenhuma peritagem encontrada.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                        <div className="info-row">
+                                            <Calendar size={16} />
+                                            <span>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <AlertCircle size={16} />
+                                            <span className={`priority-badge ${p.prioridade.toLowerCase() === 'urgente' ? 'priority-urgente' : 'priority-normal'}`}>
+                                                Prioridade: {p.prioridade}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="card-actions">
+                                        <button
+                                            className={`btn-main-action ${canEdit ? 'btn-main-edit' : 'btn-main-view'}`}
+                                            onClick={() => {
+                                                if (canEdit) {
+                                                    navigate(`/nova-peritagem?id=${p.id}`);
+                                                } else {
+                                                    navigate(`/monitoramento?id=${p.id}`);
+                                                }
+                                            }}
+                                        >
+                                            {canEdit ? (isRejection ? 'CORRIGIR' : 'EDITAR') : 'VER DETALHES'}
+                                            <ExternalLink size={16} />
+                                        </button>
+
+                                        {role === 'gestor' && (
+                                            <button
+                                                className="btn-main-action btn-main-danger"
+                                                onClick={() => handleDelete(p.id)}
+                                                style={{ flex: '0 0 45px' }}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {!loading && filteredPeritagens.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                        Nenhuma peritagem encontrada.
+                    </div>
                 )}
             </div>
         </div>

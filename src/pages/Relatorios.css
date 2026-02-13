@@ -1,134 +1,163 @@
+.report-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 2rem;
+}
+
 .report-card {
     background: white;
-    padding: 32px;
-    border-radius: 12px;
+    border-radius: 16px;
+    padding: 24px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f0f0f0;
-}
-
-.report-info {
+    border: 1px solid #f1f5f9;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 32px;
+    gap: 20px;
+    transition: all 0.2s ease;
 }
 
-.report-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #2d3748;
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary);
 }
 
-.report-id {
-    color: #a0aec0;
-    font-weight: 400;
-    font-size: 1rem;
-}
-
-.report-details {
-    color: #718096;
-    font-size: 0.95rem;
-}
-
-.status-badge.small {
-    width: fit-content;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-}
-
-.report-actions {
+.report-header {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.report-id-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.report-ref {
+    display: block;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.report-client {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.report-body {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
-.btn-outline {
+.report-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    color: #4a5568;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
-.btn-outline:hover {
-    background-color: #f8fafc;
+.report-row svg {
+    color: #94a3b8;
+}
+
+.report-actions {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px dashed #f1f5f9;
+}
+
+.btn-report {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-report-outline {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-report-outline:hover {
+    background: #f1f5f9;
     border-color: #cbd5e0;
 }
 
-/* Modais */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.btn-report-primary {
+    background: #2563eb;
+    color: white;
 }
 
-.modal-content {
-    background: white;
-    width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
-    border-radius: 12px;
+.btn-report-primary:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.loading-state {
+    padding: 5rem;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1.5rem;
+    color: #94a3b8;
 }
 
-.modal-header h2 {
-    font-size: 1.25rem;
-    color: #2d3748;
-    margin: 0;
+.status-pill {
+    padding: 5px 10px;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #a0aec0;
+.status-finalizado {
+    background: #dcfce7;
+    color: #166534;
 }
 
-.modal-body {
-    padding: 24px;
-    overflow-y: auto;
+.status-manutencao {
+    background: #fef9c3;
+    color: #854d0e;
 }
 
-.parecer-text {
-    white-space: pre-wrap;
-    font-family: inherit;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #4a5568;
-    background: #f7fafc;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #edf2f7;
+.status-aprovacao {
+    background: #e0f2fe;
+    color: #0369a1;
 }
 
-.modal-footer {
-    padding: 20px 24px;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+.status-aguardando {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+@media (max-width: 640px) {
+    .report-list {
+        grid-template-columns: 1fr;
+    }
 }

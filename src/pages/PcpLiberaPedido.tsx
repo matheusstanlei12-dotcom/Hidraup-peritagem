@@ -108,34 +108,64 @@ export const PcpLiberaPedido: React.FC = () => {
                         <div key={p.id} className="pcp-action-card">
                             <div className="pcp-card-header">
                                 <div>
-                                    <h3 className="pcp-card-client">{p.cliente}</h3>
-                                    <span style={{ fontWeight: '900', color: '#1a202c', display: 'block' }}>O.S. Int: {p.os_interna || '---'}</span>
-                                    <span className="pcp-card-id">Ref: {p.numero_peritagem}</span>
+                                    <span className="report-id-badge" style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                        {p.os_interna || 'SEM O.S'}
+                                    </span>
+                                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', fontWeight: '600' }}>
+                                        Ref: {p.numero_peritagem}
+                                    </span>
                                 </div>
-                                <span className="status-badge warning">{p.status}</span>
+                                <span className="status-pill status-aprovacao" style={{ padding: '5px 10px', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: '800', textTransform: 'uppercase', background: '#fef3c7', color: '#92400e' }}>
+                                    AGUARDANDO PEDIDO
+                                </span>
                             </div>
 
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4a5568', fontWeight: '600' }}>
-                                    Número do Pedido do Cliente:
-                                </label>
-                                <input
-                                    type="text"
-                                    className="pcp-input"
-                                    placeholder="Ex: 4500123456"
-                                    value={orderInputs[p.id] || ''}
-                                    onChange={(e) => handleInputChange(p.id, e.target.value)}
-                                />
+                            <div className="pcp-body">
+                                <h3 className="pcp-card-client" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>
+                                    {p.cliente}
+                                </h3>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.7rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>
+                                        Número do Pedido do Cliente:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="pcp-input"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '10px',
+                                            border: '2px solid #f1f5f9',
+                                            background: '#f8fafc',
+                                            fontSize: '1rem',
+                                            fontWeight: '700',
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s'
+                                        }}
+                                        placeholder="Ex: 4500123456"
+                                        value={orderInputs[p.id] || ''}
+                                        onChange={(e) => handleInputChange(p.id, e.target.value)}
+                                        onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                                        onBlur={(e) => e.target.style.borderColor = '#f1f5f9'}
+                                    />
+                                </div>
                             </div>
 
-                            <button
-                                className="btn-pcp-action"
-                                onClick={() => handleRelease(p.id)}
-                                disabled={!orderInputs[p.id]}
-                                style={{ background: orderInputs[p.id] ? '#ed8936' : '#e2e8f0' }}
-                            >
-                                <ShoppingCart size={18} /> Liberar para Manutenção
-                            </button>
+                            <div className="pcp-footer">
+                                <button
+                                    className="btn-pcp-action"
+                                    onClick={() => handleRelease(p.id)}
+                                    disabled={!orderInputs[p.id]}
+                                    style={{
+                                        background: orderInputs[p.id] ? '#2563eb' : '#f1f5f9',
+                                        color: orderInputs[p.id] ? 'white' : '#94a3b8',
+                                        cursor: orderInputs[p.id] ? 'pointer' : 'not-allowed'
+                                    }}
+                                >
+                                    <ShoppingCart size={18} /> Liberar Manutenção
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}

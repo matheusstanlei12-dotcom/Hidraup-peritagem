@@ -282,26 +282,41 @@ export const PcpAprovaPeritagem: React.FC = () => {
                             </div>
                         ) : (
                             filtered.map(p => (
-                                <div key={p.id} className="pcp-action-card clickable" onClick={() => setSelectedPeritagem(p)}>
+                                <div key={p.id} className="pcp-action-card" onClick={() => setSelectedPeritagem(p)}>
                                     <div className="pcp-card-header">
                                         <div>
-                                            <h3 className="pcp-card-client">{p.cliente}</h3>
-                                            <span className="pcp-card-id" style={{ fontWeight: '900', color: '#1a202c', fontSize: '1.1rem' }}>O.S. Int: {p.os_interna || '---'}</span>
-                                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#718096' }}>Ref: {p.numero_peritagem}</span>
+                                            <span className="report-id-badge" style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                                {p.os_interna || 'SEM O.S'}
+                                            </span>
+                                            <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', fontWeight: '600' }}>
+                                                Ref: {p.numero_peritagem}
+                                            </span>
                                         </div>
-                                        <span className="status-badge peritagem-criada">{p.status}</span>
+                                        <span className="status-pill status-aprovacao" style={{ padding: '5px 10px', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: '800', textTransform: 'uppercase', background: '#e0f2fe', color: '#0369a1' }}>
+                                            {p.status}
+                                        </span>
                                     </div>
 
-                                    <div className="pcp-details-mini-grid">
-                                        <div className="pcp-detail-item"><small>O.S.</small><strong>{p.os_interna || p.numero_os || '---'}</strong></div>
-                                        <div className="pcp-detail-item"><small>C. INT/EXT</small><strong>{p.camisa_int || '---'}/{p.camisa_ext || '---'}</strong></div>
-                                        <div className="pcp-detail-item"><small>H. DIÂMETRO</small><strong>{p.haste_diam || '---'}</strong></div>
-                                        <div className="pcp-detail-item"><small>CURSO</small><strong>{p.curso || '---'}</strong></div>
+                                    <div className="pcp-body">
+                                        <h3 className="pcp-card-client" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>
+                                            {p.cliente}
+                                        </h3>
+
+                                        <div className="pcp-details-mini-grid" style={{ marginBottom: '1.5rem', background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                                            <div className="pcp-detail-item">
+                                                <small style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: '800', textTransform: 'uppercase' }}>Cilindro</small>
+                                                <strong style={{ display: 'block', fontSize: '0.8rem' }}>{p.camisa_int || '---'}/{p.haste_diam || '---'}</strong>
+                                            </div>
+                                            <div className="pcp-detail-item">
+                                                <small style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: '800', textTransform: 'uppercase' }}>Curso</small>
+                                                <strong style={{ display: 'block', fontSize: '0.8rem' }}>{p.curso || '---'} mm</strong>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <div className="pcp-footer">
                                         <button className="btn-pcp-action">
-                                            <Search size={18} /> Ver Detalhes e Aprovar
+                                            <Search size={18} /> Detalhes da Peritagem
                                         </button>
                                     </div>
                                 </div>

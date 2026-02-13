@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, Download, Loader2 } from 'lucide-react';
+import { Search, FileText, Download, Loader2, Calendar } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import { UsiminasReportTemplate } from '../components/UsiminasReportTemplate';
 import { ReportTemplate } from '../components/ReportTemplate';
@@ -266,45 +266,69 @@ export const Relatorios: React.FC = () => {
                         <p>Carregando...</p>
                     </div>
                 ) : (
-                    filteredPeritagens.map(p => (
-                        <div key={p.id} className="report-card">
-                            <div className="report-info">
-                                <h3 className="report-title">
-                                    {p.cliente} <span className="report-id">O.S: {p.os_interna || p.numero_peritagem}</span>
-                                    {p.os_interna && p.numero_peritagem !== p.os_interna && (
-                                        <span style={{ fontSize: '0.7rem', color: '#718096', display: 'block', fontWeight: 'normal', marginTop: '2px' }}>
-                                            Ref: {p.numero_peritagem}
-                                        </span>
-                                    )}
-                                </h3>
-                                <span className="report-details">Data: {new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
-                                <span className={`status-badge small ${p.status.toLowerCase().replace(/ /g, '-')}`}>{p.status}</span>
+                    filteredPeritagens.map(p => {
+                        const getStatusColorClass = (status: string) => {
+                            const s = status.toUpperCase();
+                            if (s.includes('FINALIZADO')) return 'status-finalizado';
+                            if (s.includes('MANUTENÇÃO') || s.includes('ABERTO') || s.includes('OFICINA')) return 'status-manutencao';
+                            if (s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE')) return 'status-aprovacao';
+                            return 'status-aguardando';
+                        };
+
+                        const displayStatus = (status: string) => {
+                            const s = status.toUpperCase();
+                            if (s.includes('AGUARDANDO APROVAÇÃO') || s.includes('AGUARDANDO PEDIDO') || s.includes('ORÇAMENTO ENVIADO') || s.includes('AGUARDANDO CLIENTE')) {
+                                return 'AGUARDANDO PEDIDO DE COMPRA';
+                            }
+                            return status;
+                        };
+
+                        return (
+                            <div key={p.id} className="report-card">
+                                <div className="report-header">
+                                    <div>
+                                        <span className="report-id-badge">{p.os_interna || 'SEM O.S'}</span>
+                                        <span className="report-ref">Ref: {p.numero_peritagem}</span>
+                                    </div>
+                                    <span className={`status-pill ${getStatusColorClass(p.status)}`}>
+                                        {displayStatus(p.status)}
+                                    </span>
+                                </div>
+
+                                <div className="report-body">
+                                    <h3 className="report-client">{p.cliente}</h3>
+                                    <div className="report-row">
+                                        <Calendar size={16} />
+                                        <span>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
+                                    </div>
+                                    <div className="report-row">
+                                        <FileText size={16} />
+                                        <span>Relatórios Disponíveis</span>
+                                    </div>
+                                </div>
+
+                                <div className="report-actions">
+                                    <button
+                                        className="btn-report btn-report-outline"
+                                        onClick={() => handleDownloadPdf(p, 'peritagem')}
+                                        disabled={generatingPdf && selectedId === p.id}
+                                    >
+                                        {generatingPdf && selectedId === p.id ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                                        <span>PDF Peritagem</span>
+                                    </button>
+
+                                    <button
+                                        className="btn-report btn-report-primary"
+                                        onClick={() => handleDownloadPdf(p, 'laudo')}
+                                        disabled={generatingPdf && selectedId === p.id}
+                                    >
+                                        {generatingPdf && selectedId === p.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                                        <span>{generatingPdf && selectedId === p.id ? 'Gerando...' : 'PDF Cliente'}</span>
+                                    </button>
+                                </div>
                             </div>
-
-                            <div className="report-actions">
-                                <button
-                                    className="btn-outline"
-                                    onClick={() => handleDownloadPdf(p, 'peritagem')}
-                                    disabled={generatingPdf && selectedId === p.id}
-                                >
-                                    {generatingPdf && selectedId === p.id ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
-                                    <span>PDF Peritagem</span>
-                                </button>
-
-                                <button
-                                    className="btn-primary"
-                                    style={{ width: 'auto' }}
-                                    onClick={() => handleDownloadPdf(p, 'laudo')}
-                                    disabled={generatingPdf && selectedId === p.id}
-                                >
-                                    {generatingPdf && selectedId === p.id ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                                    <span>{generatingPdf && selectedId === p.id ? 'Gerando...' : 'PDF para o Cliente'}</span>
-                                </button>
-
-
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
                 {!loading && filteredPeritagens.length === 0 && (
                     <p style={{ textAlign: 'center', color: '#718096' }}>Nenhuma peritagem encontrada.</p>

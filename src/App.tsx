@@ -23,6 +23,8 @@ const AdminUsers = React.lazy(() => import('./pages/AdminUsers').then(module => 
 const AdminEmpresas = React.lazy(() => import('./pages/AdminEmpresas').then(module => ({ default: module.AdminEmpresas })));
 const QrCodePage = React.lazy(() => import('./pages/QrCodePage').then(module => ({ default: module.QrCodePage })));
 const ClientPeritagens = React.lazy(() => import('./pages/ClientPeritagens').then(module => ({ default: module.ClientPeritagens })));
+const DataBook = React.lazy(() => import('./pages/DataBook').then(module => ({ default: module.DataBook })));
+const AguardandoPeritagem = React.lazy(() => import('./pages/AguardandoPeritagem').then(module => ({ default: module.AguardandoPeritagem })));
 
 const LoadingSpinner = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -59,11 +61,11 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
   const isAllowedPath = currentPath === '/nova-peritagem' || currentPath === '/peritagens';
 
   if (isRestricted && !isAllowedPath) {
-    return <Navigate to="/peritagens" />;
+    return <Navigate to={role === 'cliente' ? "/meus-relatorios" : "/peritagens"} />;
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to="/peritagens" />;
+    return <Navigate to={role === 'cliente' ? "/meus-relatorios" : "/peritagens"} />;
   }
 
   return <>{children}</>;
@@ -93,19 +95,21 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to={session ? defaultPath : "/login"} replace />} />
 
         {/* Rotas Protegidas */}
-        <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente']}><Layout><Dashboard /></Layout></PrivateRoute>} />
+        <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/peritagens" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Peritagens /></Layout></PrivateRoute>} />
-        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
+        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
         <Route path="/clientes" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Clientes /></Layout></PrivateRoute>} />
         <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Manutencao /></Layout></PrivateRoute>} />
         <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Relatorios /></Layout></PrivateRoute>} />
         <Route path="/registro-fotos" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><RegistroFotos /></Layout></PrivateRoute>} />
         <Route path="/nova-peritagem" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
+        <Route path="/databook" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente']}><Layout><DataBook /></Layout></PrivateRoute>} />
 
         {/* Rota Exclusiva Cliente */}
         <Route path="/meus-relatorios" element={<PrivateRoute allowedRoles={['cliente']}><Layout><ClientPeritagens /></Layout></PrivateRoute>} />
 
         {/* Rotas de Fluxo PCP */}
+        <Route path="/pcp/aguardando" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><AguardandoPeritagem /></Layout></PrivateRoute>} />
         <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
         <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
         <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
