@@ -10,9 +10,9 @@ import {
     CheckCircle,
     ShoppingCart,
     ClipboardSignature,
-    ClipboardList,
     Folder,
     QrCode,
+    Building2,
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
@@ -51,84 +51,100 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
             </div>
 
             <nav className="sidebar-nav">
-                {/* ACESSO COMUM: Sempre visível para todos (incluindo Peritos e Mobile) */}
-                <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <PlusCircle size={20} />
-                    <span>Nova Peritagem</span>
-                </NavLink>
-
-                <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <FileText size={20} />
-                    <span>Peritagens</span>
-                </NavLink>
-
-                {/* Itens que antes eram apenas WEB, mas são úteis no mobile também */}
+                {/* ACESSO COMUM: Painel visível para todos exceto Perito no mobile */}
                 {!isRestricted && (
-                    <>
-                        <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <LayoutDashboard size={20} />
-                            <span>Painel</span>
-                        </NavLink>
-
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <ClipboardList size={20} />
-                            <span>Status de Processos</span>
-                        </NavLink>
-
-                        <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <FileSpreadsheet size={20} />
-                            <span>Relatórios em PDF</span>
-                        </NavLink>
-                    </>
+                    <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                        <LayoutDashboard size={20} />
+                        <span>Painel</span>
+                    </NavLink>
                 )}
 
-                <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <Folder size={20} />
-                    <span>Armazenamento de fotos e videos</span>
-                </NavLink>
-
-                <div className="sidebar-divider"></div>
-
-                {isAdmin && (
+                {/* ACESSO CLIENTE: Opções específicas do cliente */}
+                {role === 'cliente' ? (
                     <>
+                        <NavLink to="/meus-relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <FileSpreadsheet size={20} />
+                            <span>Relatórios</span>
+                        </NavLink>
+                    </>
+                ) : (
+                    <>
+                        {/* ACESSO EQUIPE INTERNA */}
+                        <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <PlusCircle size={20} />
+                            <span>Nova Peritagem</span>
+                        </NavLink>
+
+                        <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <FileText size={20} />
+                            <span>Peritagens</span>
+                        </NavLink>
+
+                        {/* Itens que antes eram apenas WEB, mas são úteis no mobile também */}
                         {!isRestricted && (
                             <>
-                                <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <ClipboardSignature size={20} />
-                                    <span>1. Aprovação de Peritagem</span>
-                                </NavLink>
-
-                                <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <ShoppingCart size={20} />
-                                    <span>2. Liberação do Pedido</span>
-                                </NavLink>
-
-                                <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <CheckCircle size={20} />
-                                    <span>3. Conferência Final</span>
+                                <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <FileSpreadsheet size={20} />
+                                    <span>Relatórios</span>
                                 </NavLink>
                             </>
                         )}
 
-                        <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <QrCode size={20} />
-                            <span>Gerar QR code</span>
+                        <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Folder size={20} />
+                            <span>Armazenamento de fotos e videos</span>
                         </NavLink>
 
                         <div className="sidebar-divider"></div>
 
-                        <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Wrench size={20} />
-                            <span>Cilindros em Manutenção</span>
-                        </NavLink>
-                    </>
-                )}
+                        {isAdmin && (
+                            <>
+                                {!isRestricted && (
+                                    <>
+                                        <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                            <ClipboardSignature size={20} />
+                                            <span>1. Aprovação de Peritagem</span>
+                                        </NavLink>
 
-                {role === 'gestor' && !isRestricted && (
-                    <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                        <Settings size={20} />
-                        <span>Gestão de Usuários</span>
-                    </NavLink>
+                                        <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                            <ShoppingCart size={20} />
+                                            <span>2. Liberação do Pedido</span>
+                                        </NavLink>
+
+                                        <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                            <CheckCircle size={20} />
+                                            <span>3. Conferência Final</span>
+                                        </NavLink>
+                                    </>
+                                )}
+
+                                <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <QrCode size={20} />
+                                    <span>Gerar QR code</span>
+                                </NavLink>
+
+                                <div className="sidebar-divider"></div>
+
+                                <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Wrench size={20} />
+                                    <span>Cilindros em Manutenção</span>
+                                </NavLink>
+                            </>
+                        )}
+
+                        {role === 'gestor' && !isRestricted && (
+                            <>
+                                <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Settings size={20} />
+                                    <span>Gestão de Usuários</span>
+                                </NavLink>
+                                <NavLink to="/admin/empresas" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <Building2 size={20} />
+                                    <span>Gestão de Empresas</span>
+                                </NavLink>
+                            </>
+                        )}
+                    </>
                 )}
             </nav>
 

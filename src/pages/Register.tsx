@@ -10,12 +10,26 @@ export const RegisterPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [role, setRole] = useState('Perito');
+    const [empresaId, setEmpresaId] = useState('');
+    const [empresas, setEmpresas] = useState<{ id: string, nome: string }[]>([]);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+
+    React.useEffect(() => {
+        const fetchEmpresas = async () => {
+            const { data } = await supabase
+                .from('empresas')
+                .select('id, nome')
+                .eq('ativo', true)
+                .order('nome');
+            if (data) setEmpresas(data);
+        };
+        fetchEmpresas();
+    }, []);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,7 +62,8 @@ export const RegisterPage: React.FC = () => {
                     data: {
                         full_name: fullName.trim(),
                         role: role.toLowerCase(),
-                        status: 'PENDENTE'
+                        status: 'PENDENTE',
+                        empresa_id: role.toLowerCase() === 'cliente' ? empresaId : null
                     }
                 }
             });
@@ -201,8 +216,26 @@ export const RegisterPage: React.FC = () => {
                         </select>
                     </div>
 
+                    {role.toLowerCase() === 'cliente' && (
+                        <div className="input-group">
+                            <label htmlFor="empresa">Empresa</label>
+                            <select
+                                id="empresa"
+                                className="custom-select"
+                                value={empresaId}
+                                onChange={(e) => setEmpresaId(e.target.value)}
+                                required
+                            >
+                                <option value="">Selecione sua empresa</option>
+                                {empresas.map(emp => (
+                                    <option key={emp.id} value={emp.id}>{emp.nome}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <button type="submit" className="btn-primary" disabled={loading}>
-                        {loading ? 'Processando...' : 'Criar Conta'}
+                        {loading ? 'Processando...' : 'Solicitar Acesso'}
                     </button>
                 </form>
 

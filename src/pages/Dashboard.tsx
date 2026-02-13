@@ -131,10 +131,11 @@ export const Dashboard: React.FC = () => {
                 setCounts({ total, aguardando: aguardandoCliente, manutencao, finalizados, pendentePcp, aguardandoCliente, conferenciaFinal, avgLeadTime });
 
                 // Processar estatísticas por cliente
-                const clients = data.map((p: DashboardData) => p.cliente || 'Sem Cliente');
                 const clientCounts: { [key: string]: number } = {};
-                clients.forEach((c: string) => {
-                    clientCounts[c] = (clientCounts[c] || 0) + 1;
+                data.forEach((p: DashboardData) => {
+                    // Normalizar nomes: remover espaços e converter para maiúsculo
+                    const clientName = p.cliente?.trim().toUpperCase() || 'SEM CLIENTE';
+                    clientCounts[clientName] = (clientCounts[clientName] || 0) + 1;
                 });
 
                 const sortedClients = Object.entries(clientCounts)
@@ -227,22 +228,32 @@ export const Dashboard: React.FC = () => {
         }
     };
 
-    // Plugin para desenhar valores no topo das barras
-    const valueOnTopPlugin = {
-        id: 'valueOnTop',
+    // Plugin para desenhar valores no final das barras
+    const valueAtEndPlugin = {
+        id: 'valueAtEnd',
         afterDatasetsDraw: (chart: any) => {
             const { ctx } = chart;
+            const isHorizontal = chart.config.options.indexAxis === 'y';
+
             chart.data.datasets.forEach((dataset: any, i: number) => {
                 const meta = chart.getDatasetMeta(i);
                 meta.data.forEach((bar: any, index: number) => {
                     const value = dataset.data[index];
+                    if (value === 0) return;
+
                     ctx.save();
                     ctx.fillStyle = '#64748b'; // Slate 500
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    // Desenha o valor 5px acima da barra
-                    ctx.fillText(value, bar.x, bar.y - 5);
+                    ctx.font = 'bold 11px sans-serif';
+
+                    if (isHorizontal) {
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(value, bar.x + 8, bar.y);
+                    } else {
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(value, bar.x, bar.y - 5);
+                    }
                     ctx.restore();
                 });
             });
@@ -255,10 +266,16 @@ export const Dashboard: React.FC = () => {
             {
                 label: 'Peritagens',
                 data: clientStats.length > 0 ? clientStats.map(s => s.count) : [0],
-                backgroundColor: '#3b82f6', // Corporate Blue
-                borderRadius: 4,
-                borderWidth: 0, // No border for cleaner look
-                barPercentage: 0.6, // Slightly wider bars but balanced
+                backgroundColor: (context: any) => {
+                    const ctx = context.chart.ctx;
+                    const gradient = ctx.createLinearGradient(0, 0, 400, 0);
+                    gradient.addColorStop(0, '#3b82f6');
+                    gradient.addColorStop(1, '#60a5fa');
+                    return gradient;
+                },
+                borderRadius: 6,
+                borderWidth: 0,
+                barPercentage: 0.7,
                 categoryPercentage: 0.8,
             },
         ],
@@ -303,11 +320,15 @@ export const Dashboard: React.FC = () => {
     };
 
     const barOptions = {
+        indexAxis: 'y' as const,
         responsive: true,
         maintainAspectRatio: false,
         layout: {
             padding: {
-                top: 20 // Extra space for labels on top
+                right: 40, // Espaço para o valor no final da barra
+                left: 10,
+                bottom: 10,
+                top: 10
             }
         },
         plugins: {
@@ -320,17 +341,11 @@ export const Dashboard: React.FC = () => {
                 cornerRadius: 8,
                 displayColors: false,
                 titleFont: { size: 13, weight: 'bold' as any },
-                bodyFont: { size: 13 },
-                callbacks: {
-                    title: (tooltipItems: any[]) => {
-                        // Show full name in tooltip
-                        return tooltipItems[0].label;
-                    }
-                }
+                bodyFont: { size: 13 }
             }
         },
         scales: {
-            y: {
+            x: {
                 beginAtZero: true,
                 grid: {
                     display: true,
@@ -338,31 +353,19 @@ export const Dashboard: React.FC = () => {
                     drawTicks: false
                 },
                 ticks: {
-                    stepSize: 1, // Integer steps
-                    font: { size: 11, weight: 'bold' as any },
+                    stepSize: 5, // Aumentar o passo para evitar poluição
+                    maxTicksLimit: 12, // Limitar quantidade de números no fundo
+                    font: { size: 10, weight: 'bold' as any },
                     color: '#64748b'
                 },
                 border: { display: false }
             },
-            x: {
+            y: {
                 grid: { display: false },
                 ticks: {
-                    maxRotation: 0,
-                    minRotation: 0,
-                    autoSkip: false,
-                    font: { size: 11, weight: '600' as any },
+                    font: { size: 10, weight: '600' as any },
                     color: '#475569',
-                    callback: function (val: any) {
-                        const index = val as number;
-                        if (clientStats[index]) {
-                            const label = clientStats[index].name;
-                            if (label.length > 15) {
-                                return label.split(/\s+/);
-                            }
-                            return label;
-                        }
-                        return '';
-                    }
+                    autoSkip: false
                 },
                 border: { display: false }
             }
@@ -463,11 +466,11 @@ export const Dashboard: React.FC = () => {
                 <div className="chart-card">
                     <h3>Quantidade de Peritagens por Cliente</h3>
                     <div className="chart-wrapper">
-                        <div style={{ height: '320px', width: '100%' }}>
+                        <div style={{ height: `${Math.max(300, clientStats.length * 40)}px`, width: '100%', paddingBottom: '20px' }}>
                             <Bar
                                 data={barData}
                                 options={barOptions}
-                                plugins={[valueOnTopPlugin]}
+                                plugins={[valueAtEndPlugin]}
                             />
                         </div>
                     </div>

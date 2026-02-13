@@ -91,6 +91,16 @@ export const NovaPeritagem: React.FC = () => {
         os_interna: '' // Novo campo interno
     });
 
+    const [isCustomClient, setIsCustomClient] = useState(false);
+
+    const PREDEFINED_CLIENTS = [
+        'GERDAU AÇOMINAS',
+        'GEOSOL',
+        'GEOSEDNA',
+        'FERRO MAIS MINERAÇÃO',
+        'IMIC'
+    ];
+
     // Dimensões
     const [dimensions, setDimensions] = useState({
         diametroInterno: '',
@@ -178,6 +188,9 @@ export const NovaPeritagem: React.FC = () => {
                 linha: pData.linha || '',
                 os_interna: pData.os_interna || ''
             });
+
+            const isCustom = pData.cliente && !PREDEFINED_CLIENTS.includes(pData.cliente) && pData.cliente !== 'USIMINAS';
+            setIsCustomClient(!!isCustom);
 
             setDimensions({
                 diametroInterno: pData.camisa_int || '',
@@ -923,13 +936,49 @@ export const NovaPeritagem: React.FC = () => {
                                 </div>
                                 <div>
                                     <label style={{ fontWeight: 'bold', color: '#e67e22' }}>NOME DO CLIENTE</label>
-                                    <input
-                                        required
-                                        placeholder="Nome do Cliente"
-                                        value={fixedData.cliente}
-                                        onChange={e => setFixedData({ ...fixedData, cliente: e.target.value.toUpperCase() })}
-                                        style={{ width: '100%', borderBottom: '1px solid #e67e22', borderRadius: 0, padding: '5px', backgroundColor: '#fff8f0' }}
-                                    />
+                                    {!isCustomClient ? (
+                                        <select
+                                            required
+                                            value={fixedData.cliente}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                if (val === 'OUTROS') {
+                                                    setIsCustomClient(true);
+                                                    setFixedData({ ...fixedData, cliente: '' });
+                                                } else {
+                                                    setFixedData({ ...fixedData, cliente: val });
+                                                }
+                                            }}
+                                            style={{ width: '100%', borderBottom: '1px solid #e67e22', borderRadius: 0, padding: '5px', backgroundColor: '#fff8f0', color: '#333' }}
+                                        >
+                                            <option value="" disabled>Selecione o Cliente...</option>
+                                            {PREDEFINED_CLIENTS.map(c => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
+                                            {fixedData.cliente === 'USIMINAS' && <option value="USIMINAS">USIMINAS</option>}
+                                            <option value="OUTROS">OUTROS (DIGITAR MANUAL)</option>
+                                        </select>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <input
+                                                required
+                                                placeholder="Digite o Nome do Cliente"
+                                                value={fixedData.cliente}
+                                                onChange={e => setFixedData({ ...fixedData, cliente: e.target.value.toUpperCase() })}
+                                                style={{ width: '100%', borderBottom: '1px solid #e67e22', borderRadius: 0, padding: '5px', backgroundColor: '#fff8f0' }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsCustomClient(false);
+                                                    setFixedData({ ...fixedData, cliente: '' });
+                                                }}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e67e22', display: 'flex', alignItems: 'center' }}
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
