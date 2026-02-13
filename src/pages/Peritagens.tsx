@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, ExternalLink, Loader2, Trash2, Calendar, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './Peritagens.css';
@@ -24,6 +24,8 @@ export const Peritagens: React.FC = () => {
     const [filterStatus, setFilterStatus] = useState<'all' | 'recusadas'>('all'); // Filtro para Perito
     const [empresaId, setEmpresaId] = useState<string | null>(null);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const statusParam = searchParams.get('status');
 
     useEffect(() => {
         if (user) {
@@ -33,7 +35,7 @@ export const Peritagens: React.FC = () => {
                 fetchPeritagens();
             }
         }
-    }, [user, role, filterStatus]);
+    }, [user, role, filterStatus, statusParam]);
 
     useEffect(() => {
         if (role === 'cliente' && empresaId) {
@@ -62,6 +64,11 @@ export const Peritagens: React.FC = () => {
                 .from('peritagens')
                 .select('*')
                 .order('created_at', { ascending: false });
+
+            // Filtro via URL (ex: vindo do Dashboard)
+            if (statusParam === 'finalizados') {
+                query = query.or('status.eq.PROCESSO FINALIZADO,status.eq.FINALIZADOS,status.eq.FINALIZADO,status.eq.ORÇAMENTO FINALIZADO');
+            }
 
             // Se for PERITO, filtrar apenas as suas
             if (role === 'perito') {

@@ -19,6 +19,8 @@ interface Peritagem {
     created_at: string;
 }
 
+import { useSearchParams } from 'react-router-dom';
+
 export const ClientPeritagens: React.FC = () => {
     const { user } = useAuth();
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
@@ -29,6 +31,12 @@ export const ClientPeritagens: React.FC = () => {
     const [empresaId, setEmpresaId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | 'aprovacao' | 'manutencao' | 'finalizado'>('all');
+    const [searchParams] = useSearchParams();
+
+    useEffect(() => {
+        const status = searchParams.get('status');
+        if (status === 'finalizados') setActiveFilter('finalizado');
+    }, [searchParams]);
 
     useEffect(() => {
         fetchClienteData();

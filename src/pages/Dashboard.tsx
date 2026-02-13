@@ -269,7 +269,7 @@ export const Dashboard: React.FC = () => {
             icon: <CheckCircle2 size={24} />,
             color: 'rgba(16, 185, 129, 0.15)',
             iconColor: '#10b981',
-            link: role === 'cliente' ? '/meus-relatorios' : '/peritagens',
+            link: role === 'cliente' ? '/meus-relatorios?status=finalizados' : '/peritagens?status=finalizados',
             show: true
         },
         {
