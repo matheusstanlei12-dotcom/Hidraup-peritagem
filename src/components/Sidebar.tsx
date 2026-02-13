@@ -109,25 +109,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                                     <span>Aguardando Peritagem</span>
                                 </NavLink>
 
-                                <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <ClipboardSignature size={20} />
-                                    <span>1. Aprovação de Peritagem</span>
-                                </NavLink>
+                                {['gestor', 'pcp'].includes(role || '') && (
+                                    <>
+                                        <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                            <ClipboardSignature size={20} />
+                                            <span>1. Aprovação de Peritagem</span>
+                                        </NavLink>
 
-                                <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <ShoppingCart size={20} />
-                                    <span>2. Liberação do Pedido</span>
-                                </NavLink>
+                                        <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                            <ShoppingCart size={20} />
+                                            <span>2. Liberação do Pedido</span>
+                                        </NavLink>
+                                    </>
+                                )}
 
                                 <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <Wrench size={20} />
                                     <span>3. Cilindros em Manutenção</span>
                                 </NavLink>
 
-                                <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                                    <CheckCircle size={20} />
-                                    <span>4. Conferência Final</span>
-                                </NavLink>
+                                {['gestor', 'pcp'].includes(role || '') && (
+                                    <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                        <CheckCircle size={20} />
+                                        <span>4. Conferência Final</span>
+                                    </NavLink>
+                                )}
 
                                 <div className="sidebar-divider"></div>
 

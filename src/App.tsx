@@ -117,9 +117,9 @@ function AppRoutes() {
 
         {/* Rotas de Fluxo PCP */}
         <Route path="/pcp/aguardando" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><AguardandoPeritagem /></Layout></PrivateRoute>} />
-        <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
-        <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
-        <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
+        <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
+        <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
+        <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
         <Route path="/qrcode" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><QrCodePage /></Layout></PrivateRoute>} />
 
         {/* Rota Exclusiva Gestor */}

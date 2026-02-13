@@ -234,7 +234,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(59, 130, 246, 0.15)',
             iconColor: '#3b82f6',
             link: '/pcp/aprovar',
-            show: isAdmin && role !== 'cliente'
+            show: isAdmin && role !== 'cliente' && ['gestor', 'pcp'].includes(role || '')
         },
         {
             label: '2. Liberação do Pedido',
@@ -243,7 +243,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(245, 158, 11, 0.15)',
             iconColor: '#f59e0b',
             link: '/pcp/liberar',
-            show: isAdmin && role !== 'cliente'
+            show: isAdmin && role !== 'cliente' && ['gestor', 'pcp'].includes(role || '')
         },
         {
             label: '3. Cilindros em Manutenção',
@@ -261,7 +261,7 @@ export const Dashboard: React.FC = () => {
             color: 'rgba(15, 17, 42, 0.1)',
             iconColor: '#0f172a',
             link: '/pcp/finalizar',
-            show: isAdmin && role !== 'cliente'
+            show: isAdmin && role !== 'cliente' && ['gestor', 'pcp'].includes(role || '')
         },
         {
             label: 'Finalizados',
