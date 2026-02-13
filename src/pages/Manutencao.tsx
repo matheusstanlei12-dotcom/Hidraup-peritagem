@@ -29,7 +29,7 @@ export const Manutencao: React.FC = () => {
             const { data, error } = await supabase
                 .from('peritagens')
                 .select('*')
-                .eq('status', 'Cilindros em Manutenção')
+                .or('status.eq.EM MANUTENÇÃO,status.eq.MANUTENÇÃO,status.eq.OFICINA')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
