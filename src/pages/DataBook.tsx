@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Book, FileText, Plus, ArrowLeft, Trash2, X, File as FileIcon, Search, Download } from 'lucide-react';
+import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './DataBookPremium.css';
 
