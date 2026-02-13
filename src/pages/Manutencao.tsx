@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ExternalLink, Loader2, Wrench } from 'lucide-react';
+import { Search, ExternalLink, Loader2, Wrench, Calendar, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import './Peritagens.css'; // Reutilizando estilos
@@ -69,71 +69,79 @@ export const Manutencao: React.FC = () => {
                 </div>
             </div>
 
-            <div className="table-card">
+            <div className="grid-container">
                 {loading ? (
                     <div className="loading-state">
                         <Loader2 className="animate-spin" size={40} color="#3182ce" />
                         <p>Carregando...</p>
                     </div>
                 ) : (
-                    <table className="peritagens-table">
-                        <thead>
-                            <tr>
-                                <th>Número</th>
-                                <th>Cliente</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPeritagens.map((p) => (
-                                <tr key={p.id}>
-                                    <td className="peritagem-id">{p.numero_peritagem}</td>
-                                    <td>{p.cliente}</td>
-                                    <td>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</td>
-                                    <td>
-                                        <span className={`status-badge cilindros-em-manutenção`}>
-                                            {p.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button className="btn-action" onClick={() => navigate(`/monitoramento?id=${p.id}`)}>
-                                                <span>STATUS</span>
-                                                <ExternalLink size={16} />
-                                            </button>
-                                            <button
-                                                className="btn-action"
-                                                style={{ background: '#38a169', color: 'white' }}
-                                                onClick={async () => {
-                                                    const { error } = await supabase
-                                                        .from('peritagens')
-                                                        .update({ status: 'AGUARDANDO CONFERÊNCIA FINAL' })
-                                                        .eq('id', p.id);
+                    <div className="peritagens-grid">
+                        {filteredPeritagens.map((p) => (
+                            <div key={p.id} className="peritagem-card">
+                                <div className="card-header">
+                                    <div>
+                                        <span className="os-badge">{p.os_interna || 'SEM O.S'}</span>
+                                        <span className="ref-text">Ref: {p.numero_peritagem}</span>
+                                    </div>
+                                    <span className="status-pill status-manutencao">
+                                        {p.status}
+                                    </span>
+                                </div>
 
-                                                    if (!error) {
-                                                        alert('Finalizado e enviado para conferência do PCP!');
-                                                        window.location.reload();
-                                                    }
-                                                }}
-                                            >
-                                                <span>FINALIZAR</span>
-                                                <Wrench size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredPeritagens.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>
-                                        Nenhum cilindro em manutenção no momento.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                <div className="card-body">
+                                    <h3 className="client-name">{p.cliente}</h3>
+
+                                    <div className="info-row">
+                                        <Calendar size={16} />
+                                        <span>{new Date(p.data_execucao).toLocaleDateString('pt-BR')}</span>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <AlertCircle size={16} />
+                                        <span className={`priority-badge ${p.prioridade?.toLowerCase() === 'urgente' ? 'priority-urgente' : 'priority-normal'}`}>
+                                            Prioridade: {p.prioridade || 'Normal'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="card-actions">
+                                    <button
+                                        className="btn-main-action btn-main-view"
+                                        onClick={() => navigate(`/monitoramento?id=${p.id}`)}
+                                    >
+                                        STATUS <ExternalLink size={16} />
+                                    </button>
+                                    <button
+                                        className="btn-main-action"
+                                        style={{ background: '#38a169', color: 'white' }}
+                                        onClick={async () => {
+                                            if (!window.confirm('Confirma a finalização da manutenção deste cilindro?')) return;
+
+                                            const { error } = await supabase
+                                                .from('peritagens')
+                                                .update({ status: 'AGUARDANDO CONFERÊNCIA FINAL' })
+                                                .eq('id', p.id);
+
+                                            if (!error) {
+                                                alert('Finalizado e enviado para conferência do PCP!');
+                                                fetchPeritagens();
+                                            } else {
+                                                alert('Erro ao finalizar.');
+                                            }
+                                        }}
+                                    >
+                                        FINALIZAR <Wrench size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                        {filteredPeritagens.length === 0 && (
+                            <div style={{ textAlign: 'center', padding: '3rem', width: '100%', gridColumn: '1/-1', color: '#64748b' }}>
+                                Nenhum cilindro em manutenção no momento.
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </div>
