@@ -9,6 +9,7 @@ interface AuthContextType {
     session: Session | null;
     user: any | null;
     role: UserRole;
+    status: string;
     loading: boolean;
     isAdmin: boolean;
 }
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
     session: null,
     user: null,
     role: null,
+    status: '',
     loading: true,
     isAdmin: false,
 });
@@ -24,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [role, setRole] = useState<UserRole>(null);
+    const [status, setStatus] = useState<string>('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -31,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             if (session?.user) {
-                fetchRole(session.user.id);
+                fetchRole(session.user.id, session.user.email);
             } else {
                 setLoading(false);
             }
@@ -41,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             if (session?.user) {
-                fetchRole(session.user.id);
+                fetchRole(session.user.id, session.user.email);
             } else {
                 setRole(null);
                 setLoading(false);
@@ -51,12 +54,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => subscription.unsubscribe();
     }, []);
 
-    const fetchRole = async (userId: string) => {
+    const fetchRole = async (userId: string, userEmail?: string) => {
         console.log('🔍 Fetching role for user:', userId);
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('role, status')
                 .eq('id', userId)
                 .single();
 
@@ -67,8 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (data) {
-                console.log('✅ Role loaded:', data.role);
+                console.log('✅ Role loaded:', data.role, 'Status:', data.status);
                 setRole(data.role as UserRole);
+
+                const isSuperAdmin = userEmail === 'matheus.stanley12@gmail.com';
+                setStatus(isSuperAdmin ? 'APROVADO' : (data.status || 'PENDENTE'));
             } else {
                 console.warn('⚠️ No role data found for user');
             }
@@ -83,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user: session?.user ?? null,
         role,
+        status,
         loading,
         isAdmin: role === 'gestor' || role === 'pcp' || role === 'perito'
     };

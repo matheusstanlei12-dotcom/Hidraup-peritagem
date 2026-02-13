@@ -25,6 +25,7 @@ const QrCodePage = React.lazy(() => import('./pages/QrCodePage').then(module => 
 const ClientPeritagens = React.lazy(() => import('./pages/ClientPeritagens').then(module => ({ default: module.ClientPeritagens })));
 const DataBook = React.lazy(() => import('./pages/DataBook').then(module => ({ default: module.DataBook })));
 const AguardandoPeritagem = React.lazy(() => import('./pages/AguardandoPeritagem').then(module => ({ default: module.AguardandoPeritagem })));
+const PendingApproval = React.lazy(() => import('./pages/PendingApproval').then(module => ({ default: module.PendingApproval })));
 
 const LoadingSpinner = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -46,7 +47,7 @@ const LoadingSpinner = () => (
 );
 
 const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
-  const { session, role, loading } = useAuth();
+  const { session, role, status, loading } = useAuth();
 
   const isApp = Capacitor.getPlatform() !== 'web';
 
@@ -55,6 +56,11 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>Carregando...</div>;
 
   if (!session) return <Navigate to="/login" />;
+
+  // Verificação de Status (Bloqueia acesso se não estiver APROVADO)
+  if (status !== 'APROVADO') {
+    return <Navigate to="/pending-approval" />;
+  }
 
   // Se for restrito (App ou Perito), só pode acessar Nova Peritagem e Minhas Peritagens
   const currentPath = window.location.pathname;
@@ -72,7 +78,7 @@ const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, a
 };
 
 function AppRoutes() {
-  const { session, loading, role } = useAuth();
+  const { session, loading, role, status } = useAuth();
 
   if (loading) return null;
 
@@ -91,6 +97,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={session ? <Navigate to={defaultPath} /> : <LoginPage />} />
         <Route path="/register" element={session ? <Navigate to={defaultPath} /> : <RegisterPage />} />
+        <Route path="/pending-approval" element={session ? (status === 'APROVADO' ? <Navigate to={defaultPath} /> : <PendingApproval />) : <Navigate to="/login" />} />
 
         <Route path="/" element={<Navigate to={session ? defaultPath : "/login"} replace />} />
 
