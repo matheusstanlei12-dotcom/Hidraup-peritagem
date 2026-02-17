@@ -26,6 +26,7 @@ const ClientPeritagens = React.lazy(() => import('./pages/ClientPeritagens').the
 const DataBook = React.lazy(() => import('./pages/DataBook').then(module => ({ default: module.DataBook })));
 const AguardandoPeritagem = React.lazy(() => import('./pages/AguardandoPeritagem').then(module => ({ default: module.AguardandoPeritagem })));
 const PendingApproval = React.lazy(() => import('./pages/PendingApproval').then(module => ({ default: module.PendingApproval })));
+const PublicReport = React.lazy(() => import('./pages/PublicReport').then(module => ({ default: module.PublicReport })));
 
 const LoadingSpinner = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -98,6 +99,9 @@ function AppRoutes() {
         <Route path="/login" element={session ? <Navigate to={defaultPath} /> : <LoginPage />} />
         <Route path="/register" element={session ? <Navigate to={defaultPath} /> : <RegisterPage />} />
         <Route path="/pending-approval" element={session ? (status === 'APROVADO' ? <Navigate to={defaultPath} /> : <PendingApproval />) : <Navigate to="/login" />} />
+
+        {/* Rota Pública para QR Code */}
+        <Route path="/view-report/:id" element={<PublicReport />} />
 
         <Route path="/" element={<Navigate to={session ? defaultPath : "/login"} replace />} />
 

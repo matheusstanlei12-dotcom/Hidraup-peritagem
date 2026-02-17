@@ -319,7 +319,6 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
         {/* PÁGINA 0: CAPA */}
         <Page size="A4" style={styles.coverPage}>
             <Image src="/logo.png" style={styles.coverLogo} />
-            <Text style={{ fontSize: 12, color: 'red', marginBottom: 30, fontWeight: 'bold', textTransform: 'uppercase' }}>Serviços Hidráulicos e Pneumáticos Ltda</Text>
             <Text style={styles.coverTitle}>RELATÓRIO TÉCNICO DE PERITAGEM</Text>
 
 
