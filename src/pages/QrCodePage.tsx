@@ -16,136 +16,181 @@ interface PeritagemSummary {
 }
 
 // PDF Styles
+// PDF Styles con estética técnica/futurista premium
 const pdfStyles = StyleSheet.create({
     page: {
-        backgroundColor: '#ffffff', // Fundo branco restaurado
+        backgroundColor: '#ffffff',
+        padding: 30,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    container: {
+        flex: 1,
+        border: '1.5pt solid #005696',
+        borderRadius: 15,
         padding: 40,
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100%',
     },
-    container: {
-        border: '1pt solid #e2e8f0', // Borda sutil cinza
-        borderRadius: 20,
-        padding: 40,
-        width: '100%',
-        height: '92%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-    },
-    // Elementos decorativos futuristas (cantos) em azul Hidraup
-    cornerTopLeft: {
+    // Elementos de Canto - Estilo Mira Técnica
+    corner: {
         position: 'absolute',
-        top: -1,
-        left: -1,
-        width: 40,
-        height: 40,
-        borderTop: '5pt solid #005696',
-        borderLeft: '5pt solid #005696',
-        borderTopLeftRadius: 20,
+        width: 30,
+        height: 30,
+        borderColor: '#005696',
+        borderWidth: 0,
     },
-    cornerTopRight: {
+    tl: { top: -2, left: -2, borderTopWidth: 6, borderLeftWidth: 6, borderTopLeftRadius: 15 },
+    tr: { top: -2, right: -2, borderTopWidth: 6, borderRightWidth: 6, borderTopRightRadius: 15 },
+    bl: { bottom: -2, left: -2, borderBottomWidth: 6, borderLeftWidth: 6, borderBottomLeftRadius: 15 },
+    br: { bottom: -2, right: -2, borderBottomWidth: 6, borderRightWidth: 6, borderBottomRightRadius: 15 },
+
+    // Header do PDF
+    header: {
         position: 'absolute',
-        top: -1,
-        right: -1,
-        width: 40,
-        height: 40,
-        borderTop: '5pt solid #005696',
-        borderRight: '5pt solid #005696',
-        borderTopRightRadius: 20,
-    },
-    cornerBottomLeft: {
-        position: 'absolute',
-        bottom: -1,
-        left: -1,
-        width: 40,
-        height: 40,
-        borderBottom: '5pt solid #005696',
-        borderLeft: '5pt solid #005696',
-        borderBottomLeftRadius: 20,
-    },
-    cornerBottomRight: {
-        position: 'absolute',
-        bottom: -1,
-        right: -1,
-        width: 40,
-        height: 40,
-        borderBottom: '5pt solid #005696',
-        borderRight: '5pt solid #005696',
-        borderBottomRightRadius: 20,
-    },
-    logoContainer: {
-        marginBottom: 40,
-        width: 180,
+        top: 30,
         alignItems: 'center',
     },
-    qrWrapper: {
-        padding: 15,
-        backgroundColor: '#ffffff',
-        borderRadius: 15,
-        border: '1.5pt solid #005696',
-        // Adicionar uma leve sombra visual se possível ou apenas manter borda
+    logo: {
+        width: 130,
+        marginBottom: 10,
     },
-    qrCode: {
-        width: 320,
-        height: 320,
-    },
-    scanInfo: {
-        marginTop: 45,
-        alignItems: 'center',
-    },
-    label: {
+    title: {
         fontSize: 14,
         color: '#005696',
+        fontWeight: 'bold',
+        letterSpacing: 4,
         textTransform: 'uppercase',
-        letterSpacing: 3,
+    },
+
+    // Área Central do QR
+    qrContainer: {
+        position: 'relative',
+        padding: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    qrBrackets: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        border: '1pt solid #38bdf8',
+        borderRadius: 20,
+        opacity: 0.5,
+    },
+    qrWrapper: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 10,
+        border: '2pt solid #005696',
+    },
+    qrImage: {
+        width: 300,
+        height: 300,
+    },
+
+    // Barra de Dados Técnica
+    dataBar: {
+        position: 'absolute',
+        bottom: 80,
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 30,
+        borderTop: '1pt solid #e2e8f0',
+        paddingTop: 15,
+    },
+    dataItem: {
+        alignItems: 'center',
+    },
+    dataLabel: {
+        fontSize: 7,
+        color: '#64748b',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 2,
+    },
+    dataValue: {
+        fontSize: 11,
+        color: '#005696',
         fontWeight: 'bold',
     },
-    subLabel: {
-        fontSize: 9,
-        color: '#64748b',
-        marginTop: 10,
-        letterSpacing: 1.5,
-        fontWeight: 'medium',
+
+    // Info de Acesso
+    accessInfo: {
+        marginTop: 50,
+        alignItems: 'center',
     },
+    accessLabel: {
+        fontSize: 10,
+        color: '#38bdf8',
+        fontWeight: 'bold',
+        letterSpacing: 2,
+    },
+    accessSub: {
+        fontSize: 7,
+        color: '#94a3b8',
+        marginTop: 4,
+        textTransform: 'uppercase',
+    },
+
     footer: {
         position: 'absolute',
         bottom: 25,
-        fontSize: 8,
-        color: '#94a3b8',
+        fontSize: 7,
+        color: '#cbd5e1',
         letterSpacing: 1,
-        textTransform: 'uppercase',
     }
 });
 
 // PDF Template Component
-const QrCodePDF = ({ qrDataUrl }: { qrDataUrl: string }) => (
+const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDataUrl: string }) => (
     <Document>
         <Page size="A4" style={pdfStyles.page}>
             <View style={pdfStyles.container}>
-                {/* Detalhes de Interface Futurista */}
-                <View style={pdfStyles.cornerTopLeft} />
-                <View style={pdfStyles.cornerTopRight} />
-                <View style={pdfStyles.cornerBottomLeft} />
-                <View style={pdfStyles.cornerBottomRight} />
+                {/* Cantos Estilo Mira */}
+                <View style={[pdfStyles.corner, pdfStyles.tl]} />
+                <View style={[pdfStyles.corner, pdfStyles.tr]} />
+                <View style={[pdfStyles.corner, pdfStyles.bl]} />
+                <View style={[pdfStyles.corner, pdfStyles.br]} />
 
-                <View style={pdfStyles.logoContainer}>
-                    <Image src="/logo.png" style={{ width: 140 }} />
+                <View style={pdfStyles.header}>
+                    <Image src="/logo.png" style={pdfStyles.logo} />
+                    <Text style={pdfStyles.title}>Laudo Digital Hidraup</Text>
                 </View>
 
-                <View style={pdfStyles.qrWrapper}>
-                    <Image src={qrDataUrl} style={pdfStyles.qrCode} />
+                <View style={pdfStyles.qrContainer}>
+                    <View style={pdfStyles.qrBrackets} />
+                    <View style={pdfStyles.qrWrapper}>
+                        <Image src={qrDataUrl} style={pdfStyles.qrImage} />
+                    </View>
                 </View>
 
-                <View style={pdfStyles.scanInfo}>
-                    <Text style={pdfStyles.label}>INTERFACE DE ACESSO TÉCNICO</Text>
-                    <Text style={pdfStyles.subLabel}>ESCANEIE PARA VISUALIZAR O LAUDO DIGITAL HIDRAUP</Text>
+                <View style={pdfStyles.accessInfo}>
+                    <Text style={pdfStyles.accessLabel}>SISTEMA DE ACESSO REMOTO</Text>
+                    <Text style={pdfStyles.accessSub}>Escaneie para visualizar o relatório técnico online</Text>
                 </View>
 
-                <Text style={pdfStyles.footer}>SISTEMA DE GESTÃO INTELIGENTE - TRUST TECNOLOGIA</Text>
+                <View style={pdfStyles.dataBar}>
+                    <View style={pdfStyles.dataItem}>
+                        <Text style={pdfStyles.dataLabel}>Identificador TAG</Text>
+                        <Text style={pdfStyles.dataValue}>{peritagem.tag || 'N/A'}</Text>
+                    </View>
+                    <View style={pdfStyles.dataItem}>
+                        <Text style={pdfStyles.dataLabel}>Ordem de Serviço</Text>
+                        <Text style={pdfStyles.dataValue}>{peritagem.os_interna || peritagem.os || 'N/A'}</Text>
+                    </View>
+                    <View style={pdfStyles.dataItem}>
+                        <Text style={pdfStyles.dataLabel}>Data de Geração</Text>
+                        <Text style={pdfStyles.dataValue}>{new Date().toLocaleDateString()}</Text>
+                    </View>
+                </View>
+
+                <Text style={pdfStyles.footer}>GERADO POR TRUST TECNOLOGIA - SOLUÇÕES INTELIGENTES PARA INDÚSTRIA</Text>
             </View>
         </Page>
     </Document>
@@ -214,7 +259,7 @@ export const QrCodePage: React.FC = () => {
                 return;
             }
 
-            const blob = await pdf(<QrCodePDF qrDataUrl={qrDataUrl} />).toBlob();
+            const blob = await pdf(<QrCodePDF peritagem={peritagem} qrDataUrl={qrDataUrl} />).toBlob();
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
