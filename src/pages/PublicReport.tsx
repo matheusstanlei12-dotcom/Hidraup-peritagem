@@ -8,11 +8,13 @@ interface PeritagemData {
     id: string;
     tag: string;
     cliente: string;
-    numero_os: string;
+    os_interna: string;
+    os: string;
+    numero_peritagem: string;
     ni: string;
-    pedido: string;
+    numero_pedido: string;
     nota_fiscal: string;
-    data_inspecao: string;
+    data_execucao: string;
     local_equipamento: string;
     responsavel_tecnico: string;
     camisa_int: string;
@@ -22,7 +24,6 @@ interface PeritagemData {
     haste_comp: string;
     curso: string;
     desenho_conjunto: string;
-    ni_material: string;
     area: string;
     linha: string;
     tipo_modelo: string;
@@ -52,6 +53,7 @@ export const PublicReport: React.FC = () => {
 
     useEffect(() => {
         if (id) {
+            console.log('Buscando relatório:', id);
             fetchReportData(id);
         }
     }, [id]);
@@ -63,9 +65,19 @@ export const PublicReport: React.FC = () => {
                 .from('peritagens')
                 .select('*')
                 .eq('id', reportId)
-                .single();
+                .maybeSingle(); // Usar maybeSingle para evitar erro se não encontrar
 
-            if (pError) throw pError;
+            if (pError) {
+                console.error('Erro Supabase Peritagem:', pError);
+                throw pError;
+            }
+
+            if (!pData) {
+                console.warn('Nenhuma peritagem encontrada com ID:', reportId);
+                setPeritagem(null);
+                return;
+            }
+
             setPeritagem(pData as any);
 
             const { data: aData, error: aError } = await supabase
@@ -73,13 +85,16 @@ export const PublicReport: React.FC = () => {
                 .select('*')
                 .eq('peritagem_id', reportId);
 
-            if (aError) throw aError;
+            if (aError) {
+                console.error('Erro Supabase Itens:', aError);
+                throw aError;
+            }
 
-            const compItems = aData.filter(i => i.tipo === 'componente' || !i.tipo);
+            const compItems = aData ? aData.filter(i => i.tipo === 'componente' || !i.tipo) : [];
             setItens(compItems);
 
         } catch (error) {
-            console.error('Erro ao carregar relatório:', error);
+            console.error('Erro fatal ao carregar relatório:', error);
         } finally {
             setLoading(false);
         }
@@ -100,9 +115,13 @@ export const PublicReport: React.FC = () => {
                 <AlertCircle size={64} color="#ef4444" />
                 <h1>Relatório não encontrado</h1>
                 <p>O link acessado pode estar expirado ou o ID é inválido.</p>
+                <code style={{ fontSize: '0.7rem', color: '#666' }}>ID: {id}</code>
             </div>
         );
     }
+
+    // Identificar melhor a OS para exibir no badge
+    const displayOS = peritagem.os_interna || peritagem.numero_peritagem || peritagem.os || peritagem.tag;
 
     return (
         <div className="public-report-container">
@@ -112,7 +131,7 @@ export const PublicReport: React.FC = () => {
                 </div>
                 <div className="header-info">
                     <h1>LAUDO TÉCNICO DE PERITAGEM</h1>
-                    <span className="os-badge">OS: {peritagem.numero_os || peritagem.tag}</span>
+                    <span className="os-badge">OS: {displayOS}</span>
                 </div>
             </header>
 
@@ -126,11 +145,11 @@ export const PublicReport: React.FC = () => {
                         </div>
                         <div className="grid-item">
                             <label>Nº PEDIDO COMPRA</label>
-                            <span>{peritagem.pedido || '-'}</span>
+                            <span>{peritagem.numero_pedido || '-'}</span>
                         </div>
                         <div className="grid-item">
                             <label>Nº LAUDO USIMINAS</label>
-                            <span>{peritagem.numero_os || '-'}</span>
+                            <span>{peritagem.os_interna || '-'}</span>
                         </div>
                         <div className="grid-item">
                             <label>TAG DO EQUIPAMENTO</label>
