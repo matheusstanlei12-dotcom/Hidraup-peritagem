@@ -18,40 +18,106 @@ interface PeritagemSummary {
 // PDF Styles
 const pdfStyles = StyleSheet.create({
     page: {
+        backgroundColor: '#0f172a', // Fundo azul escuro futurista
         padding: 40,
-        backgroundColor: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        height: '100%',
     },
     container: {
-        border: '2pt solid #005696',
-        borderRadius: 10,
-        padding: 30,
+        border: '1pt solid #38bdf8', // Borda neon azul
+        borderRadius: 20,
+        padding: 40,
         width: '100%',
+        height: '90%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    // Elementos decorativos futuristas (cantos)
+    cornerTopLeft: {
+        position: 'absolute',
+        top: -2,
+        left: -2,
+        width: 40,
+        height: 40,
+        borderTop: '4pt solid #3b82f6',
+        borderLeft: '4pt solid #3b82f6',
+        borderTopLeftRadius: 20,
+    },
+    cornerTopRight: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        width: 40,
+        height: 40,
+        borderTop: '4pt solid #3b82f6',
+        borderRight: '4pt solid #3b82f6',
+        borderTopRightRadius: 20,
+    },
+    cornerBottomLeft: {
+        position: 'absolute',
+        bottom: -2,
+        left: -2,
+        width: 40,
+        height: 40,
+        borderBottom: '4pt solid #3b82f6',
+        borderLeft: '4pt solid #3b82f6',
+        borderBottomLeftRadius: 20,
+    },
+    cornerBottomRight: {
+        position: 'absolute',
+        bottom: -2,
+        right: -2,
+        width: 40,
+        height: 40,
+        borderBottom: '4pt solid #3b82f6',
+        borderRight: '4pt solid #3b82f6',
+        borderBottomRightRadius: 20,
+    },
+    logoContainer: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 40,
+        width: 180,
         alignItems: 'center',
     },
-    qrCode: {
-        width: 250,
-        height: 250,
-        marginVertical: 20,
+    qrWrapper: {
+        padding: 20,
+        backgroundColor: '#ffffff',
+        borderRadius: 15,
+        border: '2pt solid #38bdf8',
     },
-    infoRow: {
-        marginBottom: 5,
-        fontSize: 14,
-        color: '#333',
-        fontWeight: 'bold',
+    qrCode: {
+        width: 320,
+        height: 320,
+    },
+    scanInfo: {
+        marginTop: 40,
+        alignItems: 'center',
     },
     label: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 20,
-        textAlign: 'center',
+        fontSize: 16,
+        color: '#38bdf8',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        fontWeight: 'bold',
+    },
+    subLabel: {
+        fontSize: 10,
+        color: '#94a3b8',
+        marginTop: 8,
+        letterSpacing: 1,
     },
     footer: {
         position: 'absolute',
         bottom: 20,
-        fontSize: 10,
-        color: '#999',
+        fontSize: 9,
+        color: '#475569',
+        letterSpacing: 1,
     }
 });
 
@@ -60,13 +126,27 @@ const QrCodePDF = ({ qrDataUrl }: { qrDataUrl: string }) => (
     <Document>
         <Page size="A4" style={pdfStyles.page}>
             <View style={pdfStyles.container}>
-                <Image src="/logo.png" style={{ width: 140, marginBottom: 20 }} />
+                {/* Detalhes de Interface Futurista */}
+                <View style={pdfStyles.cornerTopLeft} />
+                <View style={pdfStyles.cornerTopRight} />
+                <View style={pdfStyles.cornerBottomLeft} />
+                <View style={pdfStyles.cornerBottomRight} />
 
-                <Image src={qrDataUrl} style={pdfStyles.qrCode} />
+                <View style={pdfStyles.logoContainer}>
+                    <Image src="/logo.png" style={{ width: 140 }} />
+                </View>
 
-                <Text style={pdfStyles.label}>Escaneie para visualizar o Laudo Técnico Online</Text>
+                <View style={pdfStyles.qrWrapper}>
+                    <Image src={qrDataUrl} style={pdfStyles.qrCode} />
+                </View>
+
+                <View style={pdfStyles.scanInfo}>
+                    <Text style={pdfStyles.label}>INTERFACE DE ACESSO TÉCNICO</Text>
+                    <Text style={pdfStyles.subLabel}>ESCANEIE PARA VISUALIZAR O LAUDO DIGITAL HIDRAUP</Text>
+                </View>
+
+                <Text style={pdfStyles.footer}>SISTEMA DE GESTÃO INTELIGENTE - TRUST TECNOLOGIA</Text>
             </View>
-            <Text style={pdfStyles.footer}>Gerado via TrustTecnologia - {new Date().toLocaleDateString()}</Text>
         </Page>
     </Document>
 );
