@@ -228,7 +228,7 @@ export const QrCodePage: React.FC = () => {
                                 } catch (e) {
                                     reject(new Error('Erro de segurança ao acessar o canvas (CORS).'));
                                 }
-                            }, 200);
+                            }, 500);
                         } else if (attempts < maxAttempts) {
                             attempts++;
                             setTimeout(checkCanvas, 100);
@@ -315,6 +315,14 @@ export const QrCodePage: React.FC = () => {
                                                     size={120}
                                                     level="H"
                                                     includeMargin={false}
+                                                    imageSettings={{
+                                                        src: "/logo.png",
+                                                        x: undefined,
+                                                        y: undefined,
+                                                        height: 24,
+                                                        width: 24,
+                                                        excavate: true,
+                                                    }}
                                                 />
                                             </div>
                                             <div className="card-main">
@@ -368,6 +376,14 @@ export const QrCodePage: React.FC = () => {
                                     size={1024}
                                     level="H"
                                     includeMargin={false}
+                                    imageSettings={{
+                                        src: "/logo.png",
+                                        x: undefined,
+                                        y: undefined,
+                                        height: 200,
+                                        width: 200,
+                                        excavate: true,
+                                    }}
                                 />
                             )}
                         </div>
