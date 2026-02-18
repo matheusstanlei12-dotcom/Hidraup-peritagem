@@ -1,5 +1,12 @@
 .peritagens-container {
+    padding: 2.5rem;
     animation: fadeIn 0.4s ease-out;
+}
+
+@media (max-width: 768px) {
+    .peritagens-container {
+        padding: 1.25rem;
+    }
 }
 
 @keyframes fadeIn {

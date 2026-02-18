@@ -6,6 +6,120 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #1a202c;
     min-height: 100vh;
+    position: relative;
+}
+
+.public-report-container.download-mode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 0;
+}
+
+.download-center {
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.brand-logo img {
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-container h2 {
+    color: #1a2e63;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.status-container p {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.manual-download-box {
+    margin-top: 20px;
+    padding: 20px;
+    border-top: 1px solid #e2e8f0;
+    width: 100%;
+}
+
+.btn-manual {
+    background-color: #1a2e63;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px auto;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-manual:active {
+    transform: scale(0.95);
+}
+
+.simple-footer {
+    margin-top: auto;
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.footer-url {
+    color: #1a2e63;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.download-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.download-spinner {
+    background: #1a2e63;
+    padding: 30px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.download-spinner p {
+    font-weight: bold;
+    font-size: 1.1rem;
 }
 
 .report-header {

@@ -642,7 +642,9 @@ export const NovaPeritagem: React.FC = () => {
                         tipo_modelo: fixedData.tipo_modelo,
                         area: fixedData.area,
                         linha: fixedData.linha,
-                        os_interna: fixedData.os_interna
+                        os_interna: fixedData.os_interna,
+                        etapa_atual: 'peritagem',
+                        databook_pronto: false
                     })
                     .eq('id', editId);
 
@@ -691,7 +693,9 @@ export const NovaPeritagem: React.FC = () => {
                         tipo_modelo: fixedData.tipo_modelo,
                         area: fixedData.area,
                         linha: fixedData.linha,
-                        os_interna: fixedData.os_interna
+                        os_interna: fixedData.os_interna,
+                        etapa_atual: 'peritagem',
+                        databook_pronto: false
                     }])
                     .select()
                     .single();

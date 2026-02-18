@@ -15,6 +15,7 @@ import {
     Building2,
     Book,
     Clock,
+    RefreshCcw,
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
@@ -77,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
-                            <span>Data Books</span>
+                            <span>Data book</span>
                         </NavLink>
                     </>
                 ) : (
@@ -139,12 +140,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
 
                                 <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <Folder size={20} />
-                                    <span>Armazenamento de Fotos e Vídeos</span>
+                                    <span>Arquivo Geral (Fotos/Vídeos)</span>
+                                </NavLink>
+
+                                <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                                    <RefreshCcw size={20} />
+                                    <span>Fluxo de Produção & Databook</span>
                                 </NavLink>
 
                                 <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                                     <Book size={20} />
-                                    <span>Data Books</span>
+                                    <span>Data book</span>
                                 </NavLink>
 
                                 <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>

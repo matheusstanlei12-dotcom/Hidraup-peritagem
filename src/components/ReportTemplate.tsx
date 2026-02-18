@@ -628,7 +628,7 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
             )}
 
             <View style={styles.footer} fixed>
-                <Text>Documento gerado automaticamente pela TrustTecnologia.LTDA</Text>
+                <Text>Documento gerado automaticamente pela www.trusttecnologia.com.br</Text>
             </View>
         </Page>
     </Document >

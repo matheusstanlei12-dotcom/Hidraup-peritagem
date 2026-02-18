@@ -114,6 +114,15 @@
     cursor: not-allowed;
 }
 
+.btn-pcp-action.reject {
+    background-color: #ef4444;
+}
+
+.btn-pcp-action.reject:hover {
+    background-color: #dc2626;
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
 /* Review Section */
 .review-section {
     margin-bottom: 1.5rem;
@@ -132,10 +141,10 @@
 
 .review-details-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
     background: #ffffff;
-    padding: 1.25rem;
+    padding: 1.5rem;
     border-radius: var(--border-radius);
     border: 1px solid #f1f5f9;
 }
@@ -260,6 +269,94 @@
 .photo-evidence-item:hover {
     transform: scale(1.08);
     box-shadow: var(--shadow-sm);
+}
+
+/* Detailed Review Flow Full Width */
+.detailed-review-flow {
+    width: 100%;
+    margin-top: 1rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.peritagem-full-review {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 2.5rem !important;
+}
+
+.review-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.review-os-highlight {
+    font-size: 1.25rem;
+    color: var(--primary);
+    font-weight: 800;
+    margin-top: 4px;
+}
+
+.review-top-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.review-photo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid #f1f5f9;
+}
+
+.analysis-review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.pcp-approval-actions.top {
+    margin-top: 0;
+}
+
+.pcp-approval-actions.bottom {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f1f5f9;
+}
+
+@media (max-width: 1200px) {
+    .review-top-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .review-photo-container {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .peritagem-full-review {
+        padding: 1.25rem !important;
+    }
+
+    .review-main-header {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .analysis-review-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .btn-back-action {

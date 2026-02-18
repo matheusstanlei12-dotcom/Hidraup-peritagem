@@ -27,6 +27,7 @@ const DataBook = React.lazy(() => import('./pages/DataBook').then(module => ({ d
 const AguardandoPeritagem = React.lazy(() => import('./pages/AguardandoPeritagem').then(module => ({ default: module.AguardandoPeritagem })));
 const PendingApproval = React.lazy(() => import('./pages/PendingApproval').then(module => ({ default: module.PendingApproval })));
 const PublicReport = React.lazy(() => import('./pages/PublicReport').then(module => ({ default: module.PublicReport })));
+const WorkflowPage = React.lazy(() => import('./pages/Workflow').then(module => ({ default: module.WorkflowPage })));
 
 const LoadingSpinner = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -113,6 +114,7 @@ function AppRoutes() {
         <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Manutencao /></Layout></PrivateRoute>} />
         <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Relatorios /></Layout></PrivateRoute>} />
         <Route path="/registro-fotos" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><RegistroFotos /></Layout></PrivateRoute>} />
+        <Route path="/workflow" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><WorkflowPage /></Layout></PrivateRoute>} />
         <Route path="/nova-peritagem" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
         <Route path="/databook" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente']}><Layout><DataBook /></Layout></PrivateRoute>} />
 

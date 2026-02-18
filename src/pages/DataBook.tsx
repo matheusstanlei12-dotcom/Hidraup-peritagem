@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download } from 'lucide-react';
+import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './DataBookPremium.css';
 
@@ -16,6 +16,8 @@ interface DataBookFolder {
     criado_por?: string;
     empresa_id?: string;
     created_at: string;
+    is_peritagem?: boolean;
+    peritagem_id?: string;
 }
 
 interface DataBookItem {
@@ -72,21 +74,42 @@ export const DataBook: React.FC = () => {
     const fetchFolders = async () => {
         setLoading(true);
         try {
-            let query = supabase.from('databook_folders').select('*').order('created_at', { ascending: false });
-
+            let empresa_id: string | null = null;
             if (role === 'cliente') {
                 const { data: profile } = await supabase.from('profiles').select('empresa_id').eq('id', user.id).single();
-                if (profile?.empresa_id) {
-                    query = query.eq('empresa_id', profile.empresa_id);
-                } else {
-                    setFolders([]);
-                    return;
-                }
+                empresa_id = profile?.empresa_id || null;
             }
 
-            const { data, error } = await query;
-            if (error) throw error;
-            setFolders(data || []);
+            // Fetch actual databook folders
+            let foldersQuery = supabase.from('databook_folders').select('*').order('created_at', { ascending: false });
+            if (empresa_id) {
+                foldersQuery = foldersQuery.eq('empresa_id', empresa_id);
+            }
+            const { data: foldersData } = await foldersQuery;
+
+            // Fetch finalized peritagens
+            let peritagensQuery = supabase.from('peritagens')
+                .select('id, cliente, os_interna, os, created_at, empresa_id')
+                .eq('databook_pronto', true)
+                .order('created_at', { ascending: false });
+
+            if (empresa_id) {
+                peritagensQuery = peritagensQuery.eq('empresa_id', empresa_id);
+            }
+            const { data: peritagensData } = await peritagensQuery;
+
+            const mappedPeritagens: DataBookFolder[] = (peritagensData || []).map(p => ({
+                id: `peritagem_${p.id}`,
+                name: `Databook - ${p.os_interna || p.os}`,
+                cliente: p.cliente,
+                os_interna: p.os_interna || p.os,
+                created_at: p.created_at,
+                is_peritagem: true,
+                peritagem_id: p.id,
+                empresa_id: p.empresa_id
+            }));
+
+            setFolders([...mappedPeritagens, ...(foldersData || [])]);
         } catch (error) {
             console.error('Error fetching databooks:', error);
         } finally {
@@ -97,14 +120,42 @@ export const DataBook: React.FC = () => {
     const fetchItems = async (folderId: string) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('databook_items')
-                .select('*')
-                .eq('folder_id', folderId)
-                .order('created_at', { ascending: false });
+            if (currentFolder?.is_peritagem && currentFolder.peritagem_id) {
+                // Fetch from peritagens table
+                const { data, error } = await supabase
+                    .from('peritagens')
+                    .select('foto_frontal, fotos_montagem, fotos_videos_teste, foto_pintura_final')
+                    .eq('id', currentFolder.peritagem_id)
+                    .single();
 
-            if (error) throw error;
-            setItems(data || []);
+                if (error) throw error;
+
+                const peritagemItems: DataBookItem[] = [];
+                if (data.foto_frontal) peritagemItems.push({ id: 'frontal', file_data: data.foto_frontal, description: 'Foto Frontal Equipamento', file_type: 'image', created_at: '' });
+
+                (data.fotos_montagem || []).forEach((url: string, idx: number) => {
+                    peritagemItems.push({ id: `montagem_${idx}`, file_data: url, description: `Montagem/Recuperação ${idx + 1}`, file_type: 'image', created_at: '' });
+                });
+
+                (data.fotos_videos_teste || []).forEach((url: string, idx: number) => {
+                    const isVideo = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().startsWith('data:video');
+                    peritagemItems.push({ id: `teste_${idx}`, file_data: url, description: `Teste de Qualidade ${idx + 1}`, file_type: isVideo ? 'video' : 'image', created_at: '' });
+                });
+
+                if (data.foto_pintura_final) peritagemItems.push({ id: 'pintura', file_data: data.foto_pintura_final, description: 'Pintura/Acabamento Final', file_type: 'image', created_at: '' });
+
+                setItems(peritagemItems);
+            } else {
+                // Fetch from databook_items table (standard behavior)
+                const { data, error } = await supabase
+                    .from('databook_items')
+                    .select('*')
+                    .eq('folder_id', folderId)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setItems(data || []);
+            }
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -232,7 +283,7 @@ export const DataBook: React.FC = () => {
             {!currentFolder ? (
                 <>
                     <header className="page-hero">
-                        <h1>Data Books</h1>
+                        <h1>Data book</h1>
                         <p className="subtitle">Documentação técnica, certificados e manuais dos seus equipamentos.</p>
                     </header>
 
@@ -325,7 +376,9 @@ export const DataBook: React.FC = () => {
                         {items.map(item => (
                             <div key={item.id} className="item-card" onClick={() => setSelectedItem(item)}>
                                 <div className="file-preview-icon">
-                                    {item.file_type === 'pdf' ? <FileText size={40} color="#ef4444" /> : <Book size={40} color="#3b82f6" />}
+                                    {item.file_type === 'pdf' ? <FileText size={40} color="#ef4444" /> :
+                                        item.file_type === 'video' ? <Video size={40} color="#3b82f6" /> :
+                                            <Book size={40} color="#3b82f6" />}
                                 </div>
                                 <span className="file-name-text">{item.description}</span>
                                 <span className="file-meta-text">{new Date(item.created_at).toLocaleDateString()}</span>
@@ -399,6 +452,8 @@ export const DataBook: React.FC = () => {
                         <button className="close-modal-btn" onClick={() => setSelectedItem(null)}><X size={24} /></button>
                         {selectedItem.file_type === 'pdf' ? (
                             <iframe src={selectedItem.file_data} title={selectedItem.description} style={{ width: '100%', height: '80vh', border: 'none' }} />
+                        ) : selectedItem.file_type === 'video' ? (
+                            <video src={selectedItem.file_data} controls style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: '12px' }} />
                         ) : (
                             <img src={selectedItem.file_data} alt={selectedItem.description} style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: '12px' }} />
                         )}

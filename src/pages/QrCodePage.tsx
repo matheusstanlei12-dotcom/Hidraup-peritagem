@@ -13,184 +13,161 @@ interface PeritagemSummary {
     created_at: string;
     os_interna?: string;
     numero_peritagem?: string;
+    databook_pronto?: boolean;
+    etapa_atual?: string;
 }
 
-// PDF Styles
-// PDF Styles con estética técnica/futurista premium
+// PDF Styles - Design "Minimalist Premium Signature"
 const pdfStyles = StyleSheet.create({
     page: {
-        backgroundColor: '#ffffff',
-        padding: 30,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    container: {
-        flex: 1,
-        border: '1.5pt solid #005696',
-        borderRadius: 15,
         padding: 40,
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
+        backgroundColor: '#f1f5f9', // Fundo levemente cinza para destacar a plaqueta
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // Elementos de Canto - Estilo Mira Técnica
-    corner: {
-        position: 'absolute',
-        width: 30,
-        height: 30,
-        borderColor: '#005696',
-        borderWidth: 0,
-    },
-    tl: { top: -2, left: -2, borderTopWidth: 6, borderLeftWidth: 6, borderTopLeftRadius: 15 },
-    tr: { top: -2, right: -2, borderTopWidth: 6, borderRightWidth: 6, borderTopRightRadius: 15 },
-    bl: { bottom: -2, left: -2, borderBottomWidth: 6, borderLeftWidth: 6, borderBottomLeftRadius: 15 },
-    br: { bottom: -2, right: -2, borderBottomWidth: 6, borderRightWidth: 6, borderBottomRightRadius: 15 },
-
-    // Header do PDF
-    header: {
-        position: 'absolute',
-        top: 30,
-        alignItems: 'center',
-    },
-    logo: {
-        width: 130,
-        marginBottom: 10,
-    },
-    title: {
-        fontSize: 14,
-        color: '#005696',
-        fontWeight: 'bold',
-        letterSpacing: 4,
-        textTransform: 'uppercase',
-    },
-
-    // Área Central do QR
-    qrContainer: {
-        position: 'relative',
-        padding: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    qrBrackets: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        border: '1pt solid #38bdf8',
-        borderRadius: 20,
-        opacity: 0.5,
-    },
-    qrWrapper: {
+    // Moldura Premium com Sombra e Bordas Arredondadas
+    container: {
+        width: 380,
         backgroundColor: '#ffffff',
-        padding: 15,
-        borderRadius: 10,
-        border: '2pt solid #005696',
+        borderRadius: 20,
+        padding: 0, // Tiramos o padding para usar seções coloridas
+        overflow: 'hidden',
+        borderWidth: 1.5,
+        borderColor: '#1a2e63',
+        // Sombra suave (simulada)
     },
-    qrImage: {
-        width: 300,
-        height: 300,
-    },
-
-    // Barra de Dados Técnica
-    dataBar: {
-        position: 'absolute',
-        bottom: 80,
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 30,
-        borderTop: '1pt solid #e2e8f0',
-        paddingTop: 15,
-    },
-    dataItem: {
+    // Topo Azul Marinho (Barra de Título)
+    topBar: {
+        backgroundColor: '#1a2e63',
+        padding: 8,
         alignItems: 'center',
     },
-    dataLabel: {
-        fontSize: 7,
-        color: '#64748b',
+    topBarText: {
+        color: '#ffffff',
+        fontSize: 8,
+        fontWeight: 'bold',
         textTransform: 'uppercase',
-        letterSpacing: 1,
-        marginBottom: 2,
-    },
-    dataValue: {
-        fontSize: 11,
-        color: '#005696',
-        fontWeight: 'bold',
-    },
-
-    // Info de Acesso
-    accessInfo: {
-        marginTop: 50,
-        alignItems: 'center',
-    },
-    accessLabel: {
-        fontSize: 10,
-        color: '#38bdf8',
-        fontWeight: 'bold',
         letterSpacing: 2,
     },
-    accessSub: {
+    // Seção da Logo
+    logoSection: {
+        padding: 20,
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    logoImage: {
+        width: 320,
+        height: 160,
+        objectFit: 'contain',
+    },
+    // Seção Central do QR Code
+    qrSectionBase: {
+        padding: 25,
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+    },
+    qrWrapper: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        borderRadius: 15,
+        backgroundColor: '#f8fafc',
+    },
+    qrImage: {
+        width: 160,
+        height: 160,
+    },
+    // Seção de Dados Técnicos (Estilo Tabela)
+    dataSection: {
+        backgroundColor: '#f8fafc',
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#e2e8f0',
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    field: {
+        flex: 1,
+    },
+    label: {
         fontSize: 7,
         color: '#94a3b8',
-        marginTop: 4,
         textTransform: 'uppercase',
-    },
-
-    footer: {
-        position: 'absolute',
-        bottom: 25,
-        fontSize: 7,
-        color: '#cbd5e1',
         letterSpacing: 1,
+        marginBottom: 3,
+    },
+    value: {
+        fontSize: 16,
+        color: '#1e293b',
+        fontWeight: 'bold',
+    },
+    osValue: {
+        fontSize: 12,
+        color: '#475569',
+        fontWeight: 'medium',
+    },
+    // Rodapé de Segurança
+    footer: {
+        padding: 10,
+        backgroundColor: '#1a2e63',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    footerText: {
+        color: '#ffffff',
+        fontSize: 7,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 1.5,
+        opacity: 0.9,
+    },
+    lockIcon: {
+        width: 8,
+        height: 8,
+        marginRight: 5,
+        backgroundColor: '#ffffff', // Apenas um placeholder visual
     }
 });
 
-// PDF Template Component
+// PDF Template Component - Novo Modelo: Minimalista Premium
 const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDataUrl: string }) => (
     <Document>
         <Page size="A4" style={pdfStyles.page}>
             <View style={pdfStyles.container}>
-                {/* Cantos Estilo Mira */}
-                <View style={[pdfStyles.corner, pdfStyles.tl]} />
-                <View style={[pdfStyles.corner, pdfStyles.tr]} />
-                <View style={[pdfStyles.corner, pdfStyles.bl]} />
-                <View style={[pdfStyles.corner, pdfStyles.br]} />
-
-                <View style={pdfStyles.header}>
-                    <Image src="/logo.png" style={pdfStyles.logo} />
-                    <Text style={pdfStyles.title}>Laudo Digital Hidraup</Text>
+                {/* Barra de Título Superior */}
+                <View style={pdfStyles.topBar}>
+                    <Text style={pdfStyles.topBarText}>Especificação Técnica de Equipamento</Text>
                 </View>
 
-                <View style={pdfStyles.qrContainer}>
-                    <View style={pdfStyles.qrBrackets} />
+                {/* QR Code Central com Fundo Destacado */}
+                <View style={pdfStyles.qrSectionBase}>
                     <View style={pdfStyles.qrWrapper}>
                         <Image src={qrDataUrl} style={pdfStyles.qrImage} />
                     </View>
                 </View>
 
-                <View style={pdfStyles.accessInfo}>
-                    <Text style={pdfStyles.accessLabel}>SISTEMA DE ACESSO REMOTO</Text>
-                    <Text style={pdfStyles.accessSub}>Escaneie para visualizar o relatório técnico online</Text>
-                </View>
-
-                <View style={pdfStyles.dataBar}>
-                    <View style={pdfStyles.dataItem}>
-                        <Text style={pdfStyles.dataLabel}>Identificador TAG</Text>
-                        <Text style={pdfStyles.dataValue}>{peritagem.tag || 'N/A'}</Text>
-                    </View>
-                    <View style={pdfStyles.dataItem}>
-                        <Text style={pdfStyles.dataLabel}>Ordem de Serviço</Text>
-                        <Text style={pdfStyles.dataValue}>{peritagem.os_interna || peritagem.os || 'N/A'}</Text>
-                    </View>
-                    <View style={pdfStyles.dataItem}>
-                        <Text style={pdfStyles.dataLabel}>Data de Geração</Text>
-                        <Text style={pdfStyles.dataValue}>{new Date().toLocaleDateString()}</Text>
+                {/* Dados Técnicos em Estilo Tabela Moderna */}
+                <View style={pdfStyles.dataSection}>
+                    <View style={pdfStyles.row}>
+                        <View style={pdfStyles.field}>
+                            <Text style={pdfStyles.label}>Identificação TAG</Text>
+                            <Text style={pdfStyles.value}>{peritagem.tag || peritagem.numero_peritagem || 'N/A'}</Text>
+                        </View>
+                        <View style={[pdfStyles.field, { alignItems: 'flex-end' }]}>
+                            <Text style={pdfStyles.label}>Ordem de Serviço</Text>
+                            <Text style={pdfStyles.osValue}>{peritagem.os_interna || peritagem.os || 'N/A'}</Text>
+                        </View>
                     </View>
                 </View>
 
-                <Text style={pdfStyles.footer}>GERADO POR TRUST TECNOLOGIA - SOLUÇÕES INTELIGENTES PARA INDÚSTRIA</Text>
+                <View style={pdfStyles.footer}>
+                    <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
+                </View>
             </View>
         </Page>
     </Document>
@@ -198,11 +175,7 @@ const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDa
 
 // Função para obter a URL base correta (evita localhost no QR Code)
 const getBaseUrl = () => {
-    if (window.location.hostname === 'localhost') {
-        // ATENÇÃO: Altere para o seu domínio real do Vercel ou domínio próprio
-        return 'https://trusttecnologia.com.br';
-    }
-    return window.location.origin;
+    return 'https://hidraup-peritagem.vercel.app';
 };
 
 export const QrCodePage: React.FC = () => {
@@ -221,7 +194,8 @@ export const QrCodePage: React.FC = () => {
             setLoading(true);
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('id, tag, os, cliente, created_at, os_interna, numero_peritagem')
+                .select('id, tag, os, cliente, created_at, os_interna, numero_peritagem, databook_pronto, etapa_atual')
+                .eq('databook_pronto', true)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -240,16 +214,30 @@ export const QrCodePage: React.FC = () => {
 
         try {
             const generateDataUrl = (): Promise<string> => {
-                return new Promise((resolve) => {
-                    // Espera um pouco mais para garantir que a imagem do logo foi carregada no canvas
-                    setTimeout(() => {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 10;
+
+                    const checkCanvas = () => {
                         const canvasEl = document.getElementById('qr-canvas-hidden') as HTMLCanvasElement;
                         if (canvasEl) {
-                            resolve(canvasEl.toDataURL('image/png'));
+                            // Pequeno delay extra para garantir que o logo dentro do QR foi desenhado
+                            setTimeout(() => {
+                                try {
+                                    resolve(canvasEl.toDataURL('image/png'));
+                                } catch (e) {
+                                    reject(new Error('Erro de segurança ao acessar o canvas (CORS).'));
+                                }
+                            }, 200);
+                        } else if (attempts < maxAttempts) {
+                            attempts++;
+                            setTimeout(checkCanvas, 100);
                         } else {
-                            resolve('');
+                            reject(new Error('Elemento do QR Code não encontrado após várias tentativas.'));
                         }
-                    }, 500);
+                    };
+
+                    setTimeout(checkCanvas, 100);
                 });
             };
 
@@ -259,17 +247,18 @@ export const QrCodePage: React.FC = () => {
                 return;
             }
 
+            const fileName = (peritagem.tag || peritagem.os_interna || peritagem.id).replace(/\s+/g, '_');
             const blob = await pdf(<QrCodePDF peritagem={peritagem} qrDataUrl={qrDataUrl} />).toBlob();
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `QR_CODE_${peritagem.tag.replace(/\s+/g, '_')}.pdf`;
+            link.download = `QR_CODE_${fileName}.pdf`;
             link.click();
             URL.revokeObjectURL(url);
 
         } catch (error) {
-            console.error('Erro ao gerar PDF:', error);
-            alert('Erro ao gerar o PDF do QR Code.');
+            console.error('Erro ao gerar PDF detalhado:', error);
+            alert(`Erro ao gerar o PDF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         } finally {
             setGeneratingId(null);
             setQrConfig(null);
@@ -291,11 +280,6 @@ export const QrCodePage: React.FC = () => {
                 <QrCode size={32} color="#005696" />
                 <h1>Gerador de QR Code</h1>
                 <p>Lista de todas as peritagens. Gere o QR Code em PDF para identificação do equipamento.</p>
-                {window.location.hostname === 'localhost' && (
-                    <div style={{ marginTop: 10, padding: '8px 16px', background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: 8, color: '#9a3412', fontSize: '0.875rem' }}>
-                        ⚠️ <strong>Modo Desenvolvimento:</strong> O QR Code apontará para <code>{baseUrl}</code>
-                    </div>
-                )}
             </div>
 
             <div className="search-section">
@@ -331,14 +315,6 @@ export const QrCodePage: React.FC = () => {
                                                     size={120}
                                                     level="H"
                                                     includeMargin={false}
-                                                    imageSettings={{
-                                                        src: "/app-icon.png",
-                                                        x: undefined,
-                                                        y: undefined,
-                                                        height: 24,
-                                                        width: 24,
-                                                        excavate: true,
-                                                    }}
                                                 />
                                             </div>
                                             <div className="card-main">
@@ -359,6 +335,7 @@ export const QrCodePage: React.FC = () => {
                                                 className="btn-generate"
                                                 onClick={() => handleGeneratePdf(p)}
                                                 disabled={generatingId === p.id}
+                                                title="Gerar QR Code"
                                             >
                                                 {generatingId === p.id ? (
                                                     <Loader2 className="animate-spin" size={18} />
@@ -391,14 +368,6 @@ export const QrCodePage: React.FC = () => {
                                     size={1024}
                                     level="H"
                                     includeMargin={false}
-                                    imageSettings={{
-                                        src: "/app-icon.png",
-                                        x: undefined,
-                                        y: undefined,
-                                        height: 220,
-                                        width: 220,
-                                        excavate: true,
-                                    }}
                                 />
                             )}
                         </div>
