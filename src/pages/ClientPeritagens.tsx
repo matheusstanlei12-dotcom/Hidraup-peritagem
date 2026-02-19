@@ -26,11 +26,11 @@ interface Peritagem {
 // Estilos para o PDF Premium (Cliente)
 const premiumStyles = StyleSheet.create({
     page: { padding: 40, backgroundColor: '#ffffff' },
-    cover: { height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a2e63', color: 'white' },
+    cover: { height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', color: '#1a2e63' },
     coverLogo: { width: 180, marginBottom: 40 },
     coverTitle: { fontSize: 32, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase' },
-    coverSubtitle: { fontSize: 14, opacity: 0.8 },
-    coverFooter: { position: 'absolute', bottom: 40, borderTop: '0.5 solid rgba(255,255,255,0.2)', width: '80%', paddingTop: 20, textAlign: 'center' },
+    coverSubtitle: { fontSize: 14, opacity: 0.6, color: '#64748b' },
+    coverFooter: { position: 'absolute', bottom: 40, borderTop: '1 solid #1a2e63', width: '80%', paddingTop: 20, textAlign: 'center' },
     header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottom: '2 solid #1a2e63', paddingBottom: 15 },
     logo: { width: 100 },
     headerTitle: { fontSize: 14, color: '#1a2e63', fontWeight: 'bold' },
