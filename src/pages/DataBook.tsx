@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video } from 'lucide-react';
+import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video, Loader2 } from 'lucide-react';
+import { Document, Page, Text, View, StyleSheet, Image, pdf } from '@react-pdf/renderer';
 import { useAuth } from '../contexts/AuthContext';
 import './DataBookPremium.css';
 
@@ -28,6 +29,95 @@ interface DataBookItem {
     created_at: string;
 }
 
+// Fontes e Estilos para o PDF Premium
+const pdfStyles = StyleSheet.create({
+    page: { padding: 40, backgroundColor: '#ffffff', fontFamily: 'Helvetica' },
+    cover: { height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a2e63', color: 'white' },
+    coverLogo: { width: 180, marginBottom: 40 },
+    coverTitle: { fontSize: 32, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase' },
+    coverSubtitle: { fontSize: 14, opacity: 0.8 },
+    coverFooter: { position: 'absolute', bottom: 40, borderTop: '0.5 solid rgba(255,255,255,0.2)', width: '80%', paddingTop: 20, textAlign: 'center' },
+
+    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottom: '2 solid #1a2e63', paddingBottom: 15 },
+    logo: { width: 100 },
+    headerTitle: { fontSize: 14, color: '#1a2e63', fontWeight: 'bold' },
+
+    sectionTitle: { fontSize: 12, color: '#1a2e63', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 15, borderLeft: '4 solid #1a2e63', paddingLeft: 10 },
+
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 30, backgroundColor: '#f8fafc', padding: 15, borderRadius: 8 },
+    infoBox: { width: '50%', marginBottom: 12 },
+    infoLabel: { fontSize: 8, color: '#64748b', textTransform: 'uppercase', marginBottom: 2 },
+    infoValue: { fontSize: 10, color: '#1e293b', fontWeight: 'bold' },
+
+    imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+    imageCard: { width: '48%', marginBottom: 20, border: '0.5 solid #e2e8f0', padding: 5, borderRadius: 4 },
+    image: { width: '100%', height: 180, objectFit: 'contain', backgroundColor: '#000' },
+    imageLabel: { fontSize: 8, textAlign: 'center', marginTop: 8, color: '#475569', fontWeight: 'bold' },
+
+    footer: { position: 'absolute', bottom: 20, left: 40, right: 40, borderTop: '0.5 solid #e2e8f0', paddingTop: 10, flexDirection: 'row', justifyContent: 'space-between' },
+    footerText: { fontSize: 7, color: '#94a3b8' }
+});
+
+const DataBookPremiumPDF = ({ folder, items }: { folder: DataBookFolder, items: DataBookItem[] }) => (
+    <Document>
+        {/* Capa de Apresentação */}
+        <Page size="A4" style={{ padding: 0 }}>
+            <View style={pdfStyles.cover}>
+                <Image src="/logo.png" style={pdfStyles.coverLogo} />
+                <Text style={pdfStyles.coverTitle}>DATA BOOK DIGITAL</Text>
+                <Text style={pdfStyles.coverSubtitle}>Relatório de Entrega e Especificações Técnicas</Text>
+
+                <View style={pdfStyles.coverFooter}>
+                    <Text style={{ fontSize: 10, marginBottom: 5 }}>CLIENTE: {folder.cliente?.toUpperCase()}</Text>
+                    <Text style={{ fontSize: 10 }}>O.S: {folder.os_interna || '-'}</Text>
+                </View>
+            </View>
+        </Page>
+
+        {/* Informações Gerais */}
+        <Page size="A4" style={pdfStyles.page}>
+            <View style={pdfStyles.header}>
+                <Image src="/logo.png" style={pdfStyles.logo} />
+                <View style={{ textAlign: 'right' }}>
+                    <Text style={pdfStyles.headerTitle}>DADOS TÉCNICOS</Text>
+                    <Text style={{ fontSize: 8, color: '#64748b' }}>Gerado em {new Date().toLocaleDateString()}</Text>
+                </View>
+            </View>
+
+            <View style={pdfStyles.sectionTitle}>
+                <Text>1. Informações do Equipamento</Text>
+            </View>
+
+            <View style={pdfStyles.infoGrid}>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Cliente</Text><Text style={pdfStyles.infoValue}>{folder.cliente}</Text></View>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Ordem de Serviço</Text><Text style={pdfStyles.infoValue}>{folder.os_interna || '-'}</Text></View>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Pedido de Compra</Text><Text style={pdfStyles.infoValue}>{folder.pedido_compra || '-'}</Text></View>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Data de Entrega</Text><Text style={pdfStyles.infoValue}>{folder.data_entrega ? new Date(folder.data_entrega).toLocaleDateString() : '-'}</Text></View>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Responsável Técnico</Text><Text style={pdfStyles.infoValue}>{folder.responsavel || '-'}</Text></View>
+                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>O.S Externa</Text><Text style={pdfStyles.infoValue}>{folder.os_externa || '-'}</Text></View>
+            </View>
+
+            <View style={pdfStyles.sectionTitle}>
+                <Text>2. Registro Fotográfico e Documental</Text>
+            </View>
+
+            <View style={pdfStyles.imageGrid}>
+                {items.filter(i => i.file_type === 'image' || i.file_type === 'other' && !i.file_data.includes('video')).map((item) => (
+                    <View key={item.id} style={pdfStyles.imageCard}>
+                        <Image src={item.file_data} style={pdfStyles.image} />
+                        <Text style={pdfStyles.imageLabel}>{item.description}</Text>
+                    </View>
+                ))}
+            </View>
+
+            <View style={pdfStyles.footer} fixed>
+                <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
+                <Text style={pdfStyles.footerText}>www.trusttecnologia.com.br</Text>
+            </View>
+        </Page>
+    </Document>
+);
+
 export const DataBook: React.FC = () => {
     const { role, user } = useAuth();
     const [folders, setFolders] = useState<DataBookFolder[]>([]);
@@ -37,6 +127,7 @@ export const DataBook: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<DataBookItem | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [generatingPdf, setGeneratingPdf] = useState(false);
 
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
     const [empresas, setEmpresas] = useState<{ id: string, nome_fantasia: string }[]>([]);
@@ -271,6 +362,27 @@ export const DataBook: React.FC = () => {
         }
     };
 
+    const handleDownloadDatabookPDF = async () => {
+        if (!currentFolder || items.length === 0) return;
+        setGeneratingPdf(true);
+        try {
+            const blob = await pdf(<DataBookPremiumPDF folder={currentFolder} items={items} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `DATABOOK_${currentFolder.os_interna || currentFolder.cliente}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Erro ao baixar PDF:', error);
+            alert('Erro ao gerar a apresentação em PDF.');
+        } finally {
+            setGeneratingPdf(false);
+        }
+    };
+
     const canManage = role === 'gestor' || role === 'pcp' || role === 'perito';
 
     const filteredFolders = folders.filter(f =>
@@ -341,10 +453,36 @@ export const DataBook: React.FC = () => {
                         <button className="back-btn-pill" onClick={() => setCurrentFolder(null)}>
                             <ArrowLeft size={20} />
                         </button>
-                        <div>
+                        <div style={{ flex: 1 }}>
                             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{currentFolder.os_interna || 'Documentos'}</h1>
                             <p style={{ color: '#64748b' }}>{currentFolder.cliente} • Data Book</p>
                         </div>
+                        <button
+                            className="btn-download-premium"
+                            onClick={handleDownloadDatabookPDF}
+                            disabled={generatingPdf}
+                            style={{
+                                background: '#2563eb',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '12px',
+                                fontWeight: 700,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
+                            }}
+                        >
+                            {generatingPdf ? (
+                                <Loader2 className="animate-spin" size={20} />
+                            ) : (
+                                <Download size={20} />
+                            )}
+                            {generatingPdf ? 'GERANDO PDF...' : 'BAIXAR DATA BOOK'}
+                        </button>
                     </header>
 
                     <div className="folder-details-hero">
@@ -381,7 +519,7 @@ export const DataBook: React.FC = () => {
                                             <Book size={40} color="#3b82f6" />}
                                 </div>
                                 <span className="file-name-text">{item.description}</span>
-                                <span className="file-meta-text">{new Date(item.created_at).toLocaleDateString()}</span>
+                                <span className="file-meta-text">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Sem data'}</span>
                             </div>
                         ))}
                     </div>

@@ -227,6 +227,58 @@
     cursor: wait;
 }
 
+.card-actions-dual {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.btn-pdf-peritagem {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.btn-pdf-peritagem:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.btn-pdf-cliente {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    text-transform: uppercase;
+}
+
+.btn-pdf-cliente:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
     .client-portal-container {
         padding: 16px;
