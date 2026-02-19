@@ -596,7 +596,13 @@ export const NovaPeritagem: React.FC = () => {
         */
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+            if (authError || !user) {
+                alert('Sua sessão expirou ou você não está autenticado. Por favor, faça login novamente.');
+                navigate('/login');
+                return;
+            }
 
             // Se não tiver OS, gera um ID único temporário para não dar erro de duplicidade
             let numeroPeritagem = fixedData.numero_os ? fixedData.numero_os.toUpperCase() : `S/OS-${Date.now()}`;
@@ -773,7 +779,7 @@ export const NovaPeritagem: React.FC = () => {
             alert('Peritagem salva e registrada no histórico!');
             navigate('/peritagens');
         } catch (err: any) {
-            console.error('Erro ao salvar:', err);
+            console.error('❌ Erro detalhado ao salvar:', err);
             if (err.code === '23505' || err.message?.includes('duplicate key')) {
                 alert('Já existe uma peritagem com este número de OS/Laudo. Por favor, verifique ou use um número diferente.');
             } else {
