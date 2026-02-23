@@ -335,10 +335,6 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                     <Text style={styles.coverDetailValue}>{data.numero_os}</Text>
                 </View>
                 <View style={styles.coverDetailItem}>
-                    <Text style={styles.coverDetailLabel}>EQUIPAMENTO</Text>
-                    <Text style={styles.coverDetailValue}>CILINDRO HIDRÁULICO</Text>
-                </View>
-                <View style={styles.coverDetailItem}>
                     <Text style={styles.coverDetailLabel}>DATA DE EMISSÃO</Text>
                     <Text style={styles.coverDetailValue}>{data.data}</Text>
                 </View>
@@ -362,7 +358,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                 <View style={{ marginTop: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 10 }}>
                     {/* Título com faixa azul */}
                     <View style={{ padding: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: '#005696', marginBottom: 10 }}>
-                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO DO EQUIPAMENTO</Text>
+                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO</Text>
                     </View>
 
                     {/* Grid de 2 Colunas */}
@@ -374,7 +370,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                                 <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
                             </View>
                             <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO DE EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO:</Text>
                                 <Text style={{ fontSize: 9 }}>{data.tipo_modelo || '-'}</Text>
                             </View>
                             <View style={{ marginBottom: 8 }}>
@@ -382,7 +378,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                                 <Text style={{ fontSize: 9 }}>{data.linha || '-'}</Text>
                             </View>
                             <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LOCAL:</Text>
                                 <Text style={{ fontSize: 9 }}>{data.local_equipamento || '-'}</Text>
                             </View>
                         </View>
@@ -398,7 +394,7 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                                 <Text style={{ fontSize: 9 }}>{data.desenho_conjunto || '-'}</Text>
                             </View>
                             <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG DO EQUIPAMENTO:</Text>
+                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG:</Text>
                                 <Text style={{ fontSize: 9 }}>{data.tag || '-'}</Text>
                             </View>
                             <View style={{ marginBottom: 8 }}>

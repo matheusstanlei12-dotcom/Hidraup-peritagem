@@ -85,7 +85,7 @@ const DataBookPremiumPDF = ({ folder, items }: { folder: DataBookFolder, items: 
             </View>
 
             <View style={pdfStyles.sectionTitle}>
-                <Text>1. Informações do Equipamento</Text>
+                <Text>1. Informações Técnicas</Text>
             </View>
 
             <View style={pdfStyles.infoGrid}>
@@ -193,7 +193,8 @@ export const DataBook: React.FC = () => {
                 id: `peritagem_${p.id}`,
                 name: `Databook - ${p.os_interna || p.os}`,
                 cliente: p.cliente,
-                os_interna: p.os_interna || p.os,
+                os_interna: p.os || p.os_interna,
+                os_externa: p.os_interna,
                 created_at: p.created_at,
                 is_peritagem: true,
                 peritagem_id: p.id,
@@ -222,7 +223,7 @@ export const DataBook: React.FC = () => {
                 if (error) throw error;
 
                 const peritagemItems: DataBookItem[] = [];
-                if (data.foto_frontal) peritagemItems.push({ id: 'frontal', file_data: data.foto_frontal, description: 'Foto Frontal Equipamento', file_type: 'image', created_at: '' });
+                if (data.foto_frontal) peritagemItems.push({ id: 'frontal', file_data: data.foto_frontal, description: 'Foto Frontal', file_type: 'image', created_at: '' });
 
                 (data.fotos_montagem || []).forEach((url: string, idx: number) => {
                     peritagemItems.push({ id: `montagem_${idx}`, file_data: url, description: `Montagem/Recuperação ${idx + 1}`, file_type: 'image', created_at: '' });

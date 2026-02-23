@@ -94,7 +94,7 @@ export const Relatorios: React.FC = () => {
 
             const reportData = {
                 laudoNum: String(peritagem.numero_peritagem || ''),
-                numero_os: String(peritagem.os_interna || peritagem.numero_peritagem || ''),
+                numero_os: String(peritagem.os || peritagem.numero_peritagem || peritagem.os_interna || ''),
                 data: new Date().toLocaleDateString('pt-BR'),
                 hora: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
                 area: String(peritagem.area || '-'),

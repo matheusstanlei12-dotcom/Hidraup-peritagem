@@ -16,6 +16,7 @@ interface Peritagem {
     data_execucao: string;
     status: string;
     os_interna?: string;
+    os?: string;
     numero_pedido?: string;
     created_at: string;
     foto_frontal?: string;
@@ -56,7 +57,7 @@ const PeritagemPremiumPDF = ({ peritagem, analise }: { peritagem: any, analise: 
                 <Text style={premiumStyles.coverSubtitle}>Databook Digital de Manutenção</Text>
                 <View style={premiumStyles.coverFooter}>
                     <Text style={{ fontSize: 10, marginBottom: 5 }}>CLIENTE: {peritagem.cliente?.toUpperCase()}</Text>
-                    <Text style={{ fontSize: 10 }}>O.S: {peritagem.os_interna || peritagem.numero_peritagem}</Text>
+                    <Text style={{ fontSize: 10 }}>O.S: {peritagem.os || peritagem.os_interna || peritagem.numero_peritagem}</Text>
                 </View>
             </View>
         </Page>
@@ -71,7 +72,7 @@ const PeritagemPremiumPDF = ({ peritagem, analise }: { peritagem: any, analise: 
             <View style={premiumStyles.sectionTitle}><Text>1. Informações do Equipamento</Text></View>
             <View style={premiumStyles.infoGrid}>
                 <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Cliente</Text><Text style={premiumStyles.infoValue}>{peritagem.cliente}</Text></View>
-                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Ordem de Serviço</Text><Text style={premiumStyles.infoValue}>{peritagem.os_interna || '-'}</Text></View>
+                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Ordem de Serviço</Text><Text style={premiumStyles.infoValue}>{peritagem.os || peritagem.os_interna || '-'}</Text></View>
                 <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Ref. Laudo</Text><Text style={premiumStyles.infoValue}>{peritagem.numero_peritagem}</Text></View>
                 <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Técnico Responsável</Text><Text style={premiumStyles.infoValue}>{peritagem.responsavel_tecnico || '-'}</Text></View>
             </View>
@@ -191,7 +192,7 @@ export const ClientPeritagens: React.FC = () => {
             const parecer = generateTechnicalOpinion(peritagem, analise || []);
             const reportData = {
                 laudoNum: String(peritagem.numero_peritagem || ''),
-                numero_os: String(peritagem.os_interna || peritagem.numero_peritagem || ''),
+                numero_os: String(peritagem.os || peritagem.numero_peritagem || peritagem.os_interna || ''),
                 data: new Date().toLocaleDateString('pt-BR'),
                 hora: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
                 local_equipamento: String(peritagem.local_equipamento || 'OFICINA'),

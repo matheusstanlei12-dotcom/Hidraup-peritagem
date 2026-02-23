@@ -334,10 +334,6 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
                     <Text style={styles.coverDetailValue}>{data.numero_os}</Text>
                 </View>
                 <View style={styles.coverDetailItem}>
-                    <Text style={styles.coverDetailLabel}>EQUIPAMENTO</Text>
-                    <Text style={styles.coverDetailValue}>CILINDRO HIDRÁULICO</Text>
-                </View>
-                <View style={styles.coverDetailItem}>
                     <Text style={styles.coverDetailLabel}>DATA DE EMISSÃO</Text>
                     <Text style={styles.coverDetailValue}>{data.data}</Text>
                 </View>
@@ -362,7 +358,7 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
                 <View style={{ marginTop: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 10 }}>
                     {/* Título com faixa azul */}
                     <View style={{ padding: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: '#005696', marginBottom: 10 }}>
-                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO DO EQUIPAMENTO</Text>
+                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO</Text>
                     </View>
 
                     {/* Grid de 2 Colunas */}

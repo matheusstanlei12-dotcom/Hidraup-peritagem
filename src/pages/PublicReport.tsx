@@ -93,7 +93,7 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
                 <Image src="/logo.png" style={pdfStyles.logo} />
                 <View>
                     <Text style={pdfStyles.title}>DATABOOK TÉCNICO</Text>
-                    <Text style={{ fontSize: 10, color: '#64748b' }}>OS: {peritagem.os_interna || peritagem.os}</Text>
+                    <Text style={{ fontSize: 10, color: '#64748b' }}>OS: {peritagem.os || peritagem.os_interna}</Text>
                 </View>
             </View>
 
@@ -182,7 +182,7 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
                 <Text style={pdfStyles.sectionTitle}>6. Pintura e Acabamento Final</Text>
                 <View style={{ alignItems: 'center' }}>
                     <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
-                    <Text style={pdfStyles.imageLabel}>Equipamento Pronto</Text>
+                    <Text style={pdfStyles.imageLabel}>Resultado Final</Text>
                 </View>
             </Page>
         )}

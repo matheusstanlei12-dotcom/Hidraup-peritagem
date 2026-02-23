@@ -25,7 +25,7 @@ export function generateTechnicalOpinion(peritagem: PeritagemData, analyses: Ana
     let text = "";
 
     // 1. INTRODUÇÃO TÉCNICA
-    text += `O presente relatório técnico tem como objetivo apresentar os resultados da peritagem realizada no cilindro ${peritagem.tipo_cilindro || '[TIPO DO CILINDRO]'}, identificado pela TAG ${peritagem.tag || '[TAG]'}, instalado em ${peritagem.local_equipamento || '[LOCAL / EQUIPAMENTO]'}.\n`;
+    text += `O presente relatório técnico tem como objetivo apresentar os resultados da peritagem realizada no cilindro ${peritagem.tipo_cilindro || '[TIPO DO CILINDRO]'}, identificado pela TAG ${peritagem.tag || '[TAG]'}, instalado em ${peritagem.local_equipamento || '[LOCAL]'}.\n`;
     text += `A inspeção foi conduzida com base em critérios técnicos, análise visual, verificação dimensional e avaliação funcional, conforme boas práticas de manutenção industrial.\n\n`;
 
     // 2. CONDIÇÃO GERAL DO CILINDRO
@@ -51,7 +51,7 @@ export function generateTechnicalOpinion(peritagem: PeritagemData, analyses: Ana
     if (hasDim) {
         // Por padrão, se as dimensões foram preenchidas no sistema atual sem aviso de erro, consideramos conformes.
         // Se quisermos ser mais precisos, poderíamos checar um campo de status dimensional se existisse.
-        text += `As dimensões verificadas, incluindo diâmetro interno, diâmetro da haste, curso e comprimento total, encontram-se conformes em relação às especificações informadas para o equipamento avaliado.\n\n`;
+        text += `As dimensões verificadas, incluindo diâmetro interno, diâmetro da haste, curso e comprimento total, encontram-se conformes em relação às especificações informadas para o cilindro avaliado.\n\n`;
     }
 
     // 5. REGISTRO FOTOGRÁFICO

@@ -141,7 +141,7 @@ const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDa
             <View style={pdfStyles.container}>
                 {/* Barra de Título Superior */}
                 <View style={pdfStyles.topBar}>
-                    <Text style={pdfStyles.topBarText}>Especificação Técnica de Equipamento</Text>
+                    <Text style={pdfStyles.topBarText}>Especificação Técnica</Text>
                 </View>
 
                 {/* QR Code Central com Fundo Destacado */}
@@ -160,7 +160,7 @@ const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDa
                         </View>
                         <View style={[pdfStyles.field, { alignItems: 'flex-end' }]}>
                             <Text style={pdfStyles.label}>Ordem de Serviço</Text>
-                            <Text style={pdfStyles.osValue}>{peritagem.os_interna || peritagem.os || 'N/A'}</Text>
+                            <Text style={pdfStyles.osValue}>{peritagem.os || peritagem.os_interna || 'N/A'}</Text>
                         </View>
                     </View>
                 </View>
@@ -279,7 +279,7 @@ export const QrCodePage: React.FC = () => {
             <div className="qrcode-header">
                 <QrCode size={32} color="#005696" />
                 <h1>Gerador de QR Code</h1>
-                <p>Lista de todas as peritagens. Gere o QR Code em PDF para identificação do equipamento.</p>
+                <p>Lista de todas as peritagens. Gere o QR Code em PDF para identificação industrial.</p>
             </div>
 
             <div className="search-section">
