@@ -105,7 +105,7 @@ export const LoginPage: React.FC = () => {
                         Não tem uma conta? <Link to="/register" className="create-account">Criar conta</Link>
                     </p>
                     <div className="dev-signature">
-                        <p>Desenvolvido por <strong>Tust Tecnologia</strong></p>
+                        <p>Desenvolvido por <strong>Trust Tecnologia</strong></p>
                         <small>Soluções inteligentes para gestão industrial</small>
                     </div>
                 </footer>
