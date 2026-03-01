@@ -7,6 +7,8 @@ import { USIMINAS_ITEMS } from '../constants/usiminasItems';
 import { STANDARD_ITEMS } from '../constants/standardItems';
 import { compressImage } from '../lib/imageUtils';
 import { DIMENSIONAL_ANOMALIES_SERVICES } from '../constants/dimensionalItems';
+import { syncPhotosToGallery } from '../lib/photoSync';
+import type { SyncPhoto } from '../lib/photoSync';
 import './NovaPeritagem.css';
 
 type StatusColor = 'vermelho' | 'amarelo' | 'verde' | 'azul';
@@ -774,6 +776,33 @@ export const NovaPeritagem: React.FC = () => {
                     .from('aguardando_peritagem')
                     .update({ status: 'PERITADO' })
                     .eq('os_interna', fixedData.os_interna);
+            }
+
+            // 3. Sincronizar Fotos com o Arquivo Geral
+            const allPhotosForGallery: SyncPhoto[] = [];
+
+            if (fotoFrontal) {
+                allPhotosForGallery.push({ data: fotoFrontal, description: 'Foto Frontal Equipamento' });
+            }
+
+            checklistItems.forEach(item => {
+                if (item.fotos && item.fotos.length > 0) {
+                    item.fotos.forEach((f, idx) => {
+                        allPhotosForGallery.push({
+                            data: f,
+                            description: `Foto ${idx + 1} - ${item.text}`
+                        });
+                    });
+                }
+            });
+
+            if (allPhotosForGallery.length > 0) {
+                // Não aguardamos o sync para não travar o usuário, mas disparamos
+                syncPhotosToGallery(
+                    fixedData.os_interna || numeroPeritagem,
+                    fixedData.cliente,
+                    allPhotosForGallery
+                );
             }
 
             alert('Peritagem salva e registrada no histórico!');

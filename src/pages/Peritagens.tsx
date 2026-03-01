@@ -17,7 +17,7 @@ interface Peritagem {
 }
 
 export const Peritagens: React.FC = () => {
-    const { user, role } = useAuth();
+    const { role, user } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -36,6 +36,15 @@ export const Peritagens: React.FC = () => {
             }
         }
     }, [user, role, filterStatus, statusParam]);
+
+    useEffect(() => {
+        const filterParam = searchParams.get('filter');
+        if (filterParam === 'recusada') {
+            setFilterStatus('recusadas');
+        } else {
+            setFilterStatus('all');
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (role === 'cliente' && empresaId) {
@@ -78,6 +87,12 @@ export const Peritagens: React.FC = () => {
                 if (filterStatus === 'recusadas') {
                     query = query.eq('status', 'REVISÃO NECESSÁRIA');
                 }
+            }
+
+            // REGRAS PARA APP ANDROID: Qualquer usuário logado no app só vê as suas peritagens
+            const isAndroidApp = window.location.hostname === 'localhost' || window.location.protocol === 'file:';
+            if (isAndroidApp && role !== 'gestor' && role !== 'pcp' && user) {
+                query = query.eq('criado_por', user.id);
             }
 
             if (role === 'cliente') {

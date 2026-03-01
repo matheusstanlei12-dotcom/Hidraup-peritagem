@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { compressImage } from '../lib/imageUtils';
+import { syncPhotosToGallery } from '../lib/photoSync';
+import type { SyncPhoto } from '../lib/photoSync';
 import './PcpCommon.css';
 import './Peritagens.css';
 
@@ -101,6 +103,19 @@ export const WorkflowPage: React.FC = () => {
                 .eq('id', selectedPeritagem.id);
 
             if (error) throw error;
+
+            // Sincronizar com o Arquivo Geral
+            const syncItems: SyncPhoto[] = newUrls.map((data, idx) => ({
+                data,
+                description: `Foto Workflow (${type}) - ${new Date().toLocaleString()}`,
+                type: files[idx].type.startsWith('video/') ? 'video' : 'image'
+            }));
+
+            syncPhotosToGallery(
+                selectedPeritagem.os_interna,
+                selectedPeritagem.cliente,
+                syncItems
+            );
 
             // Atualiza estado local
             setSelectedPeritagem({ ...selectedPeritagem, ...updateData });

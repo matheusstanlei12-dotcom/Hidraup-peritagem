@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, ExternalLink, Loader2, Wrench, Calendar, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import './Peritagens.css'; // Reutilizando estilos
 
 interface Peritagem {
@@ -15,6 +16,7 @@ interface Peritagem {
 }
 
 export const Manutencao: React.FC = () => {
+    const { user, role } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,11 +28,19 @@ export const Manutencao: React.FC = () => {
 
     const fetchPeritagens = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('peritagens')
                 .select('*')
                 .or('status.eq.EM MANUTENÇÃO,status.eq.MANUTENÇÃO,status.eq.OFICINA')
                 .order('created_at', { ascending: false });
+
+            // Filtro para APP Android
+            const isAndroidApp = window.location.hostname === 'localhost' || window.location.protocol === 'file:';
+            if (isAndroidApp && role !== 'gestor' && role !== 'pcp' && user) {
+                query = query.eq('criado_por', user.id);
+            }
+
+            const { data, error } = await query;
 
             if (error) throw error;
             setPeritagens(data || []);

@@ -211,6 +211,9 @@ export const RegisterPage: React.FC = () => {
                         >
                             <option value="Perito">Perito</option>
                             <option value="PCP">PCP</option>
+                            <option value="Montagem">Montagem</option>
+                            <option value="Qualidade">Qualidade</option>
+                            <option value="Comercial">Comercial</option>
                             <option value="Gestor">Gestor</option>
                             <option value="Cliente">Cliente</option>
                         </select>

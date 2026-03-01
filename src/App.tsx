@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import { Layout } from './components/Layout';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
@@ -51,29 +50,34 @@ const LoadingSpinner = () => (
 const PrivateRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const { session, role, status, loading } = useAuth();
 
-  const isApp = Capacitor.getPlatform() !== 'web';
-
-  const isRestricted = isApp;
-
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>Carregando...</div>;
 
   if (!session) return <Navigate to="/login" />;
+
+  const currentPath = window.location.pathname;
 
   // Verificação de Status (Bloqueia acesso se não estiver APROVADO)
   if (status !== 'APROVADO') {
     return <Navigate to="/pending-approval" />;
   }
 
-  // Se for restrito (App ou Perito), só pode acessar Nova Peritagem e Minhas Peritagens
-  const currentPath = window.location.pathname;
-  const isAllowedPath = currentPath === '/nova-peritagem' || currentPath === '/peritagens';
-
-  if (isRestricted && !isAllowedPath) {
-    return <Navigate to={role === 'cliente' ? "/meus-relatorios" : "/peritagens"} />;
+  // Se for cliente, redireciona se tentar acessar rotas internas
+  if (role === 'cliente' && currentPath !== '/meus-relatorios' && currentPath !== '/databook' && !currentPath.startsWith('/view-report')) {
+    return <Navigate to="/meus-relatorios" />;
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to={role === 'cliente' ? "/meus-relatorios" : "/peritagens"} />;
+    // Redirecionamento padrão baseado no cargo se não tiver permissão
+    const redirectMap: Record<string, string> = {
+      perito: '/pcp/aguardando',
+      montagem: '/nova-peritagem',
+      comercial: '/nova-peritagem',
+      qualidade: '/pcp/finalizar',
+      cliente: '/meus-relatorios',
+      pcp: '/dashboard',
+      gestor: '/dashboard'
+    };
+    return <Navigate to={redirectMap[role] || "/login"} />;
   }
 
   return <>{children}</>;
@@ -84,15 +88,17 @@ function AppRoutes() {
 
   if (loading) return null;
 
-  const isApp = Capacitor.getPlatform() !== 'web';
+  const rolePaths: Record<string, string> = {
+    gestor: "/dashboard",
+    pcp: "/dashboard",
+    perito: "/pcp/aguardando",
+    montagem: "/nova-peritagem",
+    comercial: "/nova-peritagem",
+    qualidade: "/pcp/finalizar",
+    cliente: "/meus-relatorios"
+  };
 
-  const isRestricted = isApp;
-
-  let defaultPath = isRestricted ? "/peritagens" : "/dashboard";
-
-  if (role === 'cliente') {
-    defaultPath = "/meus-relatorios";
-  }
+  const defaultPath = role ? (rolePaths[role] || "/login") : "/login";
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -107,16 +113,16 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to={session ? defaultPath : "/login"} replace />} />
 
         {/* Rotas Protegidas */}
-        <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Dashboard /></Layout></PrivateRoute>} />
-        <Route path="/peritagens" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Peritagens /></Layout></PrivateRoute>} />
-        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
+        <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Dashboard /></Layout></PrivateRoute>} />
+        <Route path="/peritagens" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial']}><Layout><Peritagens /></Layout></PrivateRoute>} />
+        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
         <Route path="/clientes" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Clientes /></Layout></PrivateRoute>} />
-        <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Manutencao /></Layout></PrivateRoute>} />
-        <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><Relatorios /></Layout></PrivateRoute>} />
-        <Route path="/registro-fotos" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><RegistroFotos /></Layout></PrivateRoute>} />
-        <Route path="/workflow" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><WorkflowPage /></Layout></PrivateRoute>} />
-        <Route path="/nova-peritagem" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito']}><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
-        <Route path="/databook" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente']}><Layout><DataBook /></Layout></PrivateRoute>} />
+        <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'montagem']}><Layout><Manutencao /></Layout></PrivateRoute>} />
+        <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Relatorios /></Layout></PrivateRoute>} />
+        <Route path="/registro-fotos" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'qualidade', 'comercial']}><Layout><RegistroFotos /></Layout></PrivateRoute>} />
+        <Route path="/workflow" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'montagem', 'qualidade']}><Layout><WorkflowPage /></Layout></PrivateRoute>} />
+        <Route path="/nova-peritagem" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial']}><Layout><NovaPeritagem /></Layout></PrivateRoute>} />
+        <Route path="/databook" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'cliente', 'montagem', 'qualidade', 'comercial']}><Layout><DataBook /></Layout></PrivateRoute>} />
 
         {/* Rota Exclusiva Cliente */}
         <Route path="/meus-relatorios" element={<PrivateRoute allowedRoles={['cliente']}><Layout><ClientPeritagens /></Layout></PrivateRoute>} />
@@ -124,9 +130,9 @@ function AppRoutes() {
         {/* Rotas de Fluxo PCP */}
         <Route path="/pcp/aguardando" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><AguardandoPeritagem /></Layout></PrivateRoute>} />
         <Route path="/pcp/aprovar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpAprovaPeritagem /></Layout></PrivateRoute>} />
-        <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
-        <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
-        <Route path="/qrcode" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito']}><Layout><QrCodePage /></Layout></PrivateRoute>} />
+        <Route path="/pcp/liberar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'comercial']}><Layout><PcpLiberaPedido /></Layout></PrivateRoute>} />
+        <Route path="/pcp/finalizar" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'qualidade']}><Layout><PcpFinalizaProcesso /></Layout></PrivateRoute>} />
+        <Route path="/qrcode" element={<PrivateRoute allowedRoles={['pcp', 'gestor', 'perito', 'comercial']}><Layout><QrCodePage /></Layout></PrivateRoute>} />
 
         {/* Rota Exclusiva Gestor */}
         <Route path="/admin/usuarios" element={

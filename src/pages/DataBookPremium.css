@@ -178,6 +178,10 @@
     background: #f8fafc;
 }
 
+.item-card:hover .item-delete-btn {
+    opacity: 1 !important;
+}
+
 .file-preview-icon {
     width: 80px;
     height: 80px;

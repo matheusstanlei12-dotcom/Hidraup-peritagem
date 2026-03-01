@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video, Loader2 } from 'lucide-react';
+import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video, Loader2, Camera, Upload } from 'lucide-react';
 import { Document, Page, Text, View, StyleSheet, Image, pdf } from '@react-pdf/renderer';
 import { useAuth } from '../contexts/AuthContext';
 import './DataBookPremium.css';
@@ -178,30 +178,7 @@ export const DataBook: React.FC = () => {
             }
             const { data: foldersData } = await foldersQuery;
 
-            // Fetch finalized peritagens
-            let peritagensQuery = supabase.from('peritagens')
-                .select('id, cliente, os_interna, os, created_at, empresa_id')
-                .eq('databook_pronto', true)
-                .order('created_at', { ascending: false });
-
-            if (empresa_id) {
-                peritagensQuery = peritagensQuery.eq('empresa_id', empresa_id);
-            }
-            const { data: peritagensData } = await peritagensQuery;
-
-            const mappedPeritagens: DataBookFolder[] = (peritagensData || []).map(p => ({
-                id: `peritagem_${p.id}`,
-                name: `Databook - ${p.os_interna || p.os}`,
-                cliente: p.cliente,
-                os_interna: p.os || p.os_interna,
-                os_externa: p.os_interna,
-                created_at: p.created_at,
-                is_peritagem: true,
-                peritagem_id: p.id,
-                empresa_id: p.empresa_id
-            }));
-
-            setFolders([...mappedPeritagens, ...(foldersData || [])]);
+            setFolders(foldersData || []);
         } catch (error) {
             console.error('Error fetching databooks:', error);
         } finally {
@@ -384,7 +361,57 @@ export const DataBook: React.FC = () => {
         }
     };
 
-    const canManage = role === 'gestor' || role === 'pcp' || role === 'perito';
+    const handleUploadToFolder = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!currentFolder || !e.target.files || e.target.files.length === 0) return;
+
+        setLoading(true);
+        try {
+            for (const file of Array.from(e.target.files)) {
+                const base64 = await fileToBase64(file);
+                const isVideo = file.type.includes('video');
+                const fileType = isVideo ? 'video' : (file.type.includes('image') ? 'image' : 'other');
+
+                const { error } = await supabase
+                    .from('databook_items')
+                    .insert([{
+                        folder_id: currentFolder.id,
+                        file_data: base64,
+                        description: file.name,
+                        file_type: fileType
+                    }]);
+
+                if (error) throw error;
+            }
+            fetchItems(currentFolder.id);
+            alert('Arquivos adicionados com sucesso!');
+        } catch (error) {
+            console.error('Error uploading:', error);
+            alert('Erro ao enviar arquivos.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteItem = async (itemId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!canManage) return;
+        if (!confirm('Excluir este arquivo?')) return;
+
+        try {
+            setLoading(true);
+            const { error } = await supabase.from('databook_items').delete().eq('id', itemId);
+            if (error) throw error;
+            setItems(items.filter(i => i.id !== itemId));
+            setSelectedItem(null);
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const canManage = role === 'gestor' || role === 'pcp';
+
 
     const filteredFolders = folders.filter(f =>
         f.os_interna?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -396,8 +423,8 @@ export const DataBook: React.FC = () => {
             {!currentFolder ? (
                 <>
                     <header className="page-hero">
-                        <h1>Data book</h1>
-                        <p className="subtitle">Documentação técnica, certificados e manuais dos seus equipamentos.</p>
+                        <h1>Databook do Cliente</h1>
+                        <p className="subtitle">Documentação técnica, fotos e vídeos que o cliente terá acesso.</p>
                     </header>
 
                     <div className="reports-section-header">
@@ -484,6 +511,67 @@ export const DataBook: React.FC = () => {
                             )}
                             {generatingPdf ? 'GERANDO PDF...' : 'BAIXAR DATA BOOK'}
                         </button>
+                        {canManage && (
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {/* Upload de Galeria */}
+                                <input
+                                    type="file"
+                                    multiple
+                                    onChange={handleUploadToFolder}
+                                    style={{ display: 'none' }}
+                                    id="inner-upload-file"
+                                />
+                                <button
+                                    className="btn-add-item-inner"
+                                    onClick={() => document.getElementById('inner-upload-file')?.click()}
+                                    title="Carregar Arquivos"
+                                    style={{
+                                        background: '#10b981',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '12px',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)'
+                                    }}
+                                >
+                                    <Upload size={20} />
+                                </button>
+
+                                {/* Câmera (Foto/Vídeo) */}
+                                <input
+                                    type="file"
+                                    accept="image/*,video/*"
+                                    capture="environment"
+                                    onChange={handleUploadToFolder}
+                                    style={{ display: 'none' }}
+                                    id="inner-camera-capture"
+                                />
+                                <button
+                                    className="btn-add-item-inner"
+                                    onClick={() => document.getElementById('inner-camera-capture')?.click()}
+                                    title="Tirar Foto ou Vídeo"
+                                    style={{
+                                        background: '#6366f1',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '12px 24px',
+                                        borderRadius: '12px',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2)'
+                                    }}
+                                >
+                                    <Camera size={20} /> TIRAR FOTO / FILMAR
+                                </button>
+                            </div>
+                        )}
                     </header>
 
                     <div className="folder-details-hero">
@@ -521,8 +609,30 @@ export const DataBook: React.FC = () => {
                                 </div>
                                 <span className="file-name-text">{item.description}</span>
                                 <span className="file-meta-text">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Sem data'}</span>
+                                {canManage && (
+                                    <button
+                                        className="item-delete-btn"
+                                        onClick={(e) => handleDeleteItem(item.id, e)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '8px',
+                                            right: '8px',
+                                            background: 'rgba(239, 68, 68, 0.1)',
+                                            color: '#ef4444',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            padding: '4px',
+                                            cursor: 'pointer',
+                                            opacity: 0,
+                                            transition: 'opacity 0.2s'
+                                        }}
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                )}
                             </div>
                         ))}
+
                     </div>
                 </div>
             )}
@@ -531,7 +641,7 @@ export const DataBook: React.FC = () => {
                 <div className="modal-overlay">
                     <div className="modal-content large-modal">
                         <div className="modal-header">
-                            <h3>Novo Data Book</h3>
+                            <h3>Novo Databook do Cliente</h3>
                             <button className="close-btn" onClick={() => setIsCreateModalOpen(false)}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleCreateFolder}>
@@ -577,7 +687,7 @@ export const DataBook: React.FC = () => {
                             <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                 <button type="button" className="btn-secondary" onClick={() => setIsCreateModalOpen(false)}>Cancelar</button>
                                 <button type="submit" className="btn-primary" disabled={loading} style={{ background: '#10b981' }}>
-                                    {loading ? 'Salvando...' : 'Criar Data Book'}
+                                    {loading ? 'Salvando...' : 'Criar Databook'}
                                 </button>
                             </div>
                         </form>

@@ -198,6 +198,9 @@ export const AdminUsers: React.FC = () => {
                                             >
                                                 <option value="perito">Perito</option>
                                                 <option value="pcp">PCP</option>
+                                                <option value="montagem">Montagem</option>
+                                                <option value="qualidade">Qualidade</option>
+                                                <option value="comercial">Comercial</option>
                                                 <option value="gestor">Gestor</option>
                                                 <option value="cliente">Cliente</option>
                                             </select>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import './Login.css';
 
 export const LoginPage: React.FC = () => {
@@ -104,6 +104,10 @@ export const LoginPage: React.FC = () => {
                     <p className="no-account">
                         Não tem uma conta? <Link to="/register" className="create-account">Criar conta</Link>
                     </p>
+                    <div className="dev-signature">
+                        <p>Desenvolvido por <strong>Tust Tecnologia</strong></p>
+                        <small>Soluções inteligentes para gestão industrial</small>
+                    </div>
                 </footer>
             </div>
         </div>
