@@ -50,143 +50,320 @@ interface AnaliseItem {
     conformidade: string;
 }
 
-const pdfStyles = StyleSheet.create({
-    page: { padding: 30, backgroundColor: '#ffffff' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, borderBottom: '1 solid #005696', paddingBottom: 10 },
-    logo: { width: 100 },
-    title: { fontSize: 18, color: '#005696', fontWeight: 'bold' },
-    section: { marginBottom: 15 },
-    sectionTitle: { fontSize: 12, backgroundColor: '#f1f5f9', padding: 5, color: '#005696', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 10 },
-    row: { flexDirection: 'row', borderBottom: '0.5 solid #e2e8f0', padding: 5 },
-    label: { width: '30%', fontSize: 9, color: '#64748b' },
-    value: { width: '70%', fontSize: 9, color: '#1e293b', fontWeight: 'bold' },
-    tableHeader: { flexDirection: 'row', backgroundColor: '#005696', color: '#ffffff', padding: 5, fontSize: 8 },
-    tableRow: { flexDirection: 'row', borderBottom: '0.5 solid #e2e8f0', padding: 5, fontSize: 8 },
-    col1: { width: '5%' },
-    col2: { width: '40%' },
-    col5: { width: '15%' },
-    col6: { width: '40%' },
-    imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
-    imageCard: { width: '48%', marginBottom: 10 },
-    image: { width: '100%', height: 150, objectFit: 'cover', borderRadius: 5 },
-    imageLabel: { fontSize: 8, textAlign: 'center', marginTop: 3, color: '#64748b' },
-    footer: {
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        right: 0,
-        textAlign: 'center',
-        padding: 5,
+// PDF Styles - Modelo Premium Minimalista (mesmo do QR Code)
+const s = StyleSheet.create({
+    page: {
+        padding: 0,
+        backgroundColor: '#ffffff',
     },
-    footerText: {
+    // Header fixo em todas as páginas
+    header: {
+        backgroundColor: '#1a2e63',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        color: '#ffffff',
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 2,
+        textTransform: 'uppercase',
+    },
+    headerSubtitle: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 8,
+        letterSpacing: 1,
+    },
+    // Corpo
+    body: {
+        padding: 30,
+    },
+    // Seção
+    sectionContainer: {
+        marginBottom: 20,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        borderBottomWidth: 2,
+        borderBottomColor: '#f1f5f9',
+        paddingBottom: 8,
+    },
+    sectionNumber: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#1a2e63',
+        color: '#ffffff',
+        fontSize: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        lineHeight: 24,
+        marginRight: 10,
+    },
+    sectionTitle: {
+        fontSize: 11,
+        color: '#1e293b',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    // Grid de fotos
+    imageGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    imageCard: {
+        width: '47%',
+        marginBottom: 10,
+    },
+    imageWrapper: {
+        position: 'relative',
+        borderRadius: 8,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    image: {
+        width: '100%',
+        height: 160,
+        objectFit: 'cover',
+    },
+    imageLabel: {
+        fontSize: 7,
+        textAlign: 'center',
+        marginTop: 4,
+        color: '#94a3b8',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    // Dados técnicos
+    dataBox: {
+        backgroundColor: '#f8fafc',
+        borderRadius: 8,
+        padding: 14,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        marginBottom: 16,
+    },
+    dataRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    dataField: {
+        flex: 1,
+    },
+    dataLabel: {
         fontSize: 7,
         color: '#94a3b8',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 2,
     },
-    watermarkContainer: {
-        position: 'relative',
-        borderRadius: 5,
-        overflow: 'hidden',
+    dataValue: {
+        fontSize: 10,
+        color: '#1e293b',
+        fontWeight: 'bold',
     },
-    watermark: {
+    // Footer
+    footer: {
         position: 'absolute',
-        bottom: 5,
-        right: 5,
-        width: 40,
-        opacity: 1.0,
-    }
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1a2e63',
+        paddingVertical: 6,
+        paddingHorizontal: 30,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    footerText: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 6,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+    },
+    // Pintura grande
+    pinturaImage: {
+        width: '100%',
+        height: 400,
+        objectFit: 'contain',
+    },
+    // Componentes analisados
+    compBadge: {
+        backgroundColor: '#f1f5f9',
+        borderRadius: 4,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        marginRight: 6,
+        marginBottom: 6,
+    },
+    compText: {
+        fontSize: 7,
+        color: '#475569',
+        fontWeight: 'bold',
+    },
 });
 
-const WatermarkedImage = ({ src, style, label }: { src: string, style: any, label?: string }) => (
-    <View style={pdfStyles.imageCard} wrap={false}>
-        <View style={pdfStyles.watermarkContainer}>
-            <Image src={src} style={style} />
-            <Image src="/logo.png" style={pdfStyles.watermark} />
+const ImageCard = ({ src, label }: { src: string, label?: string }) => (
+    <View style={s.imageCard} wrap={false}>
+        <View style={s.imageWrapper}>
+            <Image src={src} style={s.image} />
         </View>
-        {label && <Text style={pdfStyles.imageLabel}>{label}</Text>}
+        {label && <Text style={s.imageLabel}>{label}</Text>}
     </View>
 );
 
 const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: AnaliseItem[] }) => (
     <Document>
-        <Page size="A4" style={pdfStyles.page} wrap>
-            <View style={pdfStyles.header} fixed>
-                <Image src="/logo.png" style={pdfStyles.logo} />
+        <Page size="A4" style={s.page} wrap>
+            {/* Header fixo */}
+            <View style={s.header} fixed>
                 <View>
-                    <Text style={pdfStyles.title}>DATABOOK TÉCNICO</Text>
-                    <Text style={{ fontSize: 10, color: '#64748b' }}>OS: {peritagem.os || peritagem.os_interna}</Text>
+                    <Text style={s.headerTitle}>Databook Técnico</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={s.headerSubtitle}>OS: {peritagem.os_interna || peritagem.os || '-'}</Text>
+                    <Text style={s.headerSubtitle}>{peritagem.cliente}</Text>
                 </View>
             </View>
 
-            <View style={pdfStyles.section}>
-                <Text style={pdfStyles.sectionTitle}>1. Registro Fotográfico (Peritagem)</Text>
-                <View style={pdfStyles.imageGrid}>
-                    {peritagem.foto_frontal && (
-                        <WatermarkedImage
-                            src={peritagem.foto_frontal}
-                            style={pdfStyles.image}
-                            label="Vista Geral"
-                        />
-                    )}
-                    {itens.map(item => item.fotos?.slice(0, 1).map((foto, fIdx) => (
-                        <WatermarkedImage
-                            key={`${item.id}-${fIdx}`}
-                            src={foto}
-                            style={pdfStyles.image}
-                            label={item.componente}
-                        />
-                    )))}
-                </View>
-            </View>
-
-            {(peritagem.fotos_montagem?.length || 0) > 0 && (
-                <View style={pdfStyles.section} break>
-                    <Text style={pdfStyles.sectionTitle}>2. Montagem e Recuperação</Text>
-                    <View style={pdfStyles.imageGrid}>
-                        {peritagem.fotos_montagem?.map((foto, idx) => (
-                            <WatermarkedImage
-                                key={idx}
-                                src={foto}
-                                style={pdfStyles.image}
-                                label={`Montagem ${idx + 1}`}
-                            />
-                        ))}
-                    </View>
-                </View>
-            )}
-
-            {(peritagem.fotos_videos_teste?.length || 0) > 0 && (
-                <View style={pdfStyles.section} break>
-                    <Text style={pdfStyles.sectionTitle}>3. Testes de Qualidade</Text>
-                    <View style={pdfStyles.imageGrid}>
-                        {peritagem.fotos_videos_teste?.filter(url => !url.toLowerCase().endsWith('.mp4')).map((foto, idx) => (
-                            <WatermarkedImage
-                                key={idx}
-                                src={foto}
-                                style={pdfStyles.image}
-                                label={`Teste ${idx + 1}`}
-                            />
-                        ))}
-                    </View>
-                    <Text style={{ fontSize: 8, color: '#64748b', marginTop: 10 }}>* Vídeos de teste disponíveis no portal online.</Text>
-                </View>
-            )}
-
-            {peritagem.foto_pintura_final && (
-                <View style={pdfStyles.section} break>
-                    <Text style={pdfStyles.sectionTitle}>4. Pintura e Acabamento Final</Text>
-                    <View style={{ alignItems: 'center' }} wrap={false}>
-                        <View style={pdfStyles.watermarkContainer}>
-                            <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
-                            <Image src="/logo.png" style={[pdfStyles.watermark, { width: 80, bottom: 20, right: 20 }]} />
+            {/* Body */}
+            <View style={s.body}>
+                {/* Dados Gerais */}
+                <View style={s.dataBox}>
+                    <View style={s.dataRow}>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>TAG</Text>
+                            <Text style={s.dataValue}>{peritagem.tag || '-'}</Text>
                         </View>
-                        <Text style={pdfStyles.imageLabel}>Resultado Final</Text>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Cliente</Text>
+                            <Text style={s.dataValue}>{peritagem.cliente}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>O.S</Text>
+                            <Text style={s.dataValue}>{peritagem.os_interna || peritagem.os || '-'}</Text>
+                        </View>
+                    </View>
+                    <View style={s.dataRow}>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Pedido</Text>
+                            <Text style={s.dataValue}>{peritagem.numero_pedido || '-'}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>NF</Text>
+                            <Text style={s.dataValue}>{peritagem.nota_fiscal || '-'}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Data</Text>
+                            <Text style={s.dataValue}>{peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleDateString('pt-BR') : '-'}</Text>
+                        </View>
                     </View>
                 </View>
-            )}
 
-            <View style={pdfStyles.footer} fixed>
-                <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
-                <Text style={{ fontSize: 6, color: '#94a3b8', marginTop: 2 }}>Documento gerado automaticamente pela www.trusttecnologia.com.br</Text>
+                {/* 1. Peritagem */}
+                <View style={s.sectionContainer}>
+                    <View style={s.sectionHeader}>
+                        <Text style={s.sectionNumber}>1</Text>
+                        <Text style={s.sectionTitle}>Registro Fotográfico (Peritagem)</Text>
+                    </View>
+                    <View style={s.imageGrid}>
+                        {peritagem.foto_frontal && (
+                            <ImageCard src={peritagem.foto_frontal} label="Vista Geral" />
+                        )}
+                        {itens.map(item => item.fotos?.slice(0, 1).map((foto, fIdx) => (
+                            <ImageCard
+                                key={`${item.id}-${fIdx}`}
+                                src={foto}
+                                label={item.componente}
+                            />
+                        )))}
+                    </View>
+
+                    {/* Componentes */}
+                    {itens.length > 0 && (
+                        <View style={{ marginTop: 10 }}>
+                            <Text style={{ fontSize: 8, color: '#64748b', fontWeight: 'bold', marginBottom: 6 }}>Componentes Analisados:</Text>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                {itens.map(item => (
+                                    <View key={item.id} style={s.compBadge}>
+                                        <Text style={s.compText}>{item.componente} - {item.conformidade === 'CONFORME' ? '✓' : '!'} {item.solucao}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+                </View>
+
+                {/* 2. Montagem */}
+                {(peritagem.fotos_montagem?.length || 0) > 0 && (
+                    <View style={s.sectionContainer} break>
+                        <View style={s.sectionHeader}>
+                            <Text style={s.sectionNumber}>2</Text>
+                            <Text style={s.sectionTitle}>Montagem e Recuperação</Text>
+                        </View>
+                        <View style={s.imageGrid}>
+                            {peritagem.fotos_montagem?.map((foto, idx) => (
+                                <ImageCard
+                                    key={idx}
+                                    src={foto}
+                                    label={`Montagem ${idx + 1}`}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* 3. Testes */}
+                {(peritagem.fotos_videos_teste?.length || 0) > 0 && (
+                    <View style={s.sectionContainer} break>
+                        <View style={s.sectionHeader}>
+                            <Text style={s.sectionNumber}>3</Text>
+                            <Text style={s.sectionTitle}>Testes de Qualidade</Text>
+                        </View>
+                        <View style={s.imageGrid}>
+                            {peritagem.fotos_videos_teste?.filter(url => !url.toLowerCase().endsWith('.mp4')).map((foto, idx) => (
+                                <ImageCard
+                                    key={idx}
+                                    src={foto}
+                                    label={`Teste ${idx + 1}`}
+                                />
+                            ))}
+                        </View>
+                        <Text style={{ fontSize: 7, color: '#94a3b8', marginTop: 8, fontStyle: 'italic' }}>* Vídeos de teste disponíveis no portal online.</Text>
+                    </View>
+                )}
+
+                {/* 4. Pintura */}
+                {peritagem.foto_pintura_final && (
+                    <View style={s.sectionContainer} break>
+                        <View style={s.sectionHeader}>
+                            <Text style={s.sectionNumber}>4</Text>
+                            <Text style={s.sectionTitle}>Pintura e Acabamento Final</Text>
+                        </View>
+                        <View style={{ alignItems: 'center' }} wrap={false}>
+                            <View style={s.imageWrapper}>
+                                <Image src={peritagem.foto_pintura_final} style={s.pinturaImage} />
+                            </View>
+                            <Text style={s.imageLabel}>Resultado Final</Text>
+                        </View>
+                    </View>
+                )}
+            </View>
+
+            {/* Footer fixo */}
+            <View style={s.footer} fixed>
+                <Text style={s.footerText}>Databook Digital</Text>
+                <Text style={s.footerText}>www.trusttecnologia.com.br</Text>
             </View>
         </Page>
     </Document>
@@ -222,10 +399,8 @@ export const PublicReport: React.FC = () => {
             const blob = await pdf(<DatabookPDF peritagem={peritagem} itens={itens} />).toBlob();
             const url = URL.createObjectURL(blob);
 
-            // Tenta abrir o visualizador de PDF do navegador
             window.location.href = url;
 
-            // Backup/Download forçado se o browser não abrir o PDF
             setTimeout(() => {
                 const link = document.createElement('a');
                 link.href = url;
@@ -275,7 +450,7 @@ export const PublicReport: React.FC = () => {
     if (loading) {
         return (
             <div className="report-loading">
-                <Loader2 className="animate-spin" size={48} color="#2563eb" />
+                <Loader2 className="animate-spin" size={48} color="#1a2e63" />
                 <p>Carregando Relatório Técnico...</p>
             </div>
         );
