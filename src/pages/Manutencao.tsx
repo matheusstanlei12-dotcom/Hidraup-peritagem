@@ -130,7 +130,7 @@ export const Manutencao: React.FC = () => {
 
                                             const { error } = await supabase
                                                 .from('peritagens')
-                                                .update({ status: 'AGUARDANDO CONFERÊNCIA FINAL' })
+                                                .update({ status: 'AGUARDANDO CONFERÊNCIA FINAL', etapa_atual: 'teste' })
                                                 .eq('id', p.id);
 
                                             if (!error) {

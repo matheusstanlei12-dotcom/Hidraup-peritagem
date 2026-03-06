@@ -236,17 +236,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                 {/* 5. QUALIDADE */}
                 {role === 'qualidade' && (
                     <>
+                        <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <RefreshCcw size={20} />
+                            <span>Teste de Qualidade</span>
+                        </NavLink>
                         <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <CheckCircle size={20} />
                             <span>Conferência Final</span>
-                        </NavLink>
-                        <NavLink to="/workflow#etapa3" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <RefreshCcw size={20} />
-                            <span>3. Teste de Qualidade</span>
-                        </NavLink>
-                        <NavLink to="/workflow#acabamento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <RefreshCcw size={20} />
-                            <span>Acabamento & Pintura</span>
                         </NavLink>
                     </>
                 )}
