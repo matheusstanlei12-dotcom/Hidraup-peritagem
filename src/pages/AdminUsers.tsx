@@ -143,9 +143,9 @@ export const AdminUsers: React.FC = () => {
 
         try {
             setLoading(true);
-            const { error, count } = await supabase
+            const { error } = await supabase
                 .from('profiles')
-                .delete({ count: 'exact' })
+                .delete()
                 .eq('id', id);
 
             if (error) throw error;

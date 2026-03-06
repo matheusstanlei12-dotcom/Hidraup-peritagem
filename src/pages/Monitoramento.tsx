@@ -14,8 +14,7 @@ import {
     FilePlus,
     CheckSquare,
     Clock,
-    Calendar,
-    AlertCircle
+    Calendar
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -161,17 +160,20 @@ export const Monitoramento: React.FC = () => {
 
             if (error) throw error;
 
-            const mappedData: Processo[] = data.map(p => ({
-                id: p.id,
-                os: p.os_interna || p.os || p.numero_peritagem,
-                cliente: p.cliente,
-                equipamento: p.tipo_cilindro || 'Cilindro Hidráulico',
-                statusTexto: p.status,
-                etapaAtual: getEtapaIndex(p.status),
-                ...p,
-                criado_por_nome: p.criador?.full_name || 'Usuário do Sistema',
-                criado_por_role: p.criador?.role || 'SISTEMA'
-            }));
+            const mappedData: Processo[] = data.map(p => {
+                const criador = Array.isArray(p.criador) ? p.criador[0] : p.criador;
+
+                return {
+                    ...p,
+                    os: p.os_interna || p.os || p.numero_peritagem,
+                    cliente: p.cliente,
+                    equipamento: p.tipo_cilindro || 'Cilindro Hidráulico',
+                    statusTexto: p.status,
+                    etapaAtual: getEtapaIndex(p.status),
+                    criado_por_nome: criador?.full_name || 'Usuário do Sistema',
+                    criado_por_role: criador?.role || 'SISTEMA'
+                };
+            });
 
             setProcessos(mappedData);
         } catch (err) {
@@ -587,43 +589,50 @@ export const Monitoramento: React.FC = () => {
 
                                     {showActions && (
                                         <div className="process-quick-actions">
-                                            {(isPcpAwaiting || statusUpper === 'PERITAGEM FINALIZADA') && isAdmin && (
-                                                <button
-                                                    className="btn-quick-approve"
-                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
-                                                >
-                                                    <Check size={16} />
-                                                    <span>Aprovar Peritagem</span>
-                                                </button>
-                                            )}
-                                            {isClientAwaiting && (isAdmin || role === 'perito') && (
-                                                <button
-                                                    className="btn-quick-client"
-                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'EM MANUTENÇÃO'); }}
-                                                >
-                                                    <ShoppingCart size={16} />
-                                                    <span>Liberação do Pedido</span>
-                                                </button>
-                                            )}
-                                            {(isMaintenance || statusUpper === 'CILINDRO EM MANUTENÇÃO') && (isAdmin || role === 'montagem') && (
-                                                <button
-                                                    className="btn-quick-finish"
-                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL'); }}
-                                                >
-                                                    <Wrench size={16} />
-                                                    <span>Finalizar Manutenção</span>
-                                                </button>
-                                            )}
-                                            {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (isAdmin || role === 'perito') && (
-                                                <button
-                                                    className="btn-quick-finish"
-                                                    style={{ background: '#2d3748' }}
-                                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'PROCESSO FINALIZADO'); }}
-                                                >
-                                                    <CheckCircle2 size={16} />
-                                                    <span>Conferir e Finalizar</span>
-                                                </button>
-                                            )}
+                                            {(() => {
+                                                const statusUpper = (processo.statusTexto || "").toUpperCase();
+                                                return (
+                                                    <>
+                                                        {(isPcpAwaiting || statusUpper === 'PERITAGEM FINALIZADA') && isAdmin && (
+                                                            <button
+                                                                className="btn-quick-approve"
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
+                                                            >
+                                                                <Check size={16} />
+                                                                <span>Aprovar Peritagem</span>
+                                                            </button>
+                                                        )}
+                                                        {isClientAwaiting && (isAdmin || role === 'perito') && (
+                                                            <button
+                                                                className="btn-quick-client"
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'EM MANUTENÇÃO'); }}
+                                                            >
+                                                                <ShoppingCart size={16} />
+                                                                <span>Liberação do Pedido</span>
+                                                            </button>
+                                                        )}
+                                                        {(isMaintenance || statusUpper === 'CILINDRO EM MANUTENÇÃO') && (isAdmin || (role as string) === 'montagem') && (
+                                                            <button
+                                                                className="btn-quick-finish"
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL'); }}
+                                                            >
+                                                                <Wrench size={16} />
+                                                                <span>Finalizar Manutenção</span>
+                                                            </button>
+                                                        )}
+                                                        {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (isAdmin || role === 'perito') && (
+                                                            <button
+                                                                className="btn-quick-finish"
+                                                                style={{ background: '#2d3748' }}
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'PROCESSO FINALIZADO'); }}
+                                                            >
+                                                                <CheckCircle2 size={16} />
+                                                                <span>Conferir e Finalizar</span>
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     )}
                                 </div>
