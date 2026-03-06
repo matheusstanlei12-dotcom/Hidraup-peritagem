@@ -43,6 +43,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [selectedPeritagem, setSelectedPeritagem] = useState<Peritagem | null>(null);
     const [technicalAnalyses, setTechnicalAnalyses] = useState<AnaliseTecnica[]>([]);
     const [loadingAnalyses, setLoadingAnalyses] = useState(false);
@@ -61,8 +62,10 @@ export const PcpAprovaPeritagem: React.FC = () => {
 
             if (error) throw error;
             setPeritagens(data || []);
-        } catch (err) {
+            setErrorMsg(null);
+        } catch (err: any) {
             console.error('Erro:', err);
+            setErrorMsg(err.message || 'Erro desconhecido ao carregar peritagens.');
         } finally {
             setLoading(false);
         }
@@ -245,7 +248,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
                             ) : (
                                 <div className="analysis-review-grid">
                                     {technicalAnalyses.map(analise => (
-                                        <div key={analise.id} className={`review-item-card ${analise.conformidade === 'não conforme' ? 'not-ok' : 'ok'}`}>
+                                        <div key={analise.id} className={`review-item-card ${(analise.conformidade || '') === 'não conforme' ? 'not-ok' : 'ok'}`}>
                                             <div className="review-item-header">
                                                 <div className="item-info">
                                                     <strong className="item-comp-name">{analise.componente}</strong>
@@ -257,12 +260,12 @@ export const PcpAprovaPeritagem: React.FC = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className={`item-badge ${analise.conformidade === 'conforme' ? 'ok' : 'nok'}`}>
-                                                    {analise.conformidade.toUpperCase()}
+                                                <span className={`item-badge ${(analise.conformidade || '') === 'conforme' ? 'ok' : 'nok'}`}>
+                                                    {(analise.conformidade || 'N/A').toUpperCase()}
                                                 </span>
                                             </div>
 
-                                            {analise.conformidade === 'não conforme' && (
+                                            {(analise.conformidade || '') === 'não conforme' && (
                                                 <div className="review-item-details">
                                                     <div className="details-stack">
                                                         {analise.anomalias && (
@@ -356,7 +359,13 @@ export const PcpAprovaPeritagem: React.FC = () => {
                             </div>
                         ))
                     ) : (
-                        <p style={{ textAlign: 'center', color: '#718096', gridColumn: '1 / -1', padding: '3rem' }}>Nenhuma peritagem pendente.</p>
+                        <div style={{ textAlign: 'center', color: '#718096', gridColumn: '1 / -1', padding: '3rem' }}>
+                            {errorMsg ? (
+                                <span style={{ color: '#ef4444' }}>Ocorreu um erro: {errorMsg}</span>
+                            ) : (
+                                <span>Nenhuma peritagem pendente.</span>
+                            )}
+                        </div>
                     )}
                 </div>
             )}
