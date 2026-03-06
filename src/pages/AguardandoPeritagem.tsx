@@ -80,9 +80,9 @@ export const AguardandoPeritagem: React.FC = () => {
             setObservacoes('');
             setShowForm(false);
             fetchItens();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Erro ao salvar:', err);
-            alert('Erro ao salvar item.');
+            alert('Erro ao salvar item: ' + (err.message || 'Erro desconhecido'));
         } finally {
             setSaving(false);
         }
@@ -185,9 +185,18 @@ export const AguardandoPeritagem: React.FC = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="modal-footer" style={{ marginTop: '20px' }}>
-                                <button type="button" className="btn-report-outline" onClick={() => setShowForm(false)}>Cancelar</button>
-                                <button type="submit" className="btn-report-primary" disabled={saving}>
+                            <div className="modal-footer" style={{
+                                marginTop: '25px',
+                                display: 'flex',
+                                gap: '12px',
+                                justifyContent: 'flex-end',
+                                borderTop: '1px solid #f1f5f9',
+                                paddingTop: '20px'
+                            }}>
+                                <button type="button" className="btn-report btn-report-outline" onClick={() => setShowForm(false)} style={{ margin: 0 }}>
+                                    Cancelar
+                                </button>
+                                <button type="submit" className="btn-report btn-report-primary" disabled={saving} style={{ margin: 0, minWidth: '120px' }}>
                                     {saving ? <Loader2 className="animate-spin" size={18} /> : 'Salvar'}
                                 </button>
                             </div>
