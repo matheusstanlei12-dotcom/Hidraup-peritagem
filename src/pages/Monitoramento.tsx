@@ -13,7 +13,9 @@ import {
     Check,
     FilePlus,
     CheckSquare,
-    Clock
+    Clock,
+    Calendar,
+    AlertCircle
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -58,6 +60,8 @@ interface Processo {
     tag?: string;
     tipo_cilindro?: string;
     os_interna?: string;
+    prioridade?: string;
+    data_execucao?: string;
 }
 
 interface Historico {
@@ -80,11 +84,11 @@ const ETAPAS = [
 const getEtapaIndex = (status: string) => {
     const s = (status || "").toUpperCase();
     if (s === 'PERITAGEM CRIADA' || s === 'REVISÃO NECESSÁRIA') return 1;
-    if (s === 'AGUARDANDO APROVAÇÃO DO PCP' || s === 'PERITAGEM FINALIZADA') return 2;
-    if (s === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || s === 'AGUARDANDO CLIENTES' || s === 'AGUARDANDO ORÇAMENTO') return 3;
-    if (s === 'EM MANUTENÇÃO' || s === 'CILINDROS EM MANUTENÇÃO') return 4;
+    if (s === 'AGUARDANDO APROVAÇÃO DO PCP' || s === 'PERITAGEM FINALIZADA' || s === 'AGUARDANDO PCP') return 2;
+    if (s === 'AGUARDANDO APROVAÇÃO DO CLIENTE' || s === 'AGUARDANDO CLIENTES' || s === 'AGUARDANDO ORÇAMENTO' || s === 'AGUARDANDO APROVAÇÃO DE ORÇAMENTO') return 3;
+    if (s === 'EM MANUTENÇÃO' || s === 'CILINDROS EM MANUTENÇÃO' || s === 'CILINDRO EM MANUTENÇÃO') return 4;
     if (s === 'AGUARDANDO CONFERÊNCIA FINAL') return 5;
-    if (s === 'PROCESSO FINALIZADO' || s === 'FINALIZADOS' || s === 'FINALIZADO') return 6;
+    if (s === 'PROCESSO FINALIZADO' || s === 'FINALIZADOS' || s === 'FINALIZADO' || s === 'FINALIZADA') return 6;
     return 1;
 };
 
@@ -135,7 +139,11 @@ export const Monitoramento: React.FC = () => {
             let query = supabase
                 .from('peritagens')
                 .select(`
-                    *,
+                    id, numero_peritagem, cliente, os_interna, status, os, tipo_cilindro, created_at, updated_at, 
+                    prioridade, data_execucao,
+                    camisa_int, camisa_ext, camisa_comp, haste_diam, haste_comp, curso, montagem, pressao_nominal, 
+                    fabricante_modelo, nota_fiscal, desenho_conjunto, lubrificante, volume, acoplamento_polia, 
+                    sistema_lubrificacao, outros_especificar, observacoes_gerais, fabricante, tipo_modelo, ni, ordem, tag,
                     criador: profiles!criado_por(full_name, role)
                 `);
 
@@ -155,12 +163,11 @@ export const Monitoramento: React.FC = () => {
 
             const mappedData: Processo[] = data.map(p => ({
                 id: p.id,
-                os: p.numero_os,
+                os: p.os_interna || p.os || p.numero_peritagem,
                 cliente: p.cliente,
-                equipamento: p.equipamento || 'Cilindro Hidráulico',
+                equipamento: p.tipo_cilindro || 'Cilindro Hidráulico',
                 statusTexto: p.status,
                 etapaAtual: getEtapaIndex(p.status),
-                ...p,
                 ...p,
                 criado_por_nome: p.criador?.full_name || 'Usuário do Sistema',
                 criado_por_role: p.criador?.role || 'SISTEMA'
@@ -376,6 +383,27 @@ export const Monitoramento: React.FC = () => {
                     })}
                 </div>
 
+                {/* AÇÕES RÁPIDAS NO DETALHE */}
+                {selectedProcess.statusTexto === 'EM MANUTENÇÃO' && (isAdmin || role === 'montagem') && (
+                    <div className="process-detail-actions">
+                        <div className="action-card-highlight">
+                            <div className="action-icon-bg">
+                                <Wrench size={32} />
+                            </div>
+                            <div className="action-text">
+                                <h3>Manutenção em Andamento</h3>
+                                <p>Este cilindro está atualmente na oficina. Quando o serviço for concluído, finalize para enviar para conferência.</p>
+                            </div>
+                            <button
+                                className="btn-finalizar-grande"
+                                onClick={() => handleUpdateStatus(selectedProcess, 'AGUARDANDO CONFERÊNCIA FINAL')}
+                            >
+                                <Check size={20} /> FINALIZAR MANUTENÇÃO
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="timeline-footer">
                     <div className="legend">
                         <div className="legend-item"><span className="dot dot-executed"></span> EXECUTADO</div>
@@ -518,13 +546,24 @@ export const Monitoramento: React.FC = () => {
                                 <div key={processo.id} className="process-card">
                                     <div className="process-main-info" onClick={() => setSelectedProcess(processo)}>
                                         <div className="process-info">
-                                            <span className="process-tag" style={{ background: '#2d3748', color: 'white' }}>{processo.os_interna || processo.os}</span>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <span className="process-tag" style={{ background: '#2d3748', color: 'white' }}>{processo.os_interna || processo.os}</span>
+                                                {processo.prioridade && (
+                                                    <span className={`priority-badge ${processo.prioridade.toLowerCase() === 'urgente' ? 'priority-urgente' : 'priority-normal'}`} style={{ fontSize: '0.6rem' }}>
+                                                        {processo.prioridade}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {processo.os_interna && (
                                                 <span style={{ fontSize: '0.65rem', color: '#718096', display: 'block', marginBottom: '4px' }}>
                                                     Ref: {processo.os}
                                                 </span>
                                             )}
                                             <h3 className="process-title">{processo.cliente}</h3>
+                                            <div style={{ display: 'flex', gap: '8px', color: '#718096', fontSize: '0.8rem', marginTop: '4px' }}>
+                                                <Calendar size={12} />
+                                                <span>{processo.data_execucao ? new Date(processo.data_execucao).toLocaleDateString('pt-BR') : 'Sem data'}</span>
+                                            </div>
                                             <span className="process-client">{processo.equipamento}</span>
                                         </div>
 
@@ -548,7 +587,7 @@ export const Monitoramento: React.FC = () => {
 
                                     {showActions && (
                                         <div className="process-quick-actions">
-                                            {isPcpAwaiting && isAdmin && (
+                                            {(isPcpAwaiting || statusUpper === 'PERITAGEM FINALIZADA') && isAdmin && (
                                                 <button
                                                     className="btn-quick-approve"
                                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
@@ -566,13 +605,13 @@ export const Monitoramento: React.FC = () => {
                                                     <span>Liberação do Pedido</span>
                                                 </button>
                                             )}
-                                            {isMaintenance && (isAdmin || role === 'perito') && (
+                                            {(isMaintenance || statusUpper === 'CILINDRO EM MANUTENÇÃO') && (isAdmin || role === 'montagem') && (
                                                 <button
                                                     className="btn-quick-finish"
                                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL'); }}
                                                 >
                                                     <Wrench size={16} />
-                                                    <span>Finalizar Oficina</span>
+                                                    <span>Finalizar Manutenção</span>
                                                 </button>
                                             )}
                                             {processo.statusTexto === 'AGUARDANDO CONFERÊNCIA FINAL' && (isAdmin || role === 'perito') && (

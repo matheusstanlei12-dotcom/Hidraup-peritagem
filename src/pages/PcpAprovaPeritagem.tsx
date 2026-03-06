@@ -7,23 +7,24 @@ import './PcpCommon.css';
 
 interface Peritagem {
     id: string;
-    numero_peritagem: string;
+    numero_peritagem?: string;
     cliente: string;
-    ordem_servico: string;
-    nota_fiscal: string;
-    camisa_int: string;
-    camisa_ext: string;
-    camisa_comp: string;
-    haste_diam: string;
-    haste_comp: string;
-    curso: string;
+    ordem_servico?: string;
+    nota_fiscal?: string;
+    camisa_int?: string;
+    camisa_ext?: string;
+    camisa_comp?: string;
+    haste_diam?: string;
+    haste_comp?: string;
+    curso?: string;
     montagem?: string;
     pressao_nominal?: string;
     fabricante_modelo?: string;
     foto_frontal?: string;
-    status: string;
+    status?: string;
     os_interna?: string;
     numero_os?: string;
+    created_at?: string;
 }
 
 interface AnaliseTecnica {
@@ -54,9 +55,9 @@ export const PcpAprovaPeritagem: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('*')
+                .select('id, numero_peritagem, cliente, os_interna, status, camisa_int, haste_diam, curso, created_at')
                 .or('status.eq.PERITAGEM CRIADA,status.eq.AGUARDANDO APROVAÇÃO DO PCP')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setPeritagens(data || []);
@@ -70,6 +71,16 @@ export const PcpAprovaPeritagem: React.FC = () => {
     const fetchAnalyses = async (peritagemId: string) => {
         try {
             setLoadingAnalyses(true);
+
+            // Buscar dados completos da peritagem para o review
+            const { data: pData } = await supabase
+                .from('peritagens')
+                .select('*')
+                .eq('id', peritagemId)
+                .single();
+
+            if (pData) setSelectedPeritagem(pData);
+
             const { data, error } = await supabase
                 .from('peritagem_analise_tecnica')
                 .select('*')
@@ -146,11 +157,12 @@ export const PcpAprovaPeritagem: React.FC = () => {
         }
     };
 
-    const filtered = peritagens.filter(p =>
-        p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filtered = peritagens.filter(p => {
+        const clienteMatch = (p.cliente || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const peritagemMatch = (p.numero_peritagem || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const osMatch = (p.os_interna || '').toLowerCase().includes(searchTerm.toLowerCase());
+        return clienteMatch || peritagemMatch || osMatch;
+    });
 
     return (
         <div className="peritagens-container">

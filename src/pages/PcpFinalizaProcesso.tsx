@@ -28,9 +28,9 @@ export const PcpFinalizaProcesso: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('*')
+                .select('id, numero_peritagem, cliente, status, numero_pedido, os_interna, created_at')
                 .eq('status', 'AGUARDANDO CONFERÊNCIA FINAL')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setPeritagens(data || []);
@@ -46,7 +46,10 @@ export const PcpFinalizaProcesso: React.FC = () => {
         try {
             const { error } = await supabase
                 .from('peritagens')
-                .update({ status: 'PROCESSO FINALIZADO' })
+                .update({
+                    status: 'PROCESSO FINALIZADO',
+                    data_finalizacao: new Date().toISOString()
+                })
                 .eq('id', id);
 
             if (error) throw error;

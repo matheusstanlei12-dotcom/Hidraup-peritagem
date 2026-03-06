@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Book, FileText, Plus, ArrowLeft, Trash2, X, Search, Download, Video, Loader2, Camera, Upload } from 'lucide-react';
+import {
+    ArrowLeft,
+    Book,
+    Download,
+    FileText,
+    Plus,
+    Search,
+    Trash2,
+    Upload,
+    Video,
+    X,
+} from 'lucide-react';
 import { Document, Page, Text, View, StyleSheet, Image, pdf } from '@react-pdf/renderer';
 import { useAuth } from '../contexts/AuthContext';
 import './DataBookPremium.css';
@@ -27,6 +38,7 @@ interface DataBookItem {
     description: string;
     file_type: string;
     created_at: string;
+    processo?: string;
 }
 
 // Fontes e Estilos para o PDF Premium
@@ -85,30 +97,28 @@ const DataBookPremiumPDF = ({ folder, items }: { folder: DataBookFolder, items: 
             </View>
 
             <View style={pdfStyles.sectionTitle}>
-                <Text>1. Informações Técnicas</Text>
+                <Text>Registro Fotográfico e Documental</Text>
             </View>
 
-            <View style={pdfStyles.infoGrid}>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Cliente</Text><Text style={pdfStyles.infoValue}>{folder.cliente}</Text></View>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Ordem de Serviço</Text><Text style={pdfStyles.infoValue}>{folder.os_interna || '-'}</Text></View>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Pedido de Compra</Text><Text style={pdfStyles.infoValue}>{folder.pedido_compra || '-'}</Text></View>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Data de Entrega</Text><Text style={pdfStyles.infoValue}>{folder.data_entrega ? new Date(folder.data_entrega).toLocaleDateString() : '-'}</Text></View>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>Responsável Técnico</Text><Text style={pdfStyles.infoValue}>{folder.responsavel || '-'}</Text></View>
-                <View style={pdfStyles.infoBox}><Text style={pdfStyles.infoLabel}>O.S Externa</Text><Text style={pdfStyles.infoValue}>{folder.os_externa || '-'}</Text></View>
-            </View>
+            {['Peritagem', 'Montagem', 'Pintura', 'Liberação', 'Informações Complementares'].map(proc => {
+                const procItems = items.filter(i => (i.processo === proc || (!i.processo && proc === 'Peritagem')) && (i.file_type === 'image' || (i.file_type === 'other' && !i.file_data.includes('video'))));
+                if (procItems.length === 0) return null;
 
-            <View style={pdfStyles.sectionTitle}>
-                <Text>2. Registro Fotográfico e Documental</Text>
-            </View>
-
-            <View style={pdfStyles.imageGrid}>
-                {items.filter(i => i.file_type === 'image' || i.file_type === 'other' && !i.file_data.includes('video')).map((item) => (
-                    <View key={item.id} style={pdfStyles.imageCard}>
-                        <Image src={item.file_data} style={pdfStyles.image} />
-                        <Text style={pdfStyles.imageLabel}>{item.description}</Text>
+                return (
+                    <View key={proc} style={{ marginBottom: 20 }}>
+                        <Text style={{ fontSize: 10, color: '#1a2e63', fontWeight: 'bold', marginBottom: 10, borderBottom: '1 solid #f1f5f9', paddingBottom: 5 }}>
+                            {proc.toUpperCase()}
+                        </Text>
+                        <View style={pdfStyles.imageGrid}>
+                            {procItems.map((item) => (
+                                <View key={item.id} style={pdfStyles.imageCard}>
+                                    <Image src={item.file_data} style={pdfStyles.image} />
+                                </View>
+                            ))}
+                        </View>
                     </View>
-                ))}
-            </View>
+                );
+            })}
 
             <View style={pdfStyles.footer} fixed>
                 <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
@@ -128,8 +138,15 @@ export const DataBook: React.FC = () => {
     const [selectedItem, setSelectedItem] = useState<DataBookItem | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [generatingPdf, setGeneratingPdf] = useState(false);
+    const [selectedProcess, setSelectedProcess] = useState('Peritagem');
 
-    const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+    const [pendingFilesByProcess, setPendingFilesByProcess] = useState<Record<string, File[]>>({
+        'Peritagem': [],
+        'Montagem': [],
+        'Pintura': [],
+        'Liberação': [],
+        'Informações Complementares': []
+    });
     const [empresas, setEmpresas] = useState<{ id: string, nome: string }[]>([]);
 
     const [formData, setFormData] = useState({
@@ -142,7 +159,7 @@ export const DataBook: React.FC = () => {
         empresa_id: ''
     });
 
-    const modalFileInputRef = useRef<HTMLInputElement>(null);
+
 
     useEffect(() => {
         fetchFolders();
@@ -159,24 +176,15 @@ export const DataBook: React.FC = () => {
 
     const fetchEmpresas = async () => {
         try {
-            // 1. Fetch official empresas
-            const { data: empresasData } = await supabase.from('empresas').select('id, nome').order('nome');
+            // Fetch official empresas directly from the database
+            // Only companies added in "Gestão de Clientes" will appear here
+            const { data, error } = await supabase
+                .from('empresas')
+                .select('id, nome')
+                .order('nome');
 
-            // 2. Fetch unique client names from peritagens to include those not yet in official table
-            const { data: peritagensData } = await supabase.from('peritagens').select('cliente');
-            const uniquePeritagemClients = Array.from(new Set((peritagensData || []).map(p => p.cliente).filter(Boolean)));
-
-            const combined = (empresasData || []).map(e => ({ id: e.id, nome: e.nome }));
-
-            // Add clients from peritagens that are not already in combined
-            uniquePeritagemClients.forEach(clientName => {
-                if (!combined.find(e => e.nome.toUpperCase() === (clientName as string).toUpperCase())) {
-                    combined.push({ id: `peritagens:${clientName}`, nome: clientName as string });
-                }
-            });
-
-            combined.sort((a, b) => a.nome.localeCompare(b.nome));
-            setEmpresas(combined);
+            if (error) throw error;
+            setEmpresas(data || []);
         } catch (error) {
             console.error('Error fetching empresas:', error);
         }
@@ -220,18 +228,18 @@ export const DataBook: React.FC = () => {
                 if (error) throw error;
 
                 const peritagemItems: DataBookItem[] = [];
-                if (data.foto_frontal) peritagemItems.push({ id: 'frontal', file_data: data.foto_frontal, description: 'Foto Frontal', file_type: 'image', created_at: '' });
+                if (data.foto_frontal) peritagemItems.push({ id: 'frontal', file_data: data.foto_frontal, description: 'Foto Frontal', file_type: 'image', created_at: '', processo: 'Peritagem' });
 
                 (data.fotos_montagem || []).forEach((url: string, idx: number) => {
-                    peritagemItems.push({ id: `montagem_${idx}`, file_data: url, description: `Montagem/Recuperação ${idx + 1}`, file_type: 'image', created_at: '' });
+                    peritagemItems.push({ id: `montagem_${idx}`, file_data: url, description: `Montagem / Recuperação ${idx + 1}`, file_type: 'image', created_at: '', processo: 'Montagem' });
                 });
 
                 (data.fotos_videos_teste || []).forEach((url: string, idx: number) => {
                     const isVideo = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().startsWith('data:video');
-                    peritagemItems.push({ id: `teste_${idx}`, file_data: url, description: `Teste de Qualidade ${idx + 1}`, file_type: isVideo ? 'video' : 'image', created_at: '' });
+                    peritagemItems.push({ id: `teste_${idx}`, file_data: url, description: `Teste de Qualidade ${idx + 1}`, file_type: isVideo ? 'video' : 'image', created_at: '', processo: 'Pintura' });
                 });
 
-                if (data.foto_pintura_final) peritagemItems.push({ id: 'pintura', file_data: data.foto_pintura_final, description: 'Pintura/Acabamento Final', file_type: 'image', created_at: '' });
+                if (data.foto_pintura_final) peritagemItems.push({ id: 'pintura', file_data: data.foto_pintura_final, description: 'Pintura/Acabamento Final', file_type: 'image', created_at: '', processo: 'Pintura' });
 
                 setItems(peritagemItems);
             } else {
@@ -252,14 +260,20 @@ export const DataBook: React.FC = () => {
         }
     };
 
-    const handlePendingFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            setPendingFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+    const handlePendingFilesChange = (processo: string, files: FileList | null) => {
+        if (files && files.length > 0) {
+            setPendingFilesByProcess(prev => ({
+                ...prev,
+                [processo]: [...(prev[processo] || []), ...Array.from(files)]
+            }));
         }
     };
 
-    const removePendingFile = (index: number) => {
-        setPendingFiles(prev => prev.filter((_, i) => i !== index));
+    const removePendingFile = (processo: string, index: number) => {
+        setPendingFilesByProcess(prev => ({
+            ...prev,
+            [processo]: prev[processo].filter((_, i) => i !== index)
+        }));
     };
 
     const fileToBase64 = (file: File): Promise<string> => {
@@ -294,7 +308,7 @@ export const DataBook: React.FC = () => {
                     data_entrega: formData.data_entrega || null,
                     pedido_compra: formData.pedido_compra,
                     responsavel: formData.responsavel,
-                    empresa_id: formData.empresa_id?.startsWith('peritagens:') ? null : (formData.empresa_id || null),
+                    empresa_id: formData.empresa_id || null,
                     criado_por: user?.id
                 }])
                 .select()
@@ -302,21 +316,27 @@ export const DataBook: React.FC = () => {
 
             if (error) throw error;
 
-            if (pendingFiles.length > 0 && folderData) {
-                for (const file of pendingFiles) {
-                    const base64 = await fileToBase64(file);
-                    const fileType = file.type.includes('pdf') ? 'pdf' : (file.type.includes('image') ? 'image' : 'other');
+            const totalFiles = Object.values(pendingFilesByProcess).flat().length;
 
-                    const { error: itemError } = await supabase
-                        .from('databook_items')
-                        .insert([{
-                            folder_id: folderData.id,
-                            file_data: base64,
-                            description: file.name,
-                            file_type: fileType
-                        }]);
+            if (totalFiles > 0 && folderData) {
+                for (const processo of Object.keys(pendingFilesByProcess)) {
+                    const stageFiles = pendingFilesByProcess[processo];
+                    for (const file of stageFiles) {
+                        const base64 = await fileToBase64(file);
+                        const fileType = file.type.includes('pdf') ? 'pdf' : (file.type.includes('image') ? 'image' : 'other');
 
-                    if (itemError) console.error('Erro ao salvar item:', file.name, itemError);
+                        const { error: itemError } = await supabase
+                            .from('databook_items')
+                            .insert([{
+                                folder_id: folderData.id,
+                                file_data: base64,
+                                description: file.name,
+                                file_type: fileType,
+                                processo: processo
+                            }]);
+
+                        if (itemError) console.error(`Erro ao salvar item(${processo}): `, file.name, itemError);
+                    }
                 }
             }
 
@@ -330,7 +350,13 @@ export const DataBook: React.FC = () => {
                 responsavel: '',
                 empresa_id: ''
             });
-            setPendingFiles([]);
+            setPendingFilesByProcess({
+                'Peritagem': [],
+                'Montagem': [],
+                'Pintura': [],
+                'Liberação': [],
+                'Informações Complementares': []
+            });
             setIsCreateModalOpen(false);
             setCurrentFolder(folderData);
 
@@ -397,7 +423,8 @@ export const DataBook: React.FC = () => {
                         folder_id: currentFolder.id,
                         file_data: base64,
                         description: file.name,
-                        file_type: fileType
+                        file_type: fileType,
+                        processo: selectedProcess
                     }]);
 
                 if (error) throw error;
@@ -497,103 +524,106 @@ export const DataBook: React.FC = () => {
                 </>
             ) : (
                 <div className="items-view-container">
-                    <header style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-                        <button className="back-btn-pill" onClick={() => setCurrentFolder(null)}>
-                            <ArrowLeft size={20} />
-                        </button>
-                        <div style={{ flex: 1 }}>
-                            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{currentFolder.os_interna || 'Documentos'}</h1>
-                            <p style={{ color: '#64748b' }}>{currentFolder.cliente} • Data Book</p>
-                        </div>
-                        <button
-                            className="btn-download-premium"
-                            onClick={handleDownloadDatabookPDF}
-                            disabled={generatingPdf}
-                            style={{
-                                background: '#2563eb',
-                                color: 'white',
-                                border: 'none',
-                                padding: '12px 24px',
-                                borderRadius: '12px',
-                                fontWeight: 700,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
-                            }}
-                        >
-                            {generatingPdf ? (
-                                <Loader2 className="animate-spin" size={20} />
-                            ) : (
-                                <Download size={20} />
-                            )}
-                            {generatingPdf ? 'GERANDO PDF...' : 'BAIXAR DATA BOOK'}
-                        </button>
-                        {canManage && (
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                {/* Upload de Galeria */}
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={handleUploadToFolder}
-                                    style={{ display: 'none' }}
-                                    id="inner-upload-file"
-                                />
-                                <button
-                                    className="btn-add-item-inner"
-                                    onClick={() => document.getElementById('inner-upload-file')?.click()}
-                                    title="Carregar Arquivos"
-                                    style={{
-                                        background: '#10b981',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '12px',
-                                        borderRadius: '12px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)'
-                                    }}
-                                >
-                                    <Upload size={20} />
-                                </button>
-
-                                {/* Câmera (Foto/Vídeo) */}
-                                <input
-                                    type="file"
-                                    accept="image/*,video/*"
-                                    capture="environment"
-                                    onChange={handleUploadToFolder}
-                                    style={{ display: 'none' }}
-                                    id="inner-camera-capture"
-                                />
-                                <button
-                                    className="btn-add-item-inner"
-                                    onClick={() => document.getElementById('inner-camera-capture')?.click()}
-                                    title="Tirar Foto ou Vídeo"
-                                    style={{
-                                        background: '#6366f1',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '12px 24px',
-                                        borderRadius: '12px',
-                                        fontWeight: 700,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2)'
-                                    }}
-                                >
-                                    <Camera size={20} /> TIRAR FOTO / FILMAR
-                                </button>
+                    <header style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        gap: '24px',
+                        marginBottom: '32px',
+                        flexWrap: 'wrap'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 auto' }}>
+                            <button className="back-btn-pill" onClick={() => setCurrentFolder(null)}>
+                                <ArrowLeft size={20} />
+                            </button>
+                            <div>
+                                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{currentFolder.os_interna || 'Pasta'}</h1>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>{currentFolder.cliente} • Data Book</p>
                             </div>
-                        )}
-                    </header>
+                        </div>
 
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                            alignItems: 'flex-end',
+                            flex: '1 1 auto'
+                        }}>
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={handleDownloadDatabookPDF}
+                                    className="btn-primary"
+                                    disabled={generatingPdf}
+                                    style={{ padding: '0 24px', whiteSpace: 'nowrap' }}
+                                >
+                                    <Download size={18} />
+                                    {generatingPdf ? 'GERANDO PDF...' : 'BAIXAR DATA BOOK'}
+                                </button>
+
+                                {canManage && (
+                                    <>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleUploadToFolder}
+                                            style={{ display: 'none' }}
+                                            id="inner-folder-upload"
+                                        />
+                                        <button
+                                            className="btn-add-item-inner"
+                                            onClick={() => document.getElementById('inner-folder-upload')?.click()}
+                                            title="Anexar Arquivos nesta pasta"
+                                            style={{
+                                                background: '#10b981',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '12px 24px',
+                                                borderRadius: '12px',
+                                                fontWeight: 700,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            <Upload size={20} /> ANEXAR FOTOS / DOCUMENTOS
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                background: '#f1f5f9',
+                                padding: '4px',
+                                borderRadius: '14px',
+                                width: 'fit-content'
+                            }}>
+                                {['Peritagem', 'Montagem', 'Pintura', 'Liberação', 'Informações Complementares'].map(proc => (
+                                    <button
+                                        key={proc}
+                                        onClick={() => setSelectedProcess(proc)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            borderRadius: '10px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 700,
+                                            background: selectedProcess === proc ? '#21408e' : 'transparent',
+                                            color: selectedProcess === proc ? 'white' : '#64748b',
+                                            transition: 'all 0.2s',
+                                            border: 'none',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {proc}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </header>
                     <div className="folder-details-hero">
                         <div className="detail-block">
                             <label>Ordem de Serviço</label>
@@ -613,101 +643,284 @@ export const DataBook: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="items-grid">
-                        {items.length === 0 && !loading && (
-                            <div className="empty-state" style={{ gridColumn: '1/-1', padding: '60px' }}>
-                                <FileText size={48} color="#e2e8f0" />
-                                <p>Nenhum documento anexado.</p>
-                            </div>
-                        )}
-                        {items.map(item => (
-                            <div key={item.id} className="item-card" onClick={() => setSelectedItem(item)}>
-                                <div className="file-preview-icon">
-                                    {item.file_type === 'pdf' ? <FileText size={40} color="#ef4444" /> :
-                                        item.file_type === 'video' ? <Video size={40} color="#3b82f6" /> :
-                                            <Book size={40} color="#3b82f6" />}
+                    <div className="items-view-content">
+                        {(() => {
+                            const processName = selectedProcess;
+                            const processItems = items.filter(item => item.processo === processName || (!item.processo && processName === 'Peritagem'));
+
+                            if (processItems.length === 0) {
+                                return (
+                                    <div className="empty-state" style={{ padding: '60px', textAlign: 'center' }}>
+                                        <FileText size={48} color="#e2e8f0" style={{ margin: '0 auto 16px' }} />
+                                        <p style={{ color: '#94a3b8' }}>Nenhum documento anexado em {processName}.</p>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div key={processName} className="process-group" style={{ marginBottom: '40px' }}>
+                                    <div className="process-header" style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        marginBottom: '20px',
+                                        borderBottom: '2px solid #f1f5f9',
+                                        paddingBottom: '10px'
+                                    }}>
+                                        <div style={{ width: '4px', height: '20px', background: '#21408e', borderRadius: '2px' }}></div>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                            {processName}
+                                        </h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#94a3b8', background: '#f8fafc', padding: '2px 8px', borderRadius: '6px' }}>
+                                            {processItems.length} {processItems.length === 1 ? 'item' : 'itens'}
+                                        </span>
+                                    </div>
+                                    <div className="items-grid">
+                                        {processItems.map(item => (
+                                            <div key={item.id} className="item-card" onClick={() => setSelectedItem(item)}>
+                                                {item.file_type === 'image' || (item.file_type === 'other' && item.file_data.startsWith('data:image')) ? (
+                                                    <div className="item-thumbnail">
+                                                        <img src={item.file_data} alt={item.description} />
+                                                    </div>
+                                                ) : (
+                                                    <div className="file-preview-icon">
+                                                        {item.file_type === 'pdf' ? <FileText size={40} color="#ef4444" /> :
+                                                            item.file_type === 'video' ? <Video size={40} color="#3b82f6" /> :
+                                                                <Book size={40} color="#3b82f6" />}
+                                                    </div>
+                                                )}
+                                                {canManage && (
+                                                    <button
+                                                        className="item-delete-btn"
+                                                        onClick={(e) => handleDeleteItem(item.id, e)}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '8px',
+                                                            right: '8px',
+                                                            background: 'rgba(239, 68, 68, 0.1)',
+                                                            color: '#ef4444',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            padding: '4px',
+                                                            cursor: 'pointer',
+                                                            opacity: 0,
+                                                            transition: 'opacity 0.2s'
+                                                        }}
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <span className="file-name-text">{item.description}</span>
-                                <span className="file-meta-text">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Sem data'}</span>
-                                {canManage && (
-                                    <button
-                                        className="item-delete-btn"
-                                        onClick={(e) => handleDeleteItem(item.id, e)}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '8px',
-                                            right: '8px',
-                                            background: 'rgba(239, 68, 68, 0.1)',
-                                            color: '#ef4444',
-                                            border: 'none',
-                                            borderRadius: '6px',
-                                            padding: '4px',
-                                            cursor: 'pointer',
-                                            opacity: 0,
-                                            transition: 'opacity 0.2s'
-                                        }}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })()}
+
 
                     </div>
                 </div>
             )}
 
             {isCreateModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content large-modal">
-                        <div className="modal-header">
-                            <h3>Novo Databook do Cliente</h3>
-                            <button className="close-btn" onClick={() => setIsCreateModalOpen(false)}><X size={20} /></button>
+                <div className="modal-overlay" style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    backdropFilter: 'blur(8px)',
+                    padding: '20px'
+                }}>
+                    <div className="modal-content" style={{
+                        background: 'white',
+                        width: '100%',
+                        maxWidth: '900px',
+                        maxHeight: '90vh',
+                        borderRadius: '24px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        overflow: 'hidden',
+                        animation: 'modalFadeIn 0.3s ease-out'
+                    }}>
+                        <div className="modal-header" style={{
+                            padding: '24px 32px',
+                            background: '#21408e',
+                            color: 'white',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '12px' }}>
+                                    <Book size={24} />
+                                </div>
+                                <div>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Novo Databook do Cliente</h3>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.8 }}>Preencha os dados e anexe os arquivos por etapa.</p>
+                                </div>
+                            </div>
+                            <button className="close-btn" onClick={() => setIsCreateModalOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '8px', borderRadius: '10px', cursor: 'pointer' }}><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleCreateFolder}>
-                            <div className="modal-body form-grid">
-                                <div className="form-group full-width">
-                                    <label>Cliente / Empresa Vinculada *</label>
-                                    <select
-                                        value={formData.empresa_id}
-                                        onChange={e => {
-                                            const emp = empresas.find(em => em.id === e.target.value);
-                                            setFormData({ ...formData, empresa_id: e.target.value, cliente: emp?.nome || '' });
-                                        }}
-                                        required
-                                    >
-                                        <option value="">Selecione uma empresa</option>
-                                        {empresas.map(emp => <option key={emp.id} value={emp.id}>{emp.nome}</option>)}
-                                    </select>
+
+                        <form onSubmit={handleCreateFolder} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                            <div className="modal-body" style={{ padding: '32px', overflowY: 'auto', flex: 1 }}>
+                                <div className="form-sections-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Cliente / Empresa Vinculada *</label>
+                                        <select
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            value={formData.empresa_id}
+                                            onChange={e => {
+                                                const emp = empresas.find(em => em.id === e.target.value);
+                                                setFormData({ ...formData, empresa_id: e.target.value, cliente: emp?.nome || '' });
+                                            }}
+                                            required
+                                        >
+                                            <option value="">Selecione uma empresa</option>
+                                            {empresas.map(emp => <option key={emp.id} value={emp.id}>{emp.nome}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>OS Interna</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="text"
+                                            value={formData.os_interna}
+                                            onChange={e => setFormData({ ...formData, os_interna: e.target.value })}
+                                            placeholder="Ex: OS-1234"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>OS Externa</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="text"
+                                            value={formData.os_externa}
+                                            onChange={e => setFormData({ ...formData, os_externa: e.target.value })}
+                                            placeholder="Ex: OS-EXT-5678"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Pedido de Compra</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="text"
+                                            value={formData.pedido_compra}
+                                            onChange={e => setFormData({ ...formData, pedido_compra: e.target.value })}
+                                            placeholder="Número do pedido"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Responsável Técnico</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="text"
+                                            value={formData.responsavel}
+                                            onChange={e => setFormData({ ...formData, responsavel: e.target.value })}
+                                            placeholder="Nome do responsável"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Data de Entrega</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="date"
+                                            value={formData.data_entrega}
+                                            onChange={e => setFormData({ ...formData, data_entrega: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label>OS Interna</label>
-                                    <input type="text" value={formData.os_interna} onChange={e => setFormData({ ...formData, os_interna: e.target.value })} placeholder="OS-1234" />
-                                </div>
-                                <div className="form-group">
-                                    <label>Data de Entrega</label>
-                                    <input type="date" value={formData.data_entrega} onChange={e => setFormData({ ...formData, data_entrega: e.target.value })} />
-                                </div>
-                                <div className="form-group full-width">
-                                    <label>Arquivos (PDF, Imagens)</label>
-                                    <input type="file" multiple ref={modalFileInputRef} onChange={handlePendingFilesChange} style={{ display: 'none' }} />
-                                    <button type="button" className="btn-secondary" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px dashed #e2e8f0', background: 'white', color: '#64748b', fontWeight: 600 }} onClick={() => modalFileInputRef.current?.click()}>
-                                        <Plus size={18} /> Adicionar Arquivos ({pendingFiles.length})
-                                    </button>
-                                    <div className="pending-files-list" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {pendingFiles.map((file, idx) => (
-                                            <div key={idx} className="pending-file-item" style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.85rem', color: '#1e293b' }}>{file.name}</span>
-                                                <button type="button" onClick={() => removePendingFile(idx)} style={{ color: '#ef4444', background: 'none', border: 'none' }}><X size={14} /></button>
+
+                                <div className="stages-form" style={{ marginTop: '32px' }}>
+                                    <h4 style={{ fontSize: '1.1rem', color: '#1a2e63', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <Upload size={20} color="#21408e" />
+                                        Documentação por Etapa
+                                    </h4>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                        {['Peritagem', 'Montagem', 'Pintura', 'Liberação', 'Informações Complementares'].map(stage => (
+                                            <div key={stage} className="stage-upload-row" style={{ padding: '20px', background: '#f1f5f9', borderRadius: '16px', border: '1px solid #e2e8f0', transition: 'all 0.2s' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <div style={{ width: '4px', height: '24px', background: '#21408e', borderRadius: '2px' }}></div>
+                                                        <span style={{ fontSize: '1rem', fontWeight: 800, color: '#1e293b' }}>{stage}</span>
+                                                    </div>
+                                                    <input
+                                                        type="file"
+                                                        multiple
+                                                        onChange={(e) => handlePendingFilesChange(stage, e.target.files)}
+                                                        id={`file-upload-${stage}`}
+                                                        style={{ display: 'none' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => document.getElementById(`file-upload-${stage}`)?.click()}
+                                                        style={{
+                                                            background: 'white',
+                                                            color: '#21408e',
+                                                            border: '2px solid #21408e',
+                                                            padding: '8px 16px',
+                                                            borderRadius: '10px',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: 800,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        <Plus size={16} /> ANEXAR ARQUIVOS
+                                                    </button>
+                                                </div>
+
+                                                {pendingFilesByProcess[stage]?.length > 0 ? (
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                                        {pendingFilesByProcess[stage].map((file, idx) => (
+                                                            <div key={idx} style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '10px',
+                                                                background: 'white',
+                                                                padding: '6px 12px',
+                                                                borderRadius: '8px',
+                                                                border: '1px solid #e2e8f0',
+                                                                fontSize: '0.8rem',
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                                            }}>
+                                                                <FileText size={14} color="#64748b" />
+                                                                <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>{file.name}</span>
+                                                                <button type="button" onClick={() => removePendingFile(stage, idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}><X size={16} /></button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#e2e8f0' }}></div>
+                                                        Nenhum arquivo anexado nesta etapa.
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                            <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                                <button type="button" className="btn-secondary" onClick={() => setIsCreateModalOpen(false)}>Cancelar</button>
-                                <button type="submit" className="btn-primary" disabled={loading} style={{ background: '#10b981' }}>
-                                    {loading ? 'Salvando...' : 'Criar Databook'}
+                            <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '24px 32px', display: 'flex', justifyContent: 'flex-end', gap: '16px', background: '#f8fafc' }}>
+                                <button type="button" className="btn-secondary" onClick={() => setIsCreateModalOpen(false)} style={{ background: 'white', border: '1px solid #e2e8f0', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, color: '#64748b' }}>Cancelar</button>
+                                <button type="submit" className="btn-primary" disabled={loading} style={{ background: '#10b981', border: 'none', padding: '12px 32px', borderRadius: '12px', fontWeight: 800, color: 'white', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.2)' }}>
+                                    {loading ? 'SALVANDO...' : 'CRIAR DATA BOOK'}
                                 </button>
                             </div>
                         </form>

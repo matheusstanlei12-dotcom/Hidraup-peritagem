@@ -143,7 +143,7 @@ export const AdminEmpresas: React.FC = () => {
     };
 
     const handleDelete = async (id: string, nome: string) => {
-        if (!window.confirm(`Tem certeza que deseja excluir a empresa ${nome}?`)) return;
+        if (!window.confirm(`ATENÇÃO: Excluir a empresa ${nome} irá apagar permanentemente TODOS os usuários e dados vinculados a ela. Deseja continuar?`)) return;
 
         try {
             const { error } = await supabase

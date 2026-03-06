@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Folder, Image as ImageIcon, Plus, ArrowLeft, Trash2, X, Save, Video } from 'lucide-react';
+import { Folder, Image as ImageIcon, Plus, ArrowLeft, Trash2, X, Save, Video, Search } from 'lucide-react';
 import { compressImage } from '../lib/imageUtils';
 import { useAuth } from '../contexts/AuthContext';
 import './RegistroFotos.css';
@@ -35,6 +35,7 @@ export const RegistroFotos: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
     const [pendingVideos, setPendingVideos] = useState<File[]>([]);
@@ -337,6 +338,14 @@ export const RegistroFotos: React.FC = () => {
 
     const canDelete = role === 'gestor';
 
+    const filteredFolders = folders.filter(folder => {
+        const query = searchQuery.toLowerCase();
+        return (
+            (folder.cliente?.toLowerCase() || '').includes(query) ||
+            (folder.os_interna?.toLowerCase() || '').includes(query)
+        );
+    });
+
     return (
         <div className="registro-fotos-container">
             <header className="page-header">
@@ -357,16 +366,39 @@ export const RegistroFotos: React.FC = () => {
                     </div>
                 )}
 
-                <div className="header-actions">
+                <div className="header-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                     {!currentFolder && (
-                        <button
-                            className="btn-primary"
-                            onClick={() => setIsCreateModalOpen(true)}
-                            disabled={loading}
-                        >
-                            <Plus size={20} />
-                            <span>Novo Arquivo</span>
-                        </button>
+                        <>
+                            <div className="search-container" style={{ position: 'relative', minWidth: '280px' }}>
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por cliente ou OS..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 12px 10px 40px',
+                                        borderRadius: '12px',
+                                        border: '1px solid #e2e8f0',
+                                        background: '#f8fafc',
+                                        fontSize: '0.9rem',
+                                        color: '#1a2e63',
+                                        outline: 'none',
+                                        transition: 'all 0.2s',
+                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                    }}
+                                />
+                            </div>
+                            <button
+                                className="btn-primary"
+                                onClick={() => setIsCreateModalOpen(true)}
+                                disabled={loading}
+                            >
+                                <Plus size={20} />
+                                <span>Novo Arquivo</span>
+                            </button>
+                        </>
                     )}
                 </div>
             </header>
@@ -377,13 +409,13 @@ export const RegistroFotos: React.FC = () => {
                 {!currentFolder ? (
                     // Folder View
                     <div className="folders-grid">
-                        {folders.length === 0 && !loading && (
+                        {filteredFolders.length === 0 && !loading && (
                             <div className="empty-state">
-                                <Folder size={48} opacity={0.3} />
-                                <p>Nenhum arquivo encontrado.</p>
+                                <Search size={48} opacity={0.3} style={{ marginBottom: '16px' }} />
+                                <p>{searchQuery ? 'Nenhum resultado para sua busca.' : 'Nenhum arquivo encontrado.'}</p>
                             </div>
                         )}
-                        {folders.map(folder => (
+                        {filteredFolders.map(folder => (
                             <div key={folder.id} className="folder-card" onClick={() => setCurrentFolder(folder)}>
                                 <div className="folder-icon">
                                     <Folder size={40} className="icon-main" />

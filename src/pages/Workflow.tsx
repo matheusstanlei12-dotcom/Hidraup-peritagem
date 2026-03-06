@@ -52,7 +52,7 @@ export const WorkflowPage: React.FC = () => {
                 .from('peritagens')
                 .select('id, tag, cliente, os_interna, etapa_atual, databook_pronto, fotos_montagem, fotos_videos_teste, foto_pintura_final')
                 .neq('etapa_atual', 'finalizado')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setPeritagens(data || []);
@@ -227,7 +227,7 @@ export const WorkflowPage: React.FC = () => {
         <div className="peritagens-container">
             <header className="page-header" style={{ marginBottom: '2rem' }}>
                 <div>
-                    <h1 className="page-title">Fluxo de Produção & Databook</h1>
+                    <h1 className="page-title">Fluxo de QR code</h1>
                     <p className="subtitle">Gerencie as etapas de montagem, testes e pintura</p>
                 </div>
             </header>

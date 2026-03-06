@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Loader2, Calendar, Trash2 } from 'lucide-react';
+import { Search, Plus, Loader2, Calendar, Trash2, ClipboardSignature } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './Peritagens.css';
@@ -11,10 +12,12 @@ interface ItemAguardando {
     cliente: string;
     data_chegada: string;
     status: string;
+    observacoes?: string;
 }
 
 export const AguardandoPeritagem: React.FC = () => {
     const { role } = useAuth();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [itens, setItens] = useState<ItemAguardando[]>([]);
     const [loading, setLoading] = useState(true);
@@ -24,7 +27,9 @@ export const AguardandoPeritagem: React.FC = () => {
     const [osInterna, setOsInterna] = useState('');
     const [cliente, setCliente] = useState('');
     const [dataChegada, setDataChegada] = useState(new Date().toISOString().split('T')[0]);
+    const [observacoes, setObservacoes] = useState('');
     const [saving, setSaving] = useState(false);
+    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchItens();
@@ -37,7 +42,7 @@ export const AguardandoPeritagem: React.FC = () => {
                 .from('aguardando_peritagem')
                 .select('*')
                 .eq('status', 'AGUARDANDO')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setItens(data || []);
@@ -63,6 +68,7 @@ export const AguardandoPeritagem: React.FC = () => {
                     os_interna: osInterna,
                     cliente: cliente,
                     data_chegada: dataChegada,
+                    observacoes: observacoes,
                     status: 'AGUARDANDO'
                 }]);
 
@@ -71,6 +77,7 @@ export const AguardandoPeritagem: React.FC = () => {
             alert('Item adicionado com sucesso!');
             setOsInterna('');
             setCliente('');
+            setObservacoes('');
             setShowForm(false);
             fetchItens();
         } catch (err) {
@@ -168,6 +175,15 @@ export const AguardandoPeritagem: React.FC = () => {
                                         required
                                     />
                                 </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Observações (O que foi digitado)</label>
+                                    <textarea
+                                        style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', minHeight: '100px', resize: 'vertical' }}
+                                        value={observacoes}
+                                        onChange={(e) => setObservacoes(e.target.value)}
+                                        placeholder="Informações adicionais do cilindro..."
+                                    />
+                                </div>
                             </div>
                             <div className="modal-footer" style={{ marginTop: '20px' }}>
                                 <button type="button" className="btn-report-outline" onClick={() => setShowForm(false)}>Cancelar</button>
@@ -188,7 +204,12 @@ export const AguardandoPeritagem: React.FC = () => {
                     </div>
                 ) : (
                     filtered.map(item => (
-                        <div key={item.id} className="pcp-action-card">
+                        <div
+                            key={item.id}
+                            className="pcp-action-card"
+                            onClick={() => setSelectedItemId(selectedItemId === item.id ? null : item.id)}
+                            style={{ cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                        >
                             <div className="pcp-card-header">
                                 <div>
                                     <span className="report-id-badge" style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '800' }}>
@@ -208,20 +229,51 @@ export const AguardandoPeritagem: React.FC = () => {
                                     <Calendar size={16} />
                                     <span style={{ fontSize: '0.85rem' }}>Chegada: {new Date(item.data_chegada).toLocaleDateString('pt-BR')}</span>
                                 </div>
+
+                                {selectedItemId === item.id && item.observacoes && (
+                                    <div style={{
+                                        marginTop: '16px',
+                                        padding: '12px',
+                                        background: '#f8fafc',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0',
+                                        animation: 'fadeIn 0.3s ease'
+                                    }}>
+                                        <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
+                                            Informações Digitadas
+                                        </label>
+                                        <p style={{ fontSize: '0.9rem', color: '#1e293b', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                                            {item.observacoes}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
-                            {(role === 'pcp' || role === 'gestor') && (
-                                <div className="pcp-footer" style={{ marginTop: '15px' }}>
+                            <div className="pcp-footer" style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                                <button
+                                    className="btn-report-primary"
+                                    style={{ width: '100%', background: '#21408e', color: 'white', border: 'none', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700, cursor: 'pointer' }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/nova-peritagem?os_interna=${item.os_interna}&cliente=${encodeURIComponent(item.cliente)}&obs=${encodeURIComponent(item.observacoes || '')}`);
+                                    }}
+                                >
+                                    <ClipboardSignature size={16} />
+                                    <span>Iniciar Peritagem</span>
+                                </button>
+                                {(role === 'pcp' || role === 'gestor') && (
                                     <button
                                         className="btn-report-outline"
-                                        style={{ width: '100%', color: '#ef4444', borderColor: '#fee2e2' }}
-                                        onClick={() => handleDelete(item.id)}
+                                        style={{ width: 'fit-content', color: '#ef4444', borderColor: '#fee2e2', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', cursor: 'pointer', background: 'white', border: '1px solid #fee2e2' }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(item.id);
+                                        }}
                                     >
                                         <Trash2 size={16} />
-                                        <span>Excluir</span>
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     ))
                 )}

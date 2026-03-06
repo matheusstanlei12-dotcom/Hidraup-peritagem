@@ -63,11 +63,9 @@ const pdfStyles = StyleSheet.create({
     tableHeader: { flexDirection: 'row', backgroundColor: '#005696', color: '#ffffff', padding: 5, fontSize: 8 },
     tableRow: { flexDirection: 'row', borderBottom: '0.5 solid #e2e8f0', padding: 5, fontSize: 8 },
     col1: { width: '5%' },
-    col2: { width: '25%' },
-    col3: { width: '15%' },
-    col4: { width: '15%' },
+    col2: { width: '40%' },
     col5: { width: '15%' },
-    col6: { width: '25%' },
+    col6: { width: '40%' },
     imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
     imageCard: { width: '48%', marginBottom: 10 },
     image: { width: '100%', height: 150, objectFit: 'cover', borderRadius: 5 },
@@ -83,8 +81,30 @@ const pdfStyles = StyleSheet.create({
     footerText: {
         fontSize: 7,
         color: '#94a3b8',
+    },
+    watermarkContainer: {
+        position: 'relative',
+        borderRadius: 5,
+        overflow: 'hidden',
+    },
+    watermark: {
+        position: 'absolute',
+        bottom: 5,
+        right: 5,
+        width: 40,
+        opacity: 1.0,
     }
 });
+
+const WatermarkedImage = ({ src, style, label }: { src: string, style: any, label?: string }) => (
+    <View style={pdfStyles.imageCard}>
+        <View style={pdfStyles.watermarkContainer}>
+            <Image src={src} style={style} />
+            <Image src="/logo.png" style={pdfStyles.watermark} />
+        </View>
+        {label && <Text style={pdfStyles.imageLabel}>{label}</Text>}
+    </View>
+);
 
 const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: AnaliseItem[] }) => (
     <Document>
@@ -98,51 +118,22 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
             </View>
 
             <View style={pdfStyles.section}>
-                <Text style={pdfStyles.sectionTitle}>1. Informações Gerais</Text>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>Cliente:</Text><Text style={pdfStyles.value}>{peritagem.cliente}</Text></View>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>TAG:</Text><Text style={pdfStyles.value}>{peritagem.tag || '-'}</Text></View>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>Local:</Text><Text style={pdfStyles.value}>{peritagem.local_equipamento || '-'}</Text></View>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>NI:</Text><Text style={pdfStyles.value}>{peritagem.ni || '-'}</Text></View>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>Pedido:</Text><Text style={pdfStyles.value}>{peritagem.numero_pedido || '-'}</Text></View>
-                <View style={pdfStyles.row}><Text style={pdfStyles.label}>Responsável:</Text><Text style={pdfStyles.value}>{peritagem.responsavel_tecnico || '-'}</Text></View>
-            </View>
-
-            <View style={pdfStyles.section}>
-                <Text style={pdfStyles.sectionTitle}>2. Itens e Medidas</Text>
-                <View style={pdfStyles.tableHeader}>
-                    <Text style={pdfStyles.col1}>#</Text>
-                    <Text style={pdfStyles.col2}>Componente</Text>
-                    <Text style={pdfStyles.col3}>Ø Int.</Text>
-                    <Text style={pdfStyles.col4}>Ø Ext.</Text>
-                    <Text style={pdfStyles.col5}>Status</Text>
-                    <Text style={pdfStyles.col6}>Anomalia</Text>
-                </View>
-                {itens.map((item, idx) => (
-                    <View key={item.id} style={pdfStyles.tableRow}>
-                        <Text style={pdfStyles.col1}>{idx + 1}</Text>
-                        <Text style={pdfStyles.col2}>{item.componente}</Text>
-                        <Text style={pdfStyles.col3}>{item.diametro_interno_encontrado || '-'}</Text>
-                        <Text style={pdfStyles.col4}>{item.diametro_externo_encontrado || '-'}</Text>
-                        <Text style={pdfStyles.col5}>{item.conformidade?.toUpperCase()}</Text>
-                        <Text style={pdfStyles.col6}>{item.anomalias || '-'}</Text>
-                    </View>
-                ))}
-            </View>
-
-            <View style={pdfStyles.section} break>
-                <Text style={pdfStyles.sectionTitle}>3. Registro Fotográfico (Peritagem)</Text>
+                <Text style={pdfStyles.sectionTitle}>1. Registro Fotográfico (Peritagem)</Text>
                 <View style={pdfStyles.imageGrid}>
                     {peritagem.foto_frontal && (
-                        <View style={pdfStyles.imageCard}>
-                            <Image src={peritagem.foto_frontal} style={pdfStyles.image} />
-                            <Text style={pdfStyles.imageLabel}>Vista Geral</Text>
-                        </View>
+                        <WatermarkedImage
+                            src={peritagem.foto_frontal}
+                            style={pdfStyles.image}
+                            label="Vista Geral"
+                        />
                     )}
                     {itens.map(item => item.fotos?.slice(0, 1).map((foto, fIdx) => (
-                        <View key={`${item.id}-${fIdx}`} style={pdfStyles.imageCard}>
-                            <Image src={foto} style={pdfStyles.image} />
-                            <Text style={pdfStyles.imageLabel}>{item.componente}</Text>
-                        </View>
+                        <WatermarkedImage
+                            key={`${item.id}-${fIdx}`}
+                            src={foto}
+                            style={pdfStyles.image}
+                            label={item.componente}
+                        />
                     )))}
                 </View>
             </View>
@@ -150,13 +141,15 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
 
         {(peritagem.fotos_montagem?.length || 0) > 0 && (
             <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>4. Montagem e Recuperação</Text>
+                <Text style={pdfStyles.sectionTitle}>2. Montagem e Recuperação</Text>
                 <View style={pdfStyles.imageGrid}>
                     {peritagem.fotos_montagem?.map((foto, idx) => (
-                        <View key={idx} style={pdfStyles.imageCard}>
-                            <Image src={foto} style={pdfStyles.image} />
-                            <Text style={pdfStyles.imageLabel}>Montagem {idx + 1}</Text>
-                        </View>
+                        <WatermarkedImage
+                            key={idx}
+                            src={foto}
+                            style={pdfStyles.image}
+                            label={`Montagem ${idx + 1}`}
+                        />
                     ))}
                 </View>
             </Page>
@@ -164,13 +157,15 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
 
         {(peritagem.fotos_videos_teste?.length || 0) > 0 && (
             <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>5. Testes de Qualidade</Text>
+                <Text style={pdfStyles.sectionTitle}>3. Testes de Qualidade</Text>
                 <View style={pdfStyles.imageGrid}>
                     {peritagem.fotos_videos_teste?.filter(url => !url.toLowerCase().endsWith('.mp4')).map((foto, idx) => (
-                        <View key={idx} style={pdfStyles.imageCard}>
-                            <Image src={foto} style={pdfStyles.image} />
-                            <Text style={pdfStyles.imageLabel}>Teste {idx + 1}</Text>
-                        </View>
+                        <WatermarkedImage
+                            key={idx}
+                            src={foto}
+                            style={pdfStyles.image}
+                            label={`Teste ${idx + 1}`}
+                        />
                     ))}
                 </View>
                 <Text style={{ fontSize: 8, color: '#64748b', marginTop: 10 }}>* Vídeos de teste disponíveis no portal online.</Text>
@@ -179,9 +174,12 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
 
         {peritagem.foto_pintura_final && (
             <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>6. Pintura e Acabamento Final</Text>
+                <Text style={pdfStyles.sectionTitle}>4. Pintura e Acabamento Final</Text>
                 <View style={{ alignItems: 'center' }}>
-                    <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
+                    <View style={pdfStyles.watermarkContainer}>
+                        <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
+                        <Image src="/logo.png" style={[pdfStyles.watermark, { width: 80, bottom: 20, right: 20 }]} />
+                    </View>
                     <Text style={pdfStyles.imageLabel}>Resultado Final</Text>
                 </View>
             </Page>

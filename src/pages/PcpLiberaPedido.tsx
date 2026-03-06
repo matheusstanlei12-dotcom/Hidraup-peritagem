@@ -29,9 +29,9 @@ export const PcpLiberaPedido: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('*')
+                .select('id, numero_peritagem, cliente, status, numero_pedido, os_interna, created_at')
                 .or('status.eq.AGUARDANDO APROVAÇÃO DO CLIENTE,status.eq.Aguardando Clientes')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setPeritagens(data || []);

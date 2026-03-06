@@ -64,8 +64,8 @@ export const Relatorios: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('peritagens')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('id, numero_peritagem, cliente, data_execucao, status, os_interna, area, linha')
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             setPeritagens(data || []);
@@ -79,42 +79,48 @@ export const Relatorios: React.FC = () => {
     const handleGenerateData = async (peritagem: Peritagem) => {
         if (selectedId === peritagem.id && fullReportData) return; // Já carregado
 
-        setGeneratingPdf(true);
-        setSelectedId(peritagem.id);
-        setFullReportData(null);
-
         try {
-            // Buscar Análise Técnica (Checklist para o PDF)
+            // 0. Buscar dados completos da peritagem (caso a lista esteja otimizada)
+            const { data: pData, error: pError } = await supabase
+                .from('peritagens')
+                .select('*')
+                .eq('id', peritagem.id)
+                .single();
+
+            if (pError) throw pError;
+            const fullPeritagem = pData;
+
+            // 1. Buscar Análise Técnica (Checklist para o PDF)
             const { data: analise } = await supabase
                 .from('peritagem_analise_tecnica')
                 .select('*')
                 .eq('peritagem_id', peritagem.id);
 
-            const parecer = generateTechnicalOpinion(peritagem as any, analise || []);
+            const parecer = generateTechnicalOpinion(fullPeritagem as any, analise || []);
 
             const reportData = {
-                laudoNum: String(peritagem.numero_peritagem || ''),
-                numero_os: String(peritagem.os || peritagem.numero_peritagem || peritagem.os_interna || ''),
+                laudoNum: String(fullPeritagem.numero_peritagem || ''),
+                numero_os: String(fullPeritagem.os || fullPeritagem.numero_peritagem || fullPeritagem.os_interna || ''),
                 data: new Date().toLocaleDateString('pt-BR'),
-                hora: peritagem.data_execucao ? new Date(peritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
-                area: String(peritagem.area || '-'),
-                linha: String(peritagem.linha || '-'),
-                local_equipamento: String(peritagem.local_equipamento || 'OFICINA'),
-                equipamento: String(peritagem.equipamento || 'CILINDRO HIDRÁULICO'),
-                tag: String(peritagem.tag || 'N/A'),
+                hora: fullPeritagem.data_execucao ? new Date(fullPeritagem.data_execucao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+                area: String(fullPeritagem.area || '-'),
+                linha: String(fullPeritagem.linha || '-'),
+                local_equipamento: String(fullPeritagem.local_equipamento || 'OFICINA'),
+                equipamento: String(fullPeritagem.equipamento || 'CILINDRO HIDRÁULICO'),
+                tag: String(fullPeritagem.tag || 'N/A'),
                 material: 'AÇO INDUSTRIAL',
                 desenho: 'N/A',
-                cliente: String(peritagem.cliente || ''),
-                nota_fiscal: String(peritagem.nota_fiscal || ''),
-                ni: String(peritagem.ni || ''),
-                pedido: String(peritagem.numero_pedido || ''),
-                camisa_ext: String(peritagem.camisa_ext || ''),
-                haste_comp: String(peritagem.haste_comp || ''),
-                camisa_int: String(peritagem.camisa_int || ''),
-                camisa_comp: String(peritagem.camisa_comp || ''),
-                haste_diam: String(peritagem.haste_diam || ''),
-                curso: String(peritagem.curso || ''),
-                responsavel_tecnico: String(peritagem.responsavel_tecnico || ''),
+                cliente: String(fullPeritagem.cliente || ''),
+                nota_fiscal: String(fullPeritagem.nota_fiscal || ''),
+                ni: String(fullPeritagem.ni || ''),
+                pedido: String(fullPeritagem.numero_pedido || ''),
+                camisa_ext: String(fullPeritagem.camisa_ext || ''),
+                haste_comp: String(fullPeritagem.haste_comp || ''),
+                camisa_int: String(fullPeritagem.camisa_int || ''),
+                camisa_comp: String(fullPeritagem.camisa_comp || ''),
+                haste_diam: String(fullPeritagem.haste_diam || ''),
+                curso: String(fullPeritagem.curso || ''),
+                responsavel_tecnico: String(fullPeritagem.responsavel_tecnico || ''),
                 logo_trusteng: '/logo.png',
                 itens: (analise || [])
                     .filter((i: any) => i.conformidade === 'não conforme')
@@ -171,16 +177,16 @@ export const Relatorios: React.FC = () => {
                     })),
                 parecer_tecnico: String(parecer || ''),
                 parecerTecnico: String(parecer || ''),
-                foto_frontal: peritagem.foto_frontal,
-                desenho_conjunto: String(peritagem.desenho_conjunto || '-'),
-                tipo_modelo: String(peritagem.tipo_modelo || '-'),
-                fabricante: String(peritagem.fabricante || '-'),
-                lubrificante: String(peritagem.lubrificante || '-'),
-                volume: String(peritagem.volume || '-'),
-                acoplamento_polia: String(peritagem.acoplamento_polia || 'NÃO'),
-                sistema_lubrificacao: String(peritagem.sistema_lubrificacao || 'NÃO'),
-                outros_especificar: String(peritagem.outros_especificar || '-'),
-                observacoes_gerais: String(peritagem.observacoes_gerais || '-')
+                foto_frontal: fullPeritagem.foto_frontal,
+                desenho_conjunto: String(fullPeritagem.desenho_conjunto || '-'),
+                tipo_modelo: String(fullPeritagem.tipo_modelo || '-'),
+                fabricante: String(fullPeritagem.fabricante || '-'),
+                lubrificante: String(fullPeritagem.lubrificante || '-'),
+                volume: String(fullPeritagem.volume || '-'),
+                acoplamento_polia: String(fullPeritagem.acoplamento_polia || 'NÃO'),
+                sistema_lubrificacao: String(fullPeritagem.sistema_lubrificacao || 'NÃO'),
+                outros_especificar: String(fullPeritagem.outros_especificar || '-'),
+                observacoes_gerais: String(fullPeritagem.observacoes_gerais || '-')
             };
 
             setFullReportData(reportData);

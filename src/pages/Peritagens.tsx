@@ -14,6 +14,7 @@ interface Peritagem {
     prioridade: string;
     criado_por: string;
     os_interna?: string;
+    motivo_rejeicao?: string;
 }
 
 export const Peritagens: React.FC = () => {
@@ -71,8 +72,8 @@ export const Peritagens: React.FC = () => {
         try {
             let query = supabase
                 .from('peritagens')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('id, numero_peritagem, cliente, data_execucao, status, prioridade, criado_por, os_interna, motivo_rejeicao, created_at')
+                .order('created_at', { ascending: true });
 
             // Filtro via URL (ex: vindo do Dashboard)
             if (statusParam === 'finalizados') {
@@ -157,8 +158,29 @@ export const Peritagens: React.FC = () => {
                         <button
                             className={`btn-filter recusadas ${filterStatus === 'recusadas' ? 'active' : ''}`}
                             onClick={() => setFilterStatus('recusadas')}
+                            style={{ position: 'relative' }}
                         >
                             🔴 Recusadas
+                            {peritagens.some(p => p.status === 'REVISÃO NECESSÁRIA') && filterStatus !== 'recusadas' && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '18px',
+                                    height: '18px',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: '800',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                }}>
+                                    !
+                                </span>
+                            )}
                         </button>
                     </div>
                 )}
@@ -229,6 +251,19 @@ export const Peritagens: React.FC = () => {
                                                 Prioridade: {p.prioridade}
                                             </span>
                                         </div>
+                                        {isRejection && p.motivo_rejeicao && (
+                                            <div style={{
+                                                marginTop: '12px',
+                                                padding: '10px',
+                                                background: '#fef2f2',
+                                                borderLeft: '4px solid #ef4444',
+                                                borderRadius: '4px',
+                                                fontSize: '0.8rem',
+                                                color: '#991b1b'
+                                            }}>
+                                                <strong>Motivo da Reprovação:</strong> {p.motivo_rejeicao}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="card-actions">

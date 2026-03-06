@@ -93,6 +93,8 @@ export const NovaPeritagem: React.FC = () => {
         os_interna: '' // Novo campo interno
     });
 
+    const [motivoRejeicao, setMotivoRejeicao] = useState<string | null>(null);
+
     const [isCustomClient, setIsCustomClient] = useState(false);
     const [empresas, setEmpresas] = useState<{ id: string, nome: string }[]>([]);
 
@@ -136,6 +138,24 @@ export const NovaPeritagem: React.FC = () => {
     const [vedacoes, setVedacoes] = useState<ChecklistItem[]>([]);
 
     useEffect(() => {
+        if (!editId) {
+            const osUrl = searchParams.get('os_interna');
+            const clienteUrl = searchParams.get('cliente');
+            const obsUrl = searchParams.get('obs');
+
+            if (osUrl || clienteUrl) {
+                setFixedData(prev => ({
+                    ...prev,
+                    os_interna: osUrl || prev.os_interna,
+                    cliente: clienteUrl || prev.cliente,
+                    observacoes_gerais: obsUrl || prev.observacoes_gerais
+                }));
+                // Mantemos step(0) para o perito selecionar o tipo de relatório desejado
+            }
+        }
+    }, [searchParams, editId]);
+
+    useEffect(() => {
         if (editId) {
             loadPeritagem(editId);
         }
@@ -152,6 +172,10 @@ export const NovaPeritagem: React.FC = () => {
                 .single();
 
             if (pError) throw pError;
+
+            if (pData.motivo_rejeicao) {
+                setMotivoRejeicao(pData.motivo_rejeicao);
+            }
 
             // 2. Fetch Analyses
             const { data: aData, error: aError } = await supabase
@@ -652,7 +676,8 @@ export const NovaPeritagem: React.FC = () => {
                         linha: fixedData.linha,
                         os_interna: fixedData.os_interna,
                         etapa_atual: 'peritagem',
-                        databook_pronto: false
+                        databook_pronto: false,
+                        motivo_rejeicao: null // Limpa o motivo de rejeição ao reenviar
                     })
                     .eq('id', editId);
 
@@ -861,7 +886,30 @@ export const NovaPeritagem: React.FC = () => {
                             <span className="btn-label">Relatório Usiminas</span>
                         </button>
                     </div>
-                    {cylinderType && (
+                    {motivoRejeicao && (
+                        <div style={{
+                            padding: '20px',
+                            margin: '20px',
+                            background: '#fef2f2',
+                            border: '1px solid #fee2e2',
+                            borderLeft: '5px solid #ef4444',
+                            borderRadius: '12px',
+                            animation: 'slideIn 0.3s ease-out'
+                        }}>
+                            <h3 style={{ color: '#991b1b', fontSize: '1rem', fontWeight: '800', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <X size={18} /> REPROVADA PELO PCP
+                            </h3>
+                            <p style={{ color: '#b91c1c', fontSize: '0.9rem', margin: 0 }}>
+                                <strong>Motivo:</strong> {motivoRejeicao}
+                            </p>
+                        </div>
+                    )}
+
+                    {cylinderType === null ? (
+                        <button className="btn-start" onClick={() => setStep(1)}>
+                            Avançar para Formulário
+                        </button>
+                    ) : (
                         <button className="btn-start" onClick={() => setStep(1)}>
                             Avançar para Formulário
                         </button>

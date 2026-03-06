@@ -115,7 +115,7 @@ function AppRoutes() {
         {/* Rotas Protegidas */}
         <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/peritagens" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial']}><Layout><Peritagens /></Layout></PrivateRoute>} />
-        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
+        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial', 'qualidade', 'cliente']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
         <Route path="/clientes" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Clientes /></Layout></PrivateRoute>} />
         <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'montagem']}><Layout><Manutencao /></Layout></PrivateRoute>} />
         <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Relatorios /></Layout></PrivateRoute>} />

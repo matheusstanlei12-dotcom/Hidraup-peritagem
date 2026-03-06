@@ -162,10 +162,11 @@
 .item-card {
     background: white;
     border-radius: 16px;
-    padding: 20px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     border: 1px solid #f1f5f9;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -210,6 +211,25 @@
     color: #94a3b8;
 }
 
+.item-thumbnail {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.item-card:hover .item-thumbnail img {
+    transform: scale(1.05);
+}
+
 .btn-add-databook {
     background: #10b981;
     color: white;
@@ -246,4 +266,55 @@
 .back-btn-pill:hover {
     background: #f1f5f9;
     color: #1e293b;
+}
+
+/* Modal Detail View - Overlay patterns */
+.item-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+.item-modal-content {
+    position: relative;
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: -40px;
+    right: 20px;
+    background: white;
+    border: none;
+    color: #1e293b;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+}
+
+.item-info-bar {
+    margin-top: 24px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }

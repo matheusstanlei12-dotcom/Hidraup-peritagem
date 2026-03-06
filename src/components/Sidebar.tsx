@@ -16,6 +16,7 @@ import {
     Clock,
     RefreshCcw,
     Folder,
+    Activity,
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -73,13 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
                         </NavLink>
-                        <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <PlusCircle size={20} />
-                            <span>Nova Peritagem</span>
-                        </NavLink>
                         <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
+                        </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
                         </NavLink>
                         <NavLink to="/peritagens?filter=recusada" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
@@ -103,6 +104,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <FileSpreadsheet size={20} />
                             <span>Relatórios</span>
                         </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
+                        </NavLink>
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
@@ -130,13 +135,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <Folder size={20} />
                             <span>Arquivo Geral (Fotos/Vídeos)</span>
                         </NavLink>
-                        <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <RefreshCcw size={20} />
-                            <span>Fluxo de Produção & Databook</span>
-                        </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
                             <span>Databook do Cliente</span>
+                        </NavLink>
+                        <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <RefreshCcw size={20} />
+                            <span>Fluxo de QR code</span>
                         </NavLink>
                         <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <QrCode size={20} />
@@ -155,6 +160,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
+                        </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
                         </NavLink>
                         <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Wrench size={20} />
@@ -178,6 +187,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
                         </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
+                        </NavLink>
                         <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ShoppingCart size={20} />
                             <span>Liberar Pedido</span>
@@ -191,6 +204,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <CheckCircle size={20} />
                             <span>Conferência Final</span>
+                        </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
                         </NavLink>
                         <NavLink to="/workflow#etapa3" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
@@ -209,6 +226,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/meus-relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
                             <span>Relatórios</span>
+                        </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Acompanhar Processo</span>
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
@@ -231,6 +252,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
                             <span>Relatórios</span>
+                        </NavLink>
+                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <Activity size={20} />
+                            <span>Monitoramento (Status)</span>
                         </NavLink>
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
@@ -259,13 +284,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <Folder size={20} />
                             <span>Arquivo Geral (Fotos/Vídeos)</span>
                         </NavLink>
-                        <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <RefreshCcw size={20} />
-                            <span>Fluxo de Produção & Databook</span>
-                        </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
                             <span>Databook do Cliente</span>
+                        </NavLink>
+                        <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <RefreshCcw size={20} />
+                            <span>Fluxo de QR code</span>
                         </NavLink>
                         <NavLink to="/qrcode" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <QrCode size={20} />

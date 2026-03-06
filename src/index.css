@@ -185,3 +185,26 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Global Back Button Style */
+.back-btn-pill {
+  background: white;
+  border: 1px solid #e2e8f0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.back-btn-pill:hover {
+  background: #f1f5f9;
+  color: var(--text-main);
+  box-shadow: var(--shadow);
+}

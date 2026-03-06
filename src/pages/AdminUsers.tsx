@@ -139,18 +139,24 @@ export const AdminUsers: React.FC = () => {
     };
 
     const handleDeleteUser = async (id: string, name: string) => {
-        if (!window.confirm(`Tem certeza que deseja excluir o usuário ${name}?`)) return;
+        if (!window.confirm(`Tem certeza que deseja excluir o usuário ${name || 'este usuário'}?`)) return;
 
         try {
-            const { error } = await supabase
+            setLoading(true);
+            const { error, count } = await supabase
                 .from('profiles')
-                .delete()
+                .delete({ count: 'exact' })
                 .eq('id', id);
 
             if (error) throw error;
-            setUsers(users.filter(u => u.id !== id));
+
+            setUsers(prevUsers => prevUsers.filter(u => u.id !== id));
+            alert('Usuário excluído com sucesso!');
         } catch (error: any) {
+            console.error('Erro ao excluir usuário:', error);
             alert('Erro ao excluir usuário: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     };
 

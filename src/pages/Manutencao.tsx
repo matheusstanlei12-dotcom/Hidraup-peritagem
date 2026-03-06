@@ -32,7 +32,7 @@ export const Manutencao: React.FC = () => {
                 .from('peritagens')
                 .select('*')
                 .or('status.eq.EM MANUTENÇÃO,status.eq.MANUTENÇÃO,status.eq.OFICINA')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             // Filtro para APP Android
             const isAndroidApp = window.location.hostname === 'localhost' || window.location.protocol === 'file:';

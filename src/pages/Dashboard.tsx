@@ -102,7 +102,8 @@ export const Dashboard: React.FC = () => {
             setLoading(true);
             console.log('📊 Dashboard: Iniciando busca de dados para role:', role);
 
-            let query = supabase.from('peritagens').select('*');
+            // Selecionar apenas colunas necessárias para contagem e dashboard (evita carregar fotos pesadas)
+            let query = supabase.from('peritagens').select('status, created_at, data_execucao, data_finalizacao, cliente, empresa_id');
 
             if (role === 'cliente') {
                 if (empresaId) {
@@ -151,8 +152,10 @@ export const Dashboard: React.FC = () => {
 
                 const finishedItems = normalizedData.filter((p: any) =>
                     p.status === 'PROCESSO FINALIZADO' ||
-                    p.status === 'FINALIZADOS' ||
                     p.status === 'FINALIZADO' ||
+                    p.status === 'FINALIZADOS' ||
+                    p.status === 'PROCESSO CONCLUÍDO' ||
+                    p.status === 'CONCLUÍDO' ||
                     p.status === 'ORÇAMENTO FINALIZADO'
                 );
                 const finalizados = finishedItems.length;
@@ -165,7 +168,10 @@ export const Dashboard: React.FC = () => {
                     // Como não temos updated_at, usamos data_execucao se disponível, senão usamos created_at (o que dará lead time 0 mas evita erro)
                     if (item.created_at) {
                         const start = new Date(item.created_at);
-                        const end = item.data_execucao ? new Date(item.data_execucao) : new Date(item.created_at);
+                        // Usar data_finalizacao se disponível, senão data_execucao, senão created_at
+                        const end = item.data_finalizacao ? new Date(item.data_finalizacao) :
+                            (item.data_execucao ? new Date(item.data_execucao) : new Date(item.created_at));
+
                         const diffTime = Math.abs(end.getTime() - start.getTime());
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
