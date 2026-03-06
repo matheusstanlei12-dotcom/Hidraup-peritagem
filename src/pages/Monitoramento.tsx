@@ -398,7 +398,7 @@ export const Monitoramento: React.FC = () => {
                             </div>
                             <button
                                 className="btn-finalizar-grande"
-                                onClick={() => handleUpdateStatus(selectedProcess, 'AGUARDANDO CONFERÊNCIA FINAL')}
+                                onClick={() => handleUpdateStatus(selectedProcess, 'AGUARDANDO CONFERÊNCIA FINAL', { etapa_atual: 'teste' })}
                             >
                                 <Check size={20} /> FINALIZAR MANUTENÇÃO
                             </button>
@@ -596,7 +596,7 @@ export const Monitoramento: React.FC = () => {
                                                         {(isPcpAwaiting || statusUpper === 'PERITAGEM FINALIZADA') && isAdmin && (
                                                             <button
                                                                 className="btn-quick-approve"
-                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE'); }}
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO APROVAÇÃO DO CLIENTE', { etapa_atual: 'montagem' }); }}
                                                             >
                                                                 <Check size={16} />
                                                                 <span>Aprovar Peritagem</span>
@@ -605,7 +605,7 @@ export const Monitoramento: React.FC = () => {
                                                         {isClientAwaiting && (isAdmin || role === 'perito') && (
                                                             <button
                                                                 className="btn-quick-client"
-                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'EM MANUTENÇÃO'); }}
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'EM MANUTENÇÃO', { etapa_atual: 'montagem' }); }}
                                                             >
                                                                 <ShoppingCart size={16} />
                                                                 <span>Liberação do Pedido</span>
@@ -614,7 +614,7 @@ export const Monitoramento: React.FC = () => {
                                                         {(isMaintenance || statusUpper === 'CILINDRO EM MANUTENÇÃO') && (isAdmin || (role as string) === 'montagem') && (
                                                             <button
                                                                 className="btn-quick-finish"
-                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL'); }}
+                                                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus(processo, 'AGUARDANDO CONFERÊNCIA FINAL', { etapa_atual: 'teste' }); }}
                                                             >
                                                                 <Wrench size={16} />
                                                                 <span>Finalizar Manutenção</span>

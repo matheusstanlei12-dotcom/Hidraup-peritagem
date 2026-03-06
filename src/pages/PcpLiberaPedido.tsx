@@ -54,7 +54,8 @@ export const PcpLiberaPedido: React.FC = () => {
                 .from('peritagens')
                 .update({
                     status: 'EM MANUTENÇÃO',
-                    numero_pedido: orderNum
+                    numero_pedido: orderNum,
+                    etapa_atual: 'montagem'
                 })
                 .eq('id', id);
 
