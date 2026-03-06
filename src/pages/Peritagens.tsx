@@ -139,11 +139,16 @@ export const Peritagens: React.FC = () => {
         }
     };
 
-    const filteredPeritagens = peritagens.filter(p =>
-        p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_peritagem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.os_interna && p.os_interna.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredPeritagens = peritagens.filter(p => {
+        const clienteStr = p.cliente || '';
+        const numStr = p.numero_peritagem || '';
+        const osStr = p.os_interna || '';
+        const searchLow = searchTerm.toLowerCase();
+
+        return clienteStr.toLowerCase().includes(searchLow) ||
+            numStr.toLowerCase().includes(searchLow) ||
+            osStr.toLowerCase().includes(searchLow);
+    });
 
     return (
         <div className="peritagens-container">
