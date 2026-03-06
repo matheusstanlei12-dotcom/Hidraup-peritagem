@@ -128,11 +128,12 @@ const s = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#e2e8f0',
+        backgroundColor: '#f8fafc', // Fundo para imagens que não preenchem tudo
     },
     image: {
         width: '100%',
         height: 160,
-        objectFit: 'cover',
+        objectFit: 'contain',
     },
     imageLabel: {
         fontSize: 7,
