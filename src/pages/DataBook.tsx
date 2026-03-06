@@ -24,6 +24,7 @@ interface DataBookFolder {
     os_externa?: string;
     data_entrega?: string;
     pedido_compra?: string;
+    nota_fiscal?: string;
     responsavel?: string;
     criado_por?: string;
     empresa_id?: string;
@@ -155,6 +156,7 @@ export const DataBook: React.FC = () => {
         os_externa: '',
         data_entrega: '',
         pedido_compra: '',
+        nota_fiscal: '',
         responsavel: '',
         empresa_id: ''
     });
@@ -307,6 +309,7 @@ export const DataBook: React.FC = () => {
                     os_externa: formData.os_externa,
                     data_entrega: formData.data_entrega || null,
                     pedido_compra: formData.pedido_compra,
+                    nota_fiscal: formData.nota_fiscal,
                     responsavel: formData.responsavel,
                     empresa_id: formData.empresa_id || null,
                     criado_por: user?.id
@@ -347,6 +350,7 @@ export const DataBook: React.FC = () => {
                 os_externa: '',
                 data_entrega: '',
                 pedido_compra: '',
+                nota_fiscal: '',
                 responsavel: '',
                 empresa_id: ''
             });
@@ -641,6 +645,12 @@ export const DataBook: React.FC = () => {
                             <label>Data de Registro</label>
                             <span>{new Date(currentFolder.created_at).toLocaleDateString()}</span>
                         </div>
+                        {currentFolder.nota_fiscal && (
+                            <div className="detail-block">
+                                <label>NF</label>
+                                <span>{currentFolder.nota_fiscal}</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="items-view-content">
@@ -818,6 +828,17 @@ export const DataBook: React.FC = () => {
                                             value={formData.pedido_compra}
                                             onChange={e => setFormData({ ...formData, pedido_compra: e.target.value })}
                                             placeholder="Número do pedido"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Nota Fiscal (NF)</label>
+                                        <input
+                                            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', color: '#1a2e63', outline: 'none' }}
+                                            type="text"
+                                            value={formData.nota_fiscal}
+                                            onChange={e => setFormData({ ...formData, nota_fiscal: e.target.value })}
+                                            placeholder="Número da nota fiscal"
                                         />
                                     </div>
 
