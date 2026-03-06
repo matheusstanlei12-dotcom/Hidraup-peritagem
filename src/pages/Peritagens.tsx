@@ -87,6 +87,9 @@ export const Peritagens: React.FC = () => {
                 // Se estiver vendo recusadas
                 if (filterStatus === 'recusadas') {
                     query = query.eq('status', 'REVISÃO NECESSÁRIA');
+                } else {
+                    // Minhas Peritagens: apenas aprovadas ou aguardando (ocultar recusadas)
+                    query = query.neq('status', 'REVISÃO NECESSÁRIA');
                 }
             }
 
@@ -145,45 +148,11 @@ export const Peritagens: React.FC = () => {
     return (
         <div className="peritagens-container">
             <div className="header-actions">
-                <h1 className="page-title">{role === 'perito' ? 'Minhas Peritagens' : 'Todas as Peritagens'}</h1>
-
-                {role === 'perito' && (
-                    <div className="filter-group">
-                        <button
-                            className={`btn-filter ${filterStatus === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilterStatus('all')}
-                        >
-                            Todas
-                        </button>
-                        <button
-                            className={`btn-filter recusadas ${filterStatus === 'recusadas' ? 'active' : ''}`}
-                            onClick={() => setFilterStatus('recusadas')}
-                            style={{ position: 'relative' }}
-                        >
-                            🔴 Recusadas
-                            {peritagens.some(p => p.status === 'REVISÃO NECESSÁRIA') && filterStatus !== 'recusadas' && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '-8px',
-                                    right: '-8px',
-                                    background: '#ef4444',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    width: '18px',
-                                    height: '18px',
-                                    fontSize: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: '800',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                                }}>
-                                    !
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                )}
+                <h1 className="page-title">
+                    {role === 'perito'
+                        ? (filterStatus === 'recusadas' ? 'Peritagens Recusadas' : 'Minhas Peritagens')
+                        : 'Todas as Peritagens'}
+                </h1>
                 <button className="btn-primary" style={{ width: 'auto' }} onClick={() => navigate('/nova-peritagem')}>
                     <Plus size={20} />
                     <span>Nova Peritagem</span>
