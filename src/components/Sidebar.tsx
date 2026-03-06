@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
     FileText,
@@ -17,7 +17,7 @@ import {
     RefreshCcw,
     Folder
 } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './Sidebar.css';
@@ -29,7 +29,53 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { role, user } = useAuth();
+
+    // Notificações de Aguardando Peritagem
+    const [aguardandoIds, setAguardandoIds] = useState<string[]>([]);
+    const [seenIds, setSeenIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (!['pcp', 'gestor', 'perito'].includes(role || '')) return;
+
+        // Carregar do storage
+        const stored = localStorage.getItem('seenAguardandoIds');
+        if (stored) {
+            try { setSeenIds(JSON.parse(stored)); } catch (e) { }
+        }
+
+        const fetchAguardando = async () => {
+            const { data } = await supabase.from('aguardando_peritagem').select('id').eq('status', 'AGUARDANDO');
+            if (data) setAguardandoIds(data.map(d => d.id));
+        };
+
+        fetchAguardando();
+
+        // Inscrever-se para tempo real
+        const channel = supabase.channel('aguardando_sidebar_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'aguardando_peritagem' }, () => {
+                fetchAguardando();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [role]);
+
+    // Atualiza ids vistos quando entra na página
+    useEffect(() => {
+        if (location.pathname === '/pcp/aguardando') {
+            setSeenIds(prev => {
+                const newSeen = Array.from(new Set([...prev, ...aguardandoIds]));
+                localStorage.setItem('seenAguardandoIds', JSON.stringify(newSeen));
+                return newSeen;
+            });
+        }
+    }, [location.pathname, aguardandoIds]);
+
+    const newAguardandoCount = aguardandoIds.filter(id => !seenIds.includes(id)).length;
 
     const handleLogout = async () => {
         try {
@@ -76,6 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
+                            {newAguardandoCount > 0 && <div className="notification-badge">{newAguardandoCount}</div>}
                         </NavLink>
                         <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileText size={20} />
@@ -106,6 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
+                            {newAguardandoCount > 0 && <div className="notification-badge">{newAguardandoCount}</div>}
                         </NavLink>
                         <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ClipboardSignature size={20} />
@@ -235,6 +283,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
+                            {newAguardandoCount > 0 && <div className="notification-badge">{newAguardandoCount}</div>}
                         </NavLink>
                         <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ClipboardSignature size={20} />
