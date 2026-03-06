@@ -97,7 +97,7 @@ const pdfStyles = StyleSheet.create({
 });
 
 const WatermarkedImage = ({ src, style, label }: { src: string, style: any, label?: string }) => (
-    <View style={pdfStyles.imageCard}>
+    <View style={pdfStyles.imageCard} wrap={false}>
         <View style={pdfStyles.watermarkContainer}>
             <Image src={src} style={style} />
             <Image src="/logo.png" style={pdfStyles.watermark} />
@@ -108,8 +108,8 @@ const WatermarkedImage = ({ src, style, label }: { src: string, style: any, labe
 
 const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: AnaliseItem[] }) => (
     <Document>
-        <Page size="A4" style={pdfStyles.page}>
-            <View style={pdfStyles.header}>
+        <Page size="A4" style={pdfStyles.page} wrap>
+            <View style={pdfStyles.header} fixed>
                 <Image src="/logo.png" style={pdfStyles.logo} />
                 <View>
                     <Text style={pdfStyles.title}>DATABOOK TÉCNICO</Text>
@@ -137,57 +137,58 @@ const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: An
                     )))}
                 </View>
             </View>
-        </Page>
 
-        {(peritagem.fotos_montagem?.length || 0) > 0 && (
-            <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>2. Montagem e Recuperação</Text>
-                <View style={pdfStyles.imageGrid}>
-                    {peritagem.fotos_montagem?.map((foto, idx) => (
-                        <WatermarkedImage
-                            key={idx}
-                            src={foto}
-                            style={pdfStyles.image}
-                            label={`Montagem ${idx + 1}`}
-                        />
-                    ))}
-                </View>
-            </Page>
-        )}
-
-        {(peritagem.fotos_videos_teste?.length || 0) > 0 && (
-            <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>3. Testes de Qualidade</Text>
-                <View style={pdfStyles.imageGrid}>
-                    {peritagem.fotos_videos_teste?.filter(url => !url.toLowerCase().endsWith('.mp4')).map((foto, idx) => (
-                        <WatermarkedImage
-                            key={idx}
-                            src={foto}
-                            style={pdfStyles.image}
-                            label={`Teste ${idx + 1}`}
-                        />
-                    ))}
-                </View>
-                <Text style={{ fontSize: 8, color: '#64748b', marginTop: 10 }}>* Vídeos de teste disponíveis no portal online.</Text>
-            </Page>
-        )}
-
-        {peritagem.foto_pintura_final && (
-            <Page size="A4" style={pdfStyles.page}>
-                <Text style={pdfStyles.sectionTitle}>4. Pintura e Acabamento Final</Text>
-                <View style={{ alignItems: 'center' }}>
-                    <View style={pdfStyles.watermarkContainer}>
-                        <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
-                        <Image src="/logo.png" style={[pdfStyles.watermark, { width: 80, bottom: 20, right: 20 }]} />
+            {(peritagem.fotos_montagem?.length || 0) > 0 && (
+                <View style={pdfStyles.section} break>
+                    <Text style={pdfStyles.sectionTitle}>2. Montagem e Recuperação</Text>
+                    <View style={pdfStyles.imageGrid}>
+                        {peritagem.fotos_montagem?.map((foto, idx) => (
+                            <WatermarkedImage
+                                key={idx}
+                                src={foto}
+                                style={pdfStyles.image}
+                                label={`Montagem ${idx + 1}`}
+                            />
+                        ))}
                     </View>
-                    <Text style={pdfStyles.imageLabel}>Resultado Final</Text>
                 </View>
-            </Page>
-        )}
-        <View style={pdfStyles.footer} fixed>
-            <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
-            <Text style={{ fontSize: 6, color: '#94a3b8', marginTop: 2 }}>Documento gerado automaticamente pela www.trusttecnologia.com.br</Text>
-        </View>
+            )}
+
+            {(peritagem.fotos_videos_teste?.length || 0) > 0 && (
+                <View style={pdfStyles.section} break>
+                    <Text style={pdfStyles.sectionTitle}>3. Testes de Qualidade</Text>
+                    <View style={pdfStyles.imageGrid}>
+                        {peritagem.fotos_videos_teste?.filter(url => !url.toLowerCase().endsWith('.mp4')).map((foto, idx) => (
+                            <WatermarkedImage
+                                key={idx}
+                                src={foto}
+                                style={pdfStyles.image}
+                                label={`Teste ${idx + 1}`}
+                            />
+                        ))}
+                    </View>
+                    <Text style={{ fontSize: 8, color: '#64748b', marginTop: 10 }}>* Vídeos de teste disponíveis no portal online.</Text>
+                </View>
+            )}
+
+            {peritagem.foto_pintura_final && (
+                <View style={pdfStyles.section} break>
+                    <Text style={pdfStyles.sectionTitle}>4. Pintura e Acabamento Final</Text>
+                    <View style={{ alignItems: 'center' }} wrap={false}>
+                        <View style={pdfStyles.watermarkContainer}>
+                            <Image src={peritagem.foto_pintura_final} style={{ width: '100%', height: 400, objectFit: 'contain' }} />
+                            <Image src="/logo.png" style={[pdfStyles.watermark, { width: 80, bottom: 20, right: 20 }]} />
+                        </View>
+                        <Text style={pdfStyles.imageLabel}>Resultado Final</Text>
+                    </View>
+                </View>
+            )}
+
+            <View style={pdfStyles.footer} fixed>
+                <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
+                <Text style={{ fontSize: 6, color: '#94a3b8', marginTop: 2 }}>Documento gerado automaticamente pela www.trusttecnologia.com.br</Text>
+            </View>
+        </Page>
     </Document>
 );
 
