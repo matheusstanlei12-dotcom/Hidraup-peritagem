@@ -22,6 +22,7 @@ export const Peritagens: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [peritagens, setPeritagens] = useState<Peritagem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'recusadas'>('all'); // Filtro para Perito
     const [empresaId, setEmpresaId] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -113,8 +114,10 @@ export const Peritagens: React.FC = () => {
 
             if (error) throw error;
             setPeritagens(data || []);
-        } catch (err) {
+            setErrorMsg(null);
+        } catch (err: any) {
             console.error('Erro ao buscar peritagens:', err);
+            setErrorMsg(err.message || 'Erro desconhecido');
         } finally {
             setLoading(false);
         }
@@ -221,8 +224,8 @@ export const Peritagens: React.FC = () => {
 
                                         <div className="info-row">
                                             <AlertCircle size={16} />
-                                            <span className={`priority-badge ${p.prioridade.toLowerCase() === 'urgente' ? 'priority-urgente' : 'priority-normal'}`}>
-                                                Prioridade: {p.prioridade}
+                                            <span className={`priority-badge ${(p.prioridade || '').toLowerCase() === 'urgente' ? 'priority-urgente' : 'priority-normal'}`}>
+                                                Prioridade: {p.prioridade || 'Normal'}
                                             </span>
                                         </div>
                                         {isRejection && p.motivo_rejeicao && (
@@ -271,7 +274,13 @@ export const Peritagens: React.FC = () => {
                     </div>
                 )}
 
-                {!loading && filteredPeritagens.length === 0 && (
+                {!loading && errorMsg && (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: '#ef4444', gridColumn: '1 / -1' }}>
+                        Error ao carregar {errorMsg}.
+                    </div>
+                )}
+
+                {!loading && !errorMsg && filteredPeritagens.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                         Nenhuma peritagem encontrada.
                     </div>
