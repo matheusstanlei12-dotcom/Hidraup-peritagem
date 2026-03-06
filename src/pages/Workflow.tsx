@@ -218,10 +218,18 @@ export const WorkflowPage: React.FC = () => {
         changeStage(prevStage);
     };
 
-    const filtered = peritagens.filter(p =>
-        p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.os_interna.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = peritagens.filter(p => {
+        const matchesSearch = p.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.os_interna.toLowerCase().includes(searchTerm.toLowerCase());
+        if (!matchesSearch) return false;
+
+        // Qualidade só vê peritagens na etapa 'teste'
+        if (role === 'qualidade') return p.etapa_atual === 'teste';
+        // Montagem só vê peritagens nas etapas 'peritagem' ou 'montagem'
+        if (role === 'montagem') return ['peritagem', 'montagem'].includes(p.etapa_atual);
+
+        return true;
+    });
 
     return (
         <div className="peritagens-container">
@@ -306,155 +314,163 @@ export const WorkflowPage: React.FC = () => {
 
                     <div className="workflow-steps-content">
                         {/* Passo 1: Peritagem (Início do Fluxo de Produção) */}
-                        <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'peritagem' ? 'active' : 'completed'}`}>
-                            <div className="step-header">
-                                <div className="step-number">1</div>
-                                <h3>Peritagem Inicial</h3>
-                                {selectedPeritagem.etapa_atual !== 'peritagem' && <CheckCircle color="#27ae60" size={20} />}
-                            </div>
-                            {selectedPeritagem.etapa_atual === 'peritagem' && (
-                                <div className="step-content">
-                                    <div className="step-description">
-                                        <p>A peritagem inicial foi concluída e aprovada. Agora você pode iniciar o processo de montagem e recuperação do equipamento.</p>
-                                    </div>
-                                    <button className="btn-next-stage" onClick={advanceStage} disabled={uploading}>
-                                        Iniciar Montagem e Recuperação <ChevronRight size={18} />
-                                    </button>
+                        {role !== 'qualidade' && (
+                            <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'peritagem' ? 'active' : 'completed'}`}>
+                                <div className="step-header">
+                                    <div className="step-number">1</div>
+                                    <h3>Peritagem Inicial</h3>
+                                    {selectedPeritagem.etapa_atual !== 'peritagem' && <CheckCircle color="#27ae60" size={20} />}
                                 </div>
-                            )}
-                        </div>
-                        {/* Passo 2: Montagem */}
-                        <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'montagem' ? 'active' : ''}`}>
-                            <div className="step-header">
-                                <div className="step-number">2</div>
-                                <h3>Montagem e Recuperação</h3>
-                                {['teste', 'pintura', 'finalizado'].includes(selectedPeritagem.etapa_atual) && <CheckCircle color="#27ae60" size={20} />}
-                            </div>
-
-                            {selectedPeritagem.etapa_atual === 'montagem' && (
-                                <div className="step-actions">
-                                    <p className="action-hint">Adicione fotos do processo de montagem e das peças recuperadas.</p>
-                                    <div className="upload-zone">
-                                        <input
-                                            type="file"
-                                            multiple
-                                            accept="image/*"
-                                            id="upload-montagem"
-                                            onChange={e => handleFileUpload(e, 'montagem')}
-                                            disabled={uploading}
-                                        />
-                                        <label htmlFor="upload-montagem" className="btn-upload-label">
-                                            {uploading ? <Loader2 className="animate-spin" /> : <Camera />}
-                                            Adicionar Fotos da Montagem ({selectedPeritagem.fotos_montagem?.length || 0})
-                                        </label>
-                                    </div>
-                                    <div className="preview-grid-mini">
-                                        {selectedPeritagem.fotos_montagem?.map((url, idx) => (
-                                            <div key={idx} className="preview-thumb-container">
-                                                <img src={url} alt="Montagem" />
-                                                <button className="btn-delete-file" onClick={() => handleDeleteFile(idx, 'montagem')}><Trash2 size={14} /></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button
-                                        className="btn-next-stage"
-                                        onClick={advanceStage}
-                                        disabled={uploading || !selectedPeritagem.fotos_montagem || selectedPeritagem.fotos_montagem.length === 0}
-                                        title={(!selectedPeritagem.fotos_montagem || selectedPeritagem.fotos_montagem.length === 0) ? 'Adicione pelo menos uma foto para prosseguir' : ''}
-                                    >
-                                        Concluir Montagem e Ir para Testes <ArrowRight size={18} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Passo 3: Testes */}
-                        <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'teste' ? 'active' : ''}`}>
-                            <div className="step-header">
-                                <div className="step-number">3</div>
-                                <h3>Testes de Qualidade (Pressão/Vazamento)</h3>
-                                {['pintura', 'finalizado'].includes(selectedPeritagem.etapa_atual) && <CheckCircle color="#27ae60" size={20} />}
-                            </div>
-
-                            {selectedPeritagem.etapa_atual === 'teste' && (
-                                <div className="step-actions">
-                                    <p className="action-hint">Adicione fotos e vídeos comprovando os testes de pressão.</p>
-                                    <div className="upload-zone">
-                                        <input
-                                            type="file"
-                                            multiple
-                                            accept="image/*,video/*"
-                                            id="upload-teste"
-                                            onChange={e => handleFileUpload(e, 'teste')}
-                                            disabled={uploading}
-                                        />
-                                        <label htmlFor="upload-teste" className="btn-upload-label">
-                                            {uploading ? <Loader2 className="animate-spin" /> : <Video />}
-                                            Fotos/Vídeos de Teste ({selectedPeritagem.fotos_videos_teste?.length || 0})
-                                        </label>
-                                    </div>
-                                    <div className="preview-grid-mini">
-                                        {selectedPeritagem.fotos_videos_teste?.map((url, idx) => (
-                                            <div key={idx} className="preview-thumb-container">
-                                                {url.toLowerCase().endsWith('.mp4') || url.toLowerCase().startsWith('data:video') ? (
-                                                    <div className="video-thumb"><PlayCircle size={24} color="white" /></div>
-                                                ) : (
-                                                    <img src={url} alt="Teste" />
-                                                )}
-                                                <button className="btn-delete-file" onClick={() => handleDeleteFile(idx, 'teste')}><Trash2 size={14} /></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button
-                                        className="btn-next-stage"
-                                        onClick={advanceStage}
-                                        disabled={uploading || !selectedPeritagem.fotos_videos_teste || selectedPeritagem.fotos_videos_teste.length === 0}
-                                        title={(!selectedPeritagem.fotos_videos_teste || selectedPeritagem.fotos_videos_teste.length === 0) ? 'Adicione pelo menos uma foto ou vídeo para prosseguir' : ''}
-                                    >
-                                        Concluir Testes e Ir para Pintura <ArrowRight size={18} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Passo 4: Pintura */}
-                        <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'pintura' ? 'active' : ''}`}>
-                            <div className="step-header">
-                                <div className="step-number">4</div>
-                                <h3>Acabamento e Pintura Final</h3>
-                                {selectedPeritagem.etapa_atual === 'finalizado' && <CheckCircle color="#27ae60" size={20} />}
-                            </div>
-
-                            {selectedPeritagem.etapa_atual === 'pintura' && (
-                                <div className="step-actions">
-                                    <p className="action-hint">Adicione a foto final do equipamento pronto para entrega.</p>
-                                    <div className="upload-zone">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            id="upload-pintura"
-                                            onChange={e => handleFileUpload(e, 'pintura')}
-                                            disabled={uploading}
-                                        />
-                                        <label htmlFor="upload-pintura" className="btn-upload-label">
-                                            {uploading ? <Loader2 className="animate-spin" /> : <Camera />}
-                                            {selectedPeritagem.foto_pintura_final ? 'Trocar Foto Final' : 'Foto da Pintura Final'}
-                                        </label>
-                                    </div>
-                                    {selectedPeritagem.foto_pintura_final && (
-                                        <div className="preview-grid-mini">
-                                            <div className="preview-thumb-container">
-                                                <img src={selectedPeritagem.foto_pintura_final} alt="Pintura Final" />
-                                                <button className="btn-delete-file" onClick={() => handleDeleteFile(0, 'pintura')}><Trash2 size={14} /></button>
-                                            </div>
+                                {selectedPeritagem.etapa_atual === 'peritagem' && (
+                                    <div className="step-content">
+                                        <div className="step-description">
+                                            <p>A peritagem inicial foi concluída e aprovada. Agora você pode iniciar o processo de montagem e recuperação do equipamento.</p>
                                         </div>
-                                    )}
-                                    <button className="btn-finalize-workflow" onClick={advanceStage} disabled={uploading || !selectedPeritagem.foto_pintura_final}>
-                                        FINALIZAR PROCESSO E GERAR DATABOOK <CheckCircle2 size={18} />
-                                    </button>
+                                        <button className="btn-next-stage" onClick={advanceStage} disabled={uploading}>
+                                            Iniciar Montagem e Recuperação <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {/* Passo 2: Montagem */}
+                        {role !== 'qualidade' && (
+                            <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'montagem' ? 'active' : ''}`}>
+                                <div className="step-header">
+                                    <div className="step-number">2</div>
+                                    <h3>Montagem e Recuperação</h3>
+                                    {['teste', 'pintura', 'finalizado'].includes(selectedPeritagem.etapa_atual) && <CheckCircle color="#27ae60" size={20} />}
                                 </div>
-                            )}
-                        </div>
+
+                                {selectedPeritagem.etapa_atual === 'montagem' && (
+                                    <div className="step-actions">
+                                        <p className="action-hint">Adicione fotos do processo de montagem e das peças recuperadas.</p>
+                                        <div className="upload-zone">
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                id="upload-montagem"
+                                                onChange={e => handleFileUpload(e, 'montagem')}
+                                                disabled={uploading}
+                                            />
+                                            <label htmlFor="upload-montagem" className="btn-upload-label">
+                                                {uploading ? <Loader2 className="animate-spin" /> : <Camera />}
+                                                Adicionar Fotos da Montagem ({selectedPeritagem.fotos_montagem?.length || 0})
+                                            </label>
+                                        </div>
+                                        <div className="preview-grid-mini">
+                                            {selectedPeritagem.fotos_montagem?.map((url, idx) => (
+                                                <div key={idx} className="preview-thumb-container">
+                                                    <img src={url} alt="Montagem" />
+                                                    <button className="btn-delete-file" onClick={() => handleDeleteFile(idx, 'montagem')}><Trash2 size={14} /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button
+                                            className="btn-next-stage"
+                                            onClick={advanceStage}
+                                            disabled={uploading || !selectedPeritagem.fotos_montagem || selectedPeritagem.fotos_montagem.length === 0}
+                                            title={(!selectedPeritagem.fotos_montagem || selectedPeritagem.fotos_montagem.length === 0) ? 'Adicione pelo menos uma foto para prosseguir' : ''}
+                                        >
+                                            Concluir Montagem e Ir para Testes <ArrowRight size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Passo 3: Testes - visível para qualidade, gestor, pcp */}
+                        {role !== 'montagem' && (
+                            <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'teste' ? 'active' : ''}`}>
+                                <div className="step-header">
+                                    <div className="step-number">3</div>
+                                    <h3>Testes de Qualidade (Pressão/Vazamento)</h3>
+                                    {['pintura', 'finalizado'].includes(selectedPeritagem.etapa_atual) && <CheckCircle color="#27ae60" size={20} />}
+                                </div>
+
+                                {selectedPeritagem.etapa_atual === 'teste' && (
+                                    <div className="step-actions">
+                                        <p className="action-hint">Adicione fotos e vídeos comprovando os testes de pressão.</p>
+                                        <div className="upload-zone">
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*,video/*"
+                                                id="upload-teste"
+                                                onChange={e => handleFileUpload(e, 'teste')}
+                                                disabled={uploading}
+                                            />
+                                            <label htmlFor="upload-teste" className="btn-upload-label">
+                                                {uploading ? <Loader2 className="animate-spin" /> : <Video />}
+                                                Fotos/Vídeos de Teste ({selectedPeritagem.fotos_videos_teste?.length || 0})
+                                            </label>
+                                        </div>
+                                        <div className="preview-grid-mini">
+                                            {selectedPeritagem.fotos_videos_teste?.map((url, idx) => (
+                                                <div key={idx} className="preview-thumb-container">
+                                                    {url.toLowerCase().endsWith('.mp4') || url.toLowerCase().startsWith('data:video') ? (
+                                                        <div className="video-thumb"><PlayCircle size={24} color="white" /></div>
+                                                    ) : (
+                                                        <img src={url} alt="Teste" />
+                                                    )}
+                                                    <button className="btn-delete-file" onClick={() => handleDeleteFile(idx, 'teste')}><Trash2 size={14} /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button
+                                            className="btn-next-stage"
+                                            onClick={advanceStage}
+                                            disabled={uploading || !selectedPeritagem.fotos_videos_teste || selectedPeritagem.fotos_videos_teste.length === 0}
+                                            title={(!selectedPeritagem.fotos_videos_teste || selectedPeritagem.fotos_videos_teste.length === 0) ? 'Adicione pelo menos uma foto ou vídeo para prosseguir' : ''}
+                                        >
+                                            Concluir Testes e Ir para Pintura <ArrowRight size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Passo 4: Pintura - não visível para qualidade nem montagem */}
+                        {role !== 'qualidade' && role !== 'montagem' && (
+                            <div className={`workflow-step-section ${selectedPeritagem.etapa_atual === 'pintura' ? 'active' : ''}`}>
+                                <div className="step-header">
+                                    <div className="step-number">4</div>
+                                    <h3>Acabamento e Pintura Final</h3>
+                                    {selectedPeritagem.etapa_atual === 'finalizado' && <CheckCircle color="#27ae60" size={20} />}
+                                </div>
+
+                                {selectedPeritagem.etapa_atual === 'pintura' && (
+                                    <div className="step-actions">
+                                        <p className="action-hint">Adicione a foto final do equipamento pronto para entrega.</p>
+                                        <div className="upload-zone">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                id="upload-pintura"
+                                                onChange={e => handleFileUpload(e, 'pintura')}
+                                                disabled={uploading}
+                                            />
+                                            <label htmlFor="upload-pintura" className="btn-upload-label">
+                                                {uploading ? <Loader2 className="animate-spin" /> : <Camera />}
+                                                {selectedPeritagem.foto_pintura_final ? 'Trocar Foto Final' : 'Foto da Pintura Final'}
+                                            </label>
+                                        </div>
+                                        {selectedPeritagem.foto_pintura_final && (
+                                            <div className="preview-grid-mini">
+                                                <div className="preview-thumb-container">
+                                                    <img src={selectedPeritagem.foto_pintura_final} alt="Pintura Final" />
+                                                    <button className="btn-delete-file" onClick={() => handleDeleteFile(0, 'pintura')}><Trash2 size={14} /></button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <button className="btn-finalize-workflow" onClick={advanceStage} disabled={uploading || !selectedPeritagem.foto_pintura_final}>
+                                            FINALIZAR PROCESSO E GERAR DATABOOK <CheckCircle2 size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
