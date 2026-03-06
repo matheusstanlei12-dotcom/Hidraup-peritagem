@@ -1805,13 +1805,13 @@ export const NovaPeritagem: React.FC = () => {
 
                                                     if (!detectedComponent) {
                                                         // Tenta achar via includes (case insensitive)
-                                                        detectedComponent = availableComponents.find(c => item.text.toLowerCase().includes(c.toLowerCase()));
+                                                        detectedComponent = availableComponents.find(c => (item.text || '').toLowerCase().includes(c.toLowerCase()));
                                                     }
 
                                                     if (!detectedComponent) {
                                                         // Tenta mapeamento manual
                                                         for (const [key, val] of Object.entries(manualMapping)) {
-                                                            if (item.text.includes(key)) {
+                                                            if ((item.text || '').includes(key)) {
                                                                 detectedComponent = val;
                                                                 break;
                                                             }
