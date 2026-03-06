@@ -58,7 +58,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
                 .from('peritagens')
                 .select('id, numero_peritagem, cliente, os_interna, status, camisa_int, haste_diam, curso, created_at')
                 .or('status.eq.PERITAGEM CRIADA,status.eq.AGUARDANDO APROVAÇÃO DO PCP')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setPeritagens(data || []);
