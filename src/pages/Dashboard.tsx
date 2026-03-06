@@ -82,13 +82,13 @@ export const Dashboard: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('empresa_id, empresas(nome_fantasia)')
+                .select('empresa_id, empresas(nome)')
                 .eq('id', user.id)
                 .single();
             if (error) throw error;
             setEmpresaId(data?.empresa_id || null);
             // @ts-ignore
-            setClienteNome(data?.empresas?.nome_fantasia || '');
+            setClienteNome(data?.empresas?.nome || '');
         } catch (err) {
             console.error('Erro ao buscar empresa do usuário:', err);
             setLoading(false);

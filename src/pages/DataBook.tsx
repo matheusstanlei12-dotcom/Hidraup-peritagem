@@ -130,7 +130,7 @@ export const DataBook: React.FC = () => {
     const [generatingPdf, setGeneratingPdf] = useState(false);
 
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-    const [empresas, setEmpresas] = useState<{ id: string, nome_fantasia: string }[]>([]);
+    const [empresas, setEmpresas] = useState<{ id: string, nome: string }[]>([]);
 
     const [formData, setFormData] = useState({
         cliente: '',
@@ -158,8 +158,28 @@ export const DataBook: React.FC = () => {
     }, [currentFolder]);
 
     const fetchEmpresas = async () => {
-        const { data } = await supabase.from('empresas').select('id, nome_fantasia').order('nome_fantasia');
-        setEmpresas(data || []);
+        try {
+            // 1. Fetch official empresas
+            const { data: empresasData } = await supabase.from('empresas').select('id, nome').order('nome');
+
+            // 2. Fetch unique client names from peritagens to include those not yet in official table
+            const { data: peritagensData } = await supabase.from('peritagens').select('cliente');
+            const uniquePeritagemClients = Array.from(new Set((peritagensData || []).map(p => p.cliente).filter(Boolean)));
+
+            const combined = (empresasData || []).map(e => ({ id: e.id, nome: e.nome }));
+
+            // Add clients from peritagens that are not already in combined
+            uniquePeritagemClients.forEach(clientName => {
+                if (!combined.find(e => e.nome.toUpperCase() === (clientName as string).toUpperCase())) {
+                    combined.push({ id: `peritagens:${clientName}`, nome: clientName as string });
+                }
+            });
+
+            combined.sort((a, b) => a.nome.localeCompare(b.nome));
+            setEmpresas(combined);
+        } catch (error) {
+            console.error('Error fetching empresas:', error);
+        }
     };
 
     const fetchFolders = async () => {
@@ -274,7 +294,7 @@ export const DataBook: React.FC = () => {
                     data_entrega: formData.data_entrega || null,
                     pedido_compra: formData.pedido_compra,
                     responsavel: formData.responsavel,
-                    empresa_id: formData.empresa_id || null,
+                    empresa_id: formData.empresa_id?.startsWith('peritagens:') ? null : (formData.empresa_id || null),
                     criado_por: user?.id
                 }])
                 .select()
@@ -652,12 +672,12 @@ export const DataBook: React.FC = () => {
                                         value={formData.empresa_id}
                                         onChange={e => {
                                             const emp = empresas.find(em => em.id === e.target.value);
-                                            setFormData({ ...formData, empresa_id: e.target.value, cliente: emp?.nome_fantasia || '' });
+                                            setFormData({ ...formData, empresa_id: e.target.value, cliente: emp?.nome || '' });
                                         }}
                                         required
                                     >
                                         <option value="">Selecione uma empresa</option>
-                                        {empresas.map(emp => <option key={emp.id} value={emp.id}>{emp.nome_fantasia}</option>)}
+                                        {empresas.map(emp => <option key={emp.id} value={emp.id}>{emp.nome}</option>)}
                                     </select>
                                 </div>
                                 <div className="form-group">
