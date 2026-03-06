@@ -9,10 +9,14 @@ import './PcpCommon.css';
 interface ItemAguardando {
     id: string;
     os_interna: string;
+    numero_ordem?: string;
+    ni?: string;
+    nf?: string;
+    numero_laudo?: string;
     cliente: string;
     data_chegada: string;
     status: string;
-    observacoes?: string;
+    descricao_equipamento?: string;
 }
 
 export const AguardandoPeritagem: React.FC = () => {
@@ -25,9 +29,13 @@ export const AguardandoPeritagem: React.FC = () => {
 
     // Form state
     const [osInterna, setOsInterna] = useState('');
+    const [numeroOrdem, setNumeroOrdem] = useState('');
+    const [ni, setNi] = useState('');
+    const [nf, setNf] = useState('');
+    const [numeroLaudo, setNumeroLaudo] = useState('');
     const [cliente, setCliente] = useState('');
     const [dataChegada, setDataChegada] = useState(new Date().toISOString().split('T')[0]);
-    const [observacoes, setObservacoes] = useState('');
+    const [descricaoEquipamento, setDescricaoEquipamento] = useState('');
     const [saving, setSaving] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
@@ -56,7 +64,7 @@ export const AguardandoPeritagem: React.FC = () => {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!osInterna || !cliente || !dataChegada) {
-            alert('Por favor, preencha todos os campos.');
+            alert('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
 
@@ -66,9 +74,13 @@ export const AguardandoPeritagem: React.FC = () => {
                 .from('aguardando_peritagem')
                 .insert([{
                     os_interna: osInterna,
+                    numero_ordem: numeroOrdem,
+                    ni: ni,
+                    nf: nf,
+                    numero_laudo: numeroLaudo,
                     cliente: cliente,
                     data_chegada: dataChegada,
-                    observacoes: observacoes,
+                    descricao_equipamento: descricaoEquipamento,
                     status: 'AGUARDANDO'
                 }]);
 
@@ -76,8 +88,12 @@ export const AguardandoPeritagem: React.FC = () => {
 
             alert('Item adicionado com sucesso!');
             setOsInterna('');
+            setNumeroOrdem('');
+            setNi('');
+            setNf('');
+            setNumeroLaudo('');
             setCliente('');
-            setObservacoes('');
+            setDescricaoEquipamento('');
             setShowForm(false);
             fetchItens();
         } catch (err: any) {
@@ -107,7 +123,9 @@ export const AguardandoPeritagem: React.FC = () => {
 
     const filtered = itens.filter(item =>
         item.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.os_interna.toLowerCase().includes(searchTerm.toLowerCase())
+        item.os_interna.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.numero_ordem || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.numero_laudo || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -144,7 +162,7 @@ export const AguardandoPeritagem: React.FC = () => {
                         <form onSubmit={handleSave} className="modal-body">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Ordem de Serviço Interna</label>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Numeração da OS</label>
                                     <input
                                         type="text"
                                         style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
@@ -153,6 +171,50 @@ export const AguardandoPeritagem: React.FC = () => {
                                         placeholder="Ex: 8450"
                                         required
                                     />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Número da Ordem</label>
+                                        <input
+                                            type="text"
+                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                            value={numeroOrdem}
+                                            onChange={(e) => setNumeroOrdem(e.target.value)}
+                                            placeholder="Nº da Ordem"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Número do Laudo</label>
+                                        <input
+                                            type="text"
+                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                            value={numeroLaudo}
+                                            onChange={(e) => setNumeroLaudo(e.target.value)}
+                                            placeholder="Nº do Laudo"
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>NI</label>
+                                        <input
+                                            type="text"
+                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                            value={ni}
+                                            onChange={(e) => setNi(e.target.value)}
+                                            placeholder="NI"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>NF</label>
+                                        <input
+                                            type="text"
+                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                            value={nf}
+                                            onChange={(e) => setNf(e.target.value)}
+                                            placeholder="NF"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Cliente</label>
@@ -166,7 +228,7 @@ export const AguardandoPeritagem: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Data de Chegada</label>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Data</label>
                                     <input
                                         type="date"
                                         style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
@@ -176,12 +238,12 @@ export const AguardandoPeritagem: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Observações (O que foi digitado)</label>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Descrição do Equipamento</label>
                                     <textarea
                                         style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', minHeight: '100px', resize: 'vertical' }}
-                                        value={observacoes}
-                                        onChange={(e) => setObservacoes(e.target.value)}
-                                        placeholder="Informações adicionais do cilindro..."
+                                        value={descricaoEquipamento}
+                                        onChange={(e) => setDescricaoEquipamento(e.target.value)}
+                                        placeholder="Descrição do equipamento..."
                                     />
                                 </div>
                             </div>
@@ -234,12 +296,34 @@ export const AguardandoPeritagem: React.FC = () => {
                                 <h3 className="pcp-card-client" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>
                                     {item.cliente}
                                 </h3>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                                    {item.numero_ordem && (
+                                        <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#f0fdf4', color: '#166534', padding: '3px 8px', borderRadius: '5px' }}>
+                                            Ordem: {item.numero_ordem}
+                                        </span>
+                                    )}
+                                    {item.ni && (
+                                        <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#fefce8', color: '#854d0e', padding: '3px 8px', borderRadius: '5px' }}>
+                                            NI: {item.ni}
+                                        </span>
+                                    )}
+                                    {item.nf && (
+                                        <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#fef2f2', color: '#991b1b', padding: '3px 8px', borderRadius: '5px' }}>
+                                            NF: {item.nf}
+                                        </span>
+                                    )}
+                                    {item.numero_laudo && (
+                                        <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#f5f3ff', color: '#5b21b6', padding: '3px 8px', borderRadius: '5px' }}>
+                                            Laudo: {item.numero_laudo}
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="report-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
                                     <Calendar size={16} />
-                                    <span style={{ fontSize: '0.85rem' }}>Chegada: {new Date(item.data_chegada).toLocaleDateString('pt-BR')}</span>
+                                    <span style={{ fontSize: '0.85rem' }}>Data: {new Date(item.data_chegada).toLocaleDateString('pt-BR')}</span>
                                 </div>
 
-                                {selectedItemId === item.id && item.observacoes && (
+                                {selectedItemId === item.id && item.descricao_equipamento && (
                                     <div style={{
                                         marginTop: '16px',
                                         padding: '12px',
@@ -249,10 +333,10 @@ export const AguardandoPeritagem: React.FC = () => {
                                         animation: 'fadeIn 0.3s ease'
                                     }}>
                                         <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
-                                            Informações Digitadas
+                                            Descrição do Equipamento
                                         </label>
                                         <p style={{ fontSize: '0.9rem', color: '#1e293b', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                                            {item.observacoes}
+                                            {item.descricao_equipamento}
                                         </p>
                                     </div>
                                 )}
@@ -264,7 +348,16 @@ export const AguardandoPeritagem: React.FC = () => {
                                     style={{ width: '100%', background: '#21408e', color: 'white', border: 'none', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700, cursor: 'pointer' }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        navigate(`/nova-peritagem?os_interna=${item.os_interna}&cliente=${encodeURIComponent(item.cliente)}&obs=${encodeURIComponent(item.observacoes || '')}`);
+                                        const params = new URLSearchParams({
+                                            os_interna: item.os_interna,
+                                            cliente: item.cliente,
+                                            ...(item.numero_ordem && { numero_ordem: item.numero_ordem }),
+                                            ...(item.ni && { ni: item.ni }),
+                                            ...(item.nf && { nf: item.nf }),
+                                            ...(item.numero_laudo && { numero_laudo: item.numero_laudo }),
+                                            ...(item.descricao_equipamento && { desc_equip: item.descricao_equipamento }),
+                                        });
+                                        navigate(`/nova-peritagem?${params.toString()}`);
                                     }}
                                 >
                                     <ClipboardSignature size={16} />

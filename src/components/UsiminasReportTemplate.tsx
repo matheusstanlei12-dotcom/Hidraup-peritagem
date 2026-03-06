@@ -1,6 +1,13 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 
+// Helper: returns true if the value has meaningful content
+const hasValue = (val: string | undefined | null): boolean => {
+    if (!val) return false;
+    const trimmed = val.trim();
+    return trimmed !== '' && trimmed !== '-';
+};
+
 // Fontes nativas para evitar erros de rede
 const FONT_FAMILY = 'Helvetica';
 
@@ -361,46 +368,62 @@ export const UsiminasReportTemplate: React.FC<{ data: ReportData }> = ({ data })
                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO</Text>
                     </View>
 
-                    {/* Grid de 2 Colunas */}
+                    {/* Grid de 2 Colunas - Somente campos preenchidos */}
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                         {/* Coluna 1 */}
                         <View style={{ width: '50%', paddingRight: 10 }}>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LAUDO / REPARO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.tipo_modelo || '-'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LINHA:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.linha || '-'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LOCAL:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.local_equipamento || '-'}</Text>
-                            </View>
+                            {hasValue(data.numero_os) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LAUDO / REPARO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.tipo_modelo) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.tipo_modelo}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.linha) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LINHA:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.linha}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.local_equipamento) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LOCAL:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.local_equipamento}</Text>
+                                </View>
+                            )}
                         </View>
 
                         {/* Coluna 2 */}
                         <View style={{ width: '50%', paddingLeft: 10 }}>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ÁREA:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.area || '-'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.desenho_conjunto || '-'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.tag || '-'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>MATERIAL / NI:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.ni || '-'}</Text>
-                            </View>
+                            {hasValue(data.area) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ÁREA:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.area}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.desenho_conjunto) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.desenho_conjunto}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.tag) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TAG:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.tag}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.ni) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>MATERIAL / NI:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.ni}</Text>
+                                </View>
+                            )}
                         </View>
                     </View>
                 </View>

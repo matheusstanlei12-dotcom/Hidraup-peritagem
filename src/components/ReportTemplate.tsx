@@ -1,6 +1,13 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 
+// Helper: returns true if the value has meaningful content
+const hasValue = (val: string | undefined | null): boolean => {
+    if (!val) return false;
+    const trimmed = val.trim();
+    return trimmed !== '' && trimmed !== '-';
+};
+
 // Fontes nativas para evitar erros de rede
 const FONT_FAMILY = 'Helvetica';
 
@@ -361,62 +368,86 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#fff' }}>IDENTIFICAÇÃO</Text>
                     </View>
 
-                    {/* Grid de 2 Colunas */}
+                    {/* Grid de 2 Colunas - Somente campos preenchidos */}
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                         {/* Coluna 1 */}
                         <View style={{ width: '50%', paddingRight: 10 }}>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ORDEM DE SERVIÇO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>NI:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.ni}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO/ MODELO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.tipo_modelo}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LUBRIFICANTE:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.lubrificante}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ACOPLAMENTO / POLIA:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.acoplamento_polia || 'NÃO'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>OUTROS:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.outros_especificar}</Text>
-                            </View>
+                            {hasValue(data.numero_os) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ORDEM DE SERVIÇO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.numero_os}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.ni) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>NI:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.ni}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.tipo_modelo) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>TIPO/ MODELO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.tipo_modelo}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.lubrificante) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>LUBRIFICANTE:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.lubrificante}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.acoplamento_polia) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>ACOPLAMENTO / POLIA:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.acoplamento_polia}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.outros_especificar) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>OUTROS:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.outros_especificar}</Text>
+                                </View>
+                            )}
                         </View>
 
                         {/* Coluna 2 */}
                         <View style={{ width: '50%', paddingLeft: 10 }}>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>NF:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.nota_fiscal}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.desenho_conjunto}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>FABRICANTE:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.fabricante}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>VOLUME:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.volume}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>SISTEMA DE LUBRIFICAÇÃO:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.sistema_lubrificacao || 'NÃO'}</Text>
-                            </View>
-                            <View style={{ marginBottom: 8 }}>
-                                <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>OBSERVAÇÕES:</Text>
-                                <Text style={{ fontSize: 9 }}>{data.observacoes_gerais}</Text>
-                            </View>
+                            {hasValue(data.nota_fiscal) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>NF:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.nota_fiscal}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.desenho_conjunto) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>DESENHO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.desenho_conjunto}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.fabricante) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>FABRICANTE:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.fabricante}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.volume) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>VOLUME:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.volume}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.sistema_lubrificacao) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>SISTEMA DE LUBRIFICAÇÃO:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.sistema_lubrificacao}</Text>
+                                </View>
+                            )}
+                            {hasValue(data.observacoes_gerais) && (
+                                <View style={{ marginBottom: 8 }}>
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#555', marginBottom: 2 }}>OBSERVAÇÕES:</Text>
+                                    <Text style={{ fontSize: 9 }}>{data.observacoes_gerais}</Text>
+                                </View>
+                            )}
                         </View>
                     </View>
                 </View>
