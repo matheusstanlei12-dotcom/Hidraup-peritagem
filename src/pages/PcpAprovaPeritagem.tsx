@@ -137,7 +137,7 @@ export const PcpAprovaPeritagem: React.FC = () => {
         try {
             const { error } = await supabase
                 .from('peritagens')
-                .update({ status: 'REVISÃO NECESSÁRIA' })
+                .update({ status: 'REVISÃO NECESSÁRIA', motivo_rejeicao: motivo })
                 .eq('id', id);
 
             if (error) throw error;
