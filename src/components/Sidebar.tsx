@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     LayoutDashboard,
     FileText,
@@ -15,8 +15,7 @@ import {
     Book,
     Clock,
     RefreshCcw,
-    Folder,
-    Activity,
+    Folder
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -57,7 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
             </div>
 
             <nav className="sidebar-nav">
-                {/* ACESSO COMUM: Painel visível para PCP e Gestor, ou todos no WEB se não for cliente */}
+                {/* ACESSO COMUM: Painel visÃ­vel para PCP e Gestor, ou todos no WEB se nÃ£o for cliente */}
                 {['gestor', 'pcp'].includes(role || '') && (
                     <NavLink to="/dashboard" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                         <LayoutDashboard size={20} />
@@ -65,11 +64,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                     </NavLink>
                 )}
 
-                {/* ACESSO ESPECÍFICO POR CARGO */}
+                {/* ACESSO ESPECÃFICO POR CARGO */}
 
                 {/* 1. PERITO */}
                 {role === 'perito' && (
                     <>
+                        <NavLink to="/nova-peritagem" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                            <PlusCircle size={20} />
+                            <span>Nova Peritagem</span>
+                        </NavLink>
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
                             <span>Aguardando Peritagem</span>
@@ -77,10 +80,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         <NavLink to="/peritagens" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
-                        </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
                         </NavLink>
                         <NavLink to="/peritagens?filter=recusada" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
@@ -102,11 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
-                            <span>Relatórios</span>
-                        </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
+                            <span>RelatÃ³rios</span>
                         </NavLink>
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
@@ -114,26 +109,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ClipboardSignature size={20} />
-                            <span>1. Aprovação de Peritagem</span>
+                            <span>1. AprovaÃ§Ã£o de Peritagem</span>
                         </NavLink>
                         <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ShoppingCart size={20} />
-                            <span>2. Liberação do Pedido</span>
+                            <span>2. LiberaÃ§Ã£o do Pedido</span>
                         </NavLink>
                         <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Wrench size={20} />
-                            <span>3. Cilindros em Manutenção</span>
+                            <span>3. Cilindros em ManutenÃ§Ã£o</span>
                         </NavLink>
                         <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <CheckCircle size={20} />
-                            <span>4. Conferência Final</span>
+                            <span>4. ConferÃªncia Final</span>
                         </NavLink>
 
                         <div className="sidebar-divider"></div>
 
                         <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Folder size={20} />
-                            <span>Arquivo Geral (Fotos/Vídeos)</span>
+                            <span>Arquivo Geral (Fotos/VÃ­deos)</span>
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
@@ -161,17 +156,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
                         </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
-                        </NavLink>
                         <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Wrench size={20} />
-                            <span>Cilindros em Manutenção</span>
+                            <span>Cilindros em ManutenÃ§Ã£o</span>
                         </NavLink>
                         <NavLink to="/workflow#etapa2" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
-                            <span>2. Montagem & Recuperação</span>
+                            <span>2. Montagem & RecuperaÃ§Ã£o</span>
                         </NavLink>
                     </>
                 )}
@@ -187,10 +178,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                             <FileText size={20} />
                             <span>Minhas Peritagens</span>
                         </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
-                        </NavLink>
                         <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ShoppingCart size={20} />
                             <span>Liberar Pedido</span>
@@ -203,11 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                     <>
                         <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <CheckCircle size={20} />
-                            <span>Conferência Final</span>
-                        </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
+                            <span>ConferÃªncia Final</span>
                         </NavLink>
                         <NavLink to="/workflow#etapa3" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
@@ -225,11 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                     <>
                         <NavLink to="/meus-relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
-                            <span>Relatórios</span>
-                        </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Acompanhar Processo</span>
+                            <span>RelatÃ³rios</span>
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
@@ -251,11 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/relatorios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <FileSpreadsheet size={20} />
-                            <span>Relatórios</span>
-                        </NavLink>
-                        <NavLink to="/monitoramento" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                            <Activity size={20} />
-                            <span>Monitoramento (Status)</span>
+                            <span>RelatÃ³rios</span>
                         </NavLink>
                         <NavLink to="/pcp/aguardando" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Clock size={20} />
@@ -263,26 +238,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/pcp/aprovar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ClipboardSignature size={20} />
-                            <span>1. Aprovação de Peritagem</span>
+                            <span>1. AprovaÃ§Ã£o de Peritagem</span>
                         </NavLink>
                         <NavLink to="/pcp/liberar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <ShoppingCart size={20} />
-                            <span>2. Liberação do Pedido</span>
+                            <span>2. LiberaÃ§Ã£o do Pedido</span>
                         </NavLink>
                         <NavLink to="/manutencao" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Wrench size={20} />
-                            <span>3. Cilindros em Manutenção</span>
+                            <span>3. Cilindros em ManutenÃ§Ã£o</span>
                         </NavLink>
                         <NavLink to="/pcp/finalizar" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <CheckCircle size={20} />
-                            <span>4. Conferência Final</span>
+                            <span>4. ConferÃªncia Final</span>
                         </NavLink>
 
                         <div className="sidebar-divider"></div>
 
                         <NavLink to="/registro-fotos" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Folder size={20} />
-                            <span>Arquivo Geral (Fotos/Vídeos)</span>
+                            <span>Arquivo Geral (Fotos/VÃ­deos)</span>
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
@@ -298,11 +273,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/admin/usuarios" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Settings size={20} />
-                            <span>Gestão de Usuários</span>
+                            <span>GestÃ£o de UsuÃ¡rios</span>
                         </NavLink>
                         <NavLink to="/admin/empresas" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Building2 size={20} />
-                            <span>Gestão de Clientes</span>
+                            <span>GestÃ£o de Clientes</span>
                         </NavLink>
                     </>
                 )}
@@ -314,7 +289,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         {user?.email?.substring(0, 2).toUpperCase() || 'U'}
                     </div>
                     <div className="user-details">
-                        <span className="user-name">{user?.email?.split('@')[0] || 'Usuário'}</span>
+                        <span className="user-name">{user?.email?.split('@')[0] || 'UsuÃ¡rio'}</span>
                         <span className="user-role">{role?.toUpperCase() || 'CARREGANDO...'}</span>
                     </div>
                 </div>
@@ -326,3 +301,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
         </aside >
     );
 };
+

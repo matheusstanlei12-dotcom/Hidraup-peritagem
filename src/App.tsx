@@ -9,7 +9,6 @@ const LoginPage = React.lazy(() => import('./pages/Login').then(module => ({ def
 const RegisterPage = React.lazy(() => import('./pages/Register').then(module => ({ default: module.RegisterPage })));
 const Dashboard = React.lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
 const Peritagens = React.lazy(() => import('./pages/Peritagens').then(module => ({ default: module.Peritagens })));
-const Monitoramento = React.lazy(() => import('./pages/Monitoramento').then(module => ({ default: module.Monitoramento })));
 const Relatorios = React.lazy(() => import('./pages/Relatorios').then(module => ({ default: module.Relatorios })));
 const NovaPeritagem = React.lazy(() => import('./pages/NovaPeritagem').then(module => ({ default: module.NovaPeritagem })));
 const Clientes = React.lazy(() => import('./pages/Clientes').then(module => ({ default: module.Clientes })));
@@ -115,7 +114,6 @@ function AppRoutes() {
         {/* Rotas Protegidas */}
         <Route path="/dashboard" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/peritagens" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial']}><Layout><Peritagens /></Layout></PrivateRoute>} />
-        <Route path="/monitoramento" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'perito', 'montagem', 'comercial', 'qualidade', 'cliente']}><Layout><Monitoramento /></Layout></PrivateRoute>} />
         <Route path="/clientes" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Clientes /></Layout></PrivateRoute>} />
         <Route path="/manutencao" element={<PrivateRoute allowedRoles={['gestor', 'pcp', 'montagem']}><Layout><Manutencao /></Layout></PrivateRoute>} />
         <Route path="/relatorios" element={<PrivateRoute allowedRoles={['gestor', 'pcp']}><Layout><Relatorios /></Layout></PrivateRoute>} />
