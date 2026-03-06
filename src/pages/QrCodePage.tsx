@@ -175,7 +175,7 @@ const QrCodePDF = ({ peritagem, qrDataUrl }: { peritagem: PeritagemSummary, qrDa
 
 // Função para obter a URL base correta (evita localhost no QR Code)
 const getBaseUrl = () => {
-    return 'https://hidraup-peritagem.vercel.app';
+    return 'https://www.hidraupperitagem.com.br';
 };
 
 export const QrCodePage: React.FC = () => {
