@@ -180,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
-                            <span>Databook do Cliente</span>
+                            <span>Databook</span>
                         </NavLink>
                         <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
@@ -260,7 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
-                            <span>Databook do Cliente</span>
+                            <span>Databook</span>
                         </NavLink>
                     </>
                 )}
@@ -310,7 +310,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
                         </NavLink>
                         <NavLink to="/databook" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <Book size={20} />
-                            <span>Databook do Cliente</span>
+                            <span>Databook</span>
                         </NavLink>
                         <NavLink to="/workflow" onClick={handleLinkClick} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
                             <RefreshCcw size={20} />
