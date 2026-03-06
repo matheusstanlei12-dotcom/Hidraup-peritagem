@@ -63,20 +63,20 @@ const pdfStyles = StyleSheet.create({
     },
     // Seção Central do QR Code
     qrSectionBase: {
-        padding: 25,
+        padding: 30,
         alignItems: 'center',
         backgroundColor: '#ffffff',
     },
     qrWrapper: {
-        padding: 12,
+        padding: 16,
         borderWidth: 1,
         borderColor: '#e2e8f0',
         borderRadius: 15,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#ffffff',
     },
     qrImage: {
-        width: 160,
-        height: 160,
+        width: 220,
+        height: 220,
     },
     // Seção de Dados Técnicos (Estilo Tabela)
     dataSection: {
@@ -314,13 +314,13 @@ export const QrCodePage: React.FC = () => {
                                                     value={`${baseUrl}/view-report/${p.id}`}
                                                     size={120}
                                                     level="H"
-                                                    includeMargin={false}
+                                                    includeMargin={true}
                                                     imageSettings={{
                                                         src: "/logo.png",
                                                         x: undefined,
                                                         y: undefined,
-                                                        height: 24,
-                                                        width: 24,
+                                                        height: 20,
+                                                        width: 20,
                                                         excavate: true,
                                                     }}
                                                 />
@@ -375,13 +375,13 @@ export const QrCodePage: React.FC = () => {
                                     value={`${baseUrl}/view-report/${qrConfig.id}`}
                                     size={1024}
                                     level="H"
-                                    includeMargin={false}
+                                    includeMargin={true}
                                     imageSettings={{
                                         src: "/logo.png",
                                         x: undefined,
                                         y: undefined,
-                                        height: 200,
-                                        width: 200,
+                                        height: 140,
+                                        width: 140,
                                         excavate: true,
                                     }}
                                 />
