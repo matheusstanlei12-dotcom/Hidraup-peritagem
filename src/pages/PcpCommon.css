@@ -55,7 +55,14 @@
     font-weight: 600;
 }
 
+.pcp-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .pcp-details-mini-grid {
+    margin-top: auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 1rem;
