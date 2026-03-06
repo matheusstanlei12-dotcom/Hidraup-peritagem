@@ -99,10 +99,10 @@ export const PcpAprovaPeritagem: React.FC = () => {
     };
 
     useEffect(() => {
-        if (selectedPeritagem) {
+        if (selectedPeritagem?.id) {
             fetchAnalyses(selectedPeritagem.id);
         }
-    }, [selectedPeritagem]);
+    }, [selectedPeritagem?.id]);
 
     const handleApprove = async (id: string) => {
         if (!user) return;
