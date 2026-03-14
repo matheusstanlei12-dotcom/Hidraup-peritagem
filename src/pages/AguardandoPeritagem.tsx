@@ -25,19 +25,9 @@ export const AguardandoPeritagem: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [itens, setItens] = useState<ItemAguardando[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
-
-    // Form state
-    const [osInterna, setOsInterna] = useState('');
-    const [numeroOrdem, setNumeroOrdem] = useState('');
-    const [ni, setNi] = useState('');
-    const [nf, setNf] = useState('');
-    const [numeroLaudo, setNumeroLaudo] = useState('');
-    const [cliente, setCliente] = useState('');
-    const [dataChegada, setDataChegada] = useState(new Date().toISOString().split('T')[0]);
-    const [descricaoEquipamento, setDescricaoEquipamento] = useState('');
-    const [saving, setSaving] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchItens();
@@ -61,63 +51,27 @@ export const AguardandoPeritagem: React.FC = () => {
         }
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!osInterna || !cliente || !dataChegada) {
-            alert('Por favor, preencha todos os campos obrigatórios.');
-            return;
-        }
 
-        setSaving(true);
-        try {
-            const { error } = await supabase
-                .from('aguardando_peritagem')
-                .insert([{
-                    os_interna: osInterna,
-                    numero_ordem: numeroOrdem,
-                    ni: ni,
-                    nf: nf,
-                    numero_laudo: numeroLaudo,
-                    cliente: cliente,
-                    data_chegada: dataChegada,
-                    descricao_equipamento: descricaoEquipamento,
-                    status: 'AGUARDANDO'
-                }]);
 
-            if (error) throw error;
-
-            alert('Item adicionado com sucesso!');
-            setOsInterna('');
-            setNumeroOrdem('');
-            setNi('');
-            setNf('');
-            setNumeroLaudo('');
-            setCliente('');
-            setDescricaoEquipamento('');
-            setShowForm(false);
-            fetchItens();
-        } catch (err: any) {
-            console.error('Erro ao salvar:', err);
-            alert('Erro ao salvar item: ' + (err.message || 'Erro desconhecido'));
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!window.confirm('Deseja realmente excluir este item?')) return;
+    const handleDelete = async () => {
+        if (!itemToDelete) return;
 
         try {
+            setIsDeleting(true);
             const { error } = await supabase
                 .from('aguardando_peritagem')
                 .delete()
-                .eq('id', id);
+                .eq('id', itemToDelete);
 
             if (error) throw error;
-            setItens(prev => prev.filter(item => item.id !== id));
-        } catch (err) {
+
+            setItens(prev => prev.filter(item => item.id !== itemToDelete));
+            setItemToDelete(null);
+        } catch (err: any) {
             console.error('Erro ao deletar:', err);
-            alert('Erro ao deletar item.');
+            alert('Erro ao deletar item: ' + (err.message || 'Erro desconhecido'));
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -133,7 +87,7 @@ export const AguardandoPeritagem: React.FC = () => {
             <div className="header-section">
                 <h1 className="page-title">Aguardando Peritagem</h1>
                 {role === 'pcp' || role === 'gestor' ? (
-                    <button className="btn-primary" onClick={() => setShowForm(true)}>
+                    <button className="btn-primary" onClick={() => navigate('/nova-peritagem?from_waitlist=true')}>
                         <Plus size={20} />
                         <span>Novo Item</span>
                     </button>
@@ -152,120 +106,7 @@ export const AguardandoPeritagem: React.FC = () => {
                 </div>
             </div>
 
-            {showForm && (
-                <div className="modal-overlay">
-                    <div className="modal-content" style={{ maxWidth: '500px' }}>
-                        <div className="modal-header">
-                            <h2>Adicionar Cilindro para Peritagem</h2>
-                            <button className="close-btn" onClick={() => setShowForm(false)}>&times;</button>
-                        </div>
-                        <form onSubmit={handleSave} className="modal-body">
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Numeração da OS</label>
-                                    <input
-                                        type="text"
-                                        style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                        value={osInterna}
-                                        onChange={(e) => setOsInterna(e.target.value)}
-                                        placeholder="Ex: 8450"
-                                        required
-                                    />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Número da Ordem</label>
-                                        <input
-                                            type="text"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                            value={numeroOrdem}
-                                            onChange={(e) => setNumeroOrdem(e.target.value)}
-                                            placeholder="Nº da Ordem"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Número do Laudo</label>
-                                        <input
-                                            type="text"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                            value={numeroLaudo}
-                                            onChange={(e) => setNumeroLaudo(e.target.value)}
-                                            placeholder="Nº do Laudo"
-                                        />
-                                    </div>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>NI</label>
-                                        <input
-                                            type="text"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                            value={ni}
-                                            onChange={(e) => setNi(e.target.value)}
-                                            placeholder="NI"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>NF</label>
-                                        <input
-                                            type="text"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                            value={nf}
-                                            onChange={(e) => setNf(e.target.value)}
-                                            placeholder="NF"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Cliente</label>
-                                    <input
-                                        type="text"
-                                        style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                        value={cliente}
-                                        onChange={(e) => setCliente(e.target.value)}
-                                        placeholder="Nome do Cliente"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Data</label>
-                                    <input
-                                        type="date"
-                                        style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
-                                        value={dataChegada}
-                                        onChange={(e) => setDataChegada(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Descrição do Equipamento</label>
-                                    <textarea
-                                        style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', minHeight: '100px', resize: 'vertical' }}
-                                        value={descricaoEquipamento}
-                                        onChange={(e) => setDescricaoEquipamento(e.target.value)}
-                                        placeholder="Descrição do equipamento..."
-                                    />
-                                </div>
-                            </div>
-                            <div className="modal-footer" style={{
-                                marginTop: '25px',
-                                display: 'flex',
-                                gap: '12px',
-                                justifyContent: 'flex-end',
-                                borderTop: '1px solid #f1f5f9',
-                                paddingTop: '20px'
-                            }}>
-                                <button type="button" className="btn-report btn-report-outline" onClick={() => setShowForm(false)} style={{ margin: 0 }}>
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="btn-report btn-report-primary" disabled={saving} style={{ margin: 0, minWidth: '120px' }}>
-                                    {saving ? <Loader2 className="animate-spin" size={18} /> : 'Salvar'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+
 
             <div className="pcp-approval-grid">
                 {loading ? (
@@ -348,16 +189,7 @@ export const AguardandoPeritagem: React.FC = () => {
                                     style={{ width: '100%', background: '#21408e', color: 'white', border: 'none', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700, cursor: 'pointer' }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        const params = new URLSearchParams({
-                                            os_interna: item.os_interna,
-                                            cliente: item.cliente,
-                                            ...(item.numero_ordem && { numero_ordem: item.numero_ordem }),
-                                            ...(item.ni && { ni: item.ni }),
-                                            ...(item.nf && { nf: item.nf }),
-                                            ...(item.numero_laudo && { numero_laudo: item.numero_laudo }),
-                                            ...(item.descricao_equipamento && { desc_equip: item.descricao_equipamento }),
-                                        });
-                                        navigate(`/nova-peritagem?${params.toString()}`);
+                                        navigate(`/nova-peritagem?id_waitlist=${item.id}`);
                                     }}
                                 >
                                     <ClipboardSignature size={16} />
@@ -369,7 +201,7 @@ export const AguardandoPeritagem: React.FC = () => {
                                         style={{ width: 'fit-content', color: '#ef4444', borderColor: '#fee2e2', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', cursor: 'pointer', background: 'white', border: '1px solid #fee2e2' }}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleDelete(item.id);
+                                            setItemToDelete(item.id);
                                         }}
                                     >
                                         <Trash2 size={16} />
@@ -384,6 +216,32 @@ export const AguardandoPeritagem: React.FC = () => {
             {!loading && filtered.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                     Nenhum cilindro aguardando peritagem.
+                </div>
+            )}
+            {itemToDelete && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '400px' }}>
+                        <div className="modal-header">
+                            <h2>Confirmar Exclusão</h2>
+                            <button className="close-btn" onClick={() => setItemToDelete(null)}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem certeza que deseja excluir este item da lista de espera? Esta ação não pode ser desfeita.</p>
+                        </div>
+                        <div className="modal-footer" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+                            <button className="btn-report btn-report-outline" onClick={() => setItemToDelete(null)}>
+                                Cancelar
+                            </button>
+                            <button 
+                                className="btn-report btn-report-primary" 
+                                style={{ background: '#ef4444', border: 'none' }}
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? <Loader2 className="animate-spin" size={18} /> : 'Excluir'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
