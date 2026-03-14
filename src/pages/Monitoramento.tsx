@@ -200,7 +200,7 @@ export const Monitoramento: React.FC = () => {
                 .from('peritagem_historico')
                 .select('*')
                 .eq('peritagem_id', peritagemId)
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             const userIds = Array.from(new Set(histData?.map(h => h.alterado_por) || []));
             const { data: profiles } = await supabase

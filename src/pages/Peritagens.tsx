@@ -74,7 +74,7 @@ export const Peritagens: React.FC = () => {
             let query = supabase
                 .from('peritagens')
                 .select('id, numero_peritagem, cliente, data_execucao, status, prioridade, criado_por, os_interna, motivo_rejeicao, created_at')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             // Filtro via URL (ex: vindo do Dashboard)
             if (statusParam === 'finalizados') {

@@ -65,7 +65,7 @@ export const Relatorios: React.FC = () => {
             const { data, error } = await supabase
                 .from('peritagens')
                 .select('id, numero_peritagem, cliente, data_execucao, status, os_interna, area, linha')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setPeritagens(data || []);

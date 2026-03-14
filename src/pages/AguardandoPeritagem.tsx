@@ -50,7 +50,7 @@ export const AguardandoPeritagem: React.FC = () => {
                 .from('aguardando_peritagem')
                 .select('*')
                 .eq('status', 'AGUARDANDO')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setItens(data || []);

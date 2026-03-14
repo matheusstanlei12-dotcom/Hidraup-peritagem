@@ -52,7 +52,7 @@ export const WorkflowPage: React.FC = () => {
                 .from('peritagens')
                 .select('id, tag, cliente, os_interna, etapa_atual, databook_pronto, fotos_montagem, fotos_videos_teste, foto_pintura_final')
                 .neq('etapa_atual', 'finalizado')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setPeritagens(data || []);

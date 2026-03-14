@@ -83,7 +83,7 @@ export const ClientPeritagens: React.FC = () => {
                 .from('peritagens')
                 .select('*')
                 .eq('empresa_id', empresaId)
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setPeritagens(data || []);

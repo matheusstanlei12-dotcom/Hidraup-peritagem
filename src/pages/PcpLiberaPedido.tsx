@@ -31,7 +31,7 @@ export const PcpLiberaPedido: React.FC = () => {
                 .from('peritagens')
                 .select('id, numero_peritagem, cliente, status, numero_pedido, os_interna, created_at')
                 .or('status.eq.AGUARDANDO APROVAÇÃO DO CLIENTE,status.eq.Aguardando Clientes')
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setPeritagens(data || []);
