@@ -225,20 +225,23 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     photoContainer: {
-        width: '48%', // Slightly less than 50% to ensure gap fitting
-        height: 160, // Increased height for better visibility
+        width: '48%',
+        height: 180,
         borderWidth: 1,
         borderColor: '#eee',
         borderRadius: 4,
-        overflow: 'hidden',
-        padding: 2, // Small padding to prevent image touching border
-        backgroundColor: '#fff'
+        padding: 4,
+        backgroundColor: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     itemPhoto: {
         width: '100%',
         height: '100%',
         objectFit: 'contain',
-        backgroundColor: '#f8fafc' // Light background to show boundaries if image is smaller
+        objectPosition: 'center',
+        backgroundColor: '#f8fafc'
     },
     footer: {
         position: 'absolute',
@@ -352,7 +355,7 @@ export const ReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
             {/* Foto Frontal no topo da página 2 */}
             {data.foto_frontal && (
                 <View style={{ marginBottom: 20, alignItems: 'center' }}>
-                    <Image src={data.foto_frontal} style={{ width: '100%', maxHeight: 250, objectFit: 'contain' }} />
+                    <Image src={data.foto_frontal} style={{ width: '100%', height: 280, objectFit: 'contain', objectPosition: 'center' }} />
                 </View>
             )}
 

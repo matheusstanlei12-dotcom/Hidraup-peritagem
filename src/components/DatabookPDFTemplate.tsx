@@ -121,15 +121,19 @@ export const s = StyleSheet.create({
     imageWrapper: {
         position: 'relative',
         borderRadius: 8,
-        overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        backgroundColor: '#f8fafc', // Fundo para imagens que não preenchem tudo
+        backgroundColor: '#f8fafc',
+        padding: 4,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     image: {
         width: '100%',
-        height: 160,
+        height: 180, // Aumentado um pouco
         objectFit: 'contain',
+        objectPosition: 'center',
     },
     imageLabel: {
         fontSize: 7,
@@ -193,6 +197,7 @@ export const s = StyleSheet.create({
         width: '100%',
         height: 400,
         objectFit: 'contain',
+        objectPosition: 'center',
     },
     // Componentes analisados
     compBadge: {
