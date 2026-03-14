@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Loader2, Search, FileText, Wrench, CheckCircle, Calendar, ShoppingCart } from 'lucide-react';
-import { pdf, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { pdf } from '@react-pdf/renderer';
 import { UsiminasReportTemplate } from '../components/UsiminasReportTemplate';
 import { ReportTemplate } from '../components/ReportTemplate';
 import { supabase } from '../lib/supabase';
@@ -24,80 +24,7 @@ interface Peritagem {
     responsavel_tecnico?: string;
 }
 
-// Estilos para o PDF Premium (Cliente)
-const premiumStyles = StyleSheet.create({
-    page: { padding: 40, backgroundColor: '#ffffff' },
-    cover: { height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', color: '#1a2e63' },
-    coverLogo: { width: 180, marginBottom: 40 },
-    coverTitle: { fontSize: 32, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase' },
-    coverSubtitle: { fontSize: 14, opacity: 0.6, color: '#64748b' },
-    coverFooter: { position: 'absolute', bottom: 40, borderTop: '1 solid #1a2e63', width: '80%', paddingTop: 20, textAlign: 'center' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottom: '2 solid #1a2e63', paddingBottom: 15 },
-    logo: { width: 100 },
-    headerTitle: { fontSize: 14, color: '#1a2e63', fontWeight: 'bold' },
-    sectionTitle: { fontSize: 12, color: '#1a2e63', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 15, borderLeft: '4 solid #1a2e63', paddingLeft: 10 },
-    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 30, backgroundColor: '#f8fafc', padding: 15, borderRadius: 8 },
-    infoBox: { width: '50%', marginBottom: 12 },
-    infoLabel: { fontSize: 8, color: '#64748b', textTransform: 'uppercase', marginBottom: 2 },
-    infoValue: { fontSize: 10, color: '#1e293b', fontWeight: 'bold' },
-    imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
-    imageCard: { width: '48%', marginBottom: 20, border: '0.5 solid #e2e8f0', padding: 5, borderRadius: 4 },
-    image: { width: '100%', height: 180, objectFit: 'contain', backgroundColor: '#000' },
-    imageLabel: { fontSize: 8, textAlign: 'center', marginTop: 8, color: '#475569', fontWeight: 'bold' },
-    footer: { position: 'absolute', bottom: 20, left: 40, right: 40, borderTop: '0.5 solid #e2e8f0', paddingTop: 10, flexDirection: 'row', justifyContent: 'space-between' },
-    footerText: { fontSize: 7, color: '#94a3b8' }
-});
-
-const PeritagemPremiumPDF = ({ peritagem, analise }: { peritagem: any, analise: any[] }) => (
-    <Document>
-        <Page size="A4" style={{ padding: 0 }}>
-            <View style={premiumStyles.cover}>
-                <Image src="/logo.png" style={premiumStyles.coverLogo} />
-                <Text style={premiumStyles.coverTitle}>RELATÓRIO DE ENTREGA</Text>
-                <Text style={premiumStyles.coverSubtitle}>Databook Digital de Manutenção</Text>
-                <View style={premiumStyles.coverFooter}>
-                    <Text style={{ fontSize: 10, marginBottom: 5 }}>CLIENTE: {peritagem.cliente?.toUpperCase()}</Text>
-                    <Text style={{ fontSize: 10 }}>O.S: {peritagem.os || peritagem.os_interna || peritagem.numero_peritagem}</Text>
-                </View>
-            </View>
-        </Page>
-        <Page size="A4" style={premiumStyles.page}>
-            <View style={premiumStyles.header}>
-                <Image src="/logo.png" style={premiumStyles.logo} />
-                <View style={{ textAlign: 'right' }}>
-                    <Text style={premiumStyles.headerTitle}>ESPECIFICAÇÕES TÉCNICAS</Text>
-                    <Text style={{ fontSize: 8, color: '#64748b' }}>Data: {new Date(peritagem.data_execucao).toLocaleDateString()}</Text>
-                </View>
-            </View>
-            <View style={premiumStyles.sectionTitle}><Text>1. Informações do Equipamento</Text></View>
-            <View style={premiumStyles.infoGrid}>
-                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Cliente</Text><Text style={premiumStyles.infoValue}>{peritagem.cliente}</Text></View>
-                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Ordem de Serviço</Text><Text style={premiumStyles.infoValue}>{peritagem.os || peritagem.os_interna || '-'}</Text></View>
-                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Ref. Laudo</Text><Text style={premiumStyles.infoValue}>{peritagem.numero_peritagem}</Text></View>
-                <View style={premiumStyles.infoBox}><Text style={premiumStyles.infoLabel}>Técnico Responsável</Text><Text style={premiumStyles.infoValue}>{peritagem.responsavel_tecnico || '-'}</Text></View>
-            </View>
-            <View style={premiumStyles.sectionTitle}><Text>2. Galeria de Imagens</Text></View>
-            <View style={premiumStyles.imageGrid}>
-                {peritagem.foto_frontal && (
-                    <View style={premiumStyles.imageCard}>
-                        <Image src={peritagem.foto_frontal} style={premiumStyles.image} />
-                        <Text style={premiumStyles.imageLabel}>Vista Geral do Equipamento</Text>
-                    </View>
-                )}
-                {analise.filter(i => i.fotos && i.fotos.length > 0).slice(0, 10).map((item, idx) => (
-                    <View key={idx} style={premiumStyles.imageCard}>
-                        <Image src={item.fotos[0]} style={premiumStyles.image} />
-                        <Text style={premiumStyles.imageLabel}>{item.componente}</Text>
-                    </View>
-                ))}
-            </View>
-            <View style={premiumStyles.footer} fixed>
-                <Text style={premiumStyles.footerText}>Relatório Gerado por HIDRAUP - Databook Digital</Text>
-                <Text style={premiumStyles.footerText}>www.trusttecnologia.com.br</Text>
-            </View>
-        </Page>
-    </Document>
-);
+import { DatabookPDF } from '../components/DatabookPDFTemplate';
 
 
 export const ClientPeritagens: React.FC = () => {
@@ -179,7 +106,7 @@ export const ClientPeritagens: React.FC = () => {
                 .eq('peritagem_id', peritagem.id);
 
             if (type === 'premium') {
-                const blob = await pdf(<PeritagemPremiumPDF peritagem={peritagem} analise={analise || []} />).toBlob();
+                const blob = await pdf(<DatabookPDF peritagem={peritagem} itens={analise || []} />).toBlob();
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;

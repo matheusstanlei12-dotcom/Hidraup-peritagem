@@ -12,8 +12,9 @@ import {
     Video,
     X,
 } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, Image, pdf } from '@react-pdf/renderer';
+import { Document, Page, Text, View, pdf } from '@react-pdf/renderer';
 import { useAuth } from '../contexts/AuthContext';
+import { s, ImageCard } from '../components/DatabookPDFTemplate';
 import './DataBookPremium.css';
 
 interface DataBookFolder {
@@ -42,88 +43,79 @@ interface DataBookItem {
     processo?: string;
 }
 
-// Fontes e Estilos para o PDF Premium
-const pdfStyles = StyleSheet.create({
-    page: { padding: 40, backgroundColor: '#ffffff', fontFamily: 'Helvetica' },
-    cover: { height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', color: '#1a2e63' },
-    coverLogo: { width: 180, marginBottom: 40 },
-    coverTitle: { fontSize: 32, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase' },
-    coverSubtitle: { fontSize: 14, opacity: 0.6, color: '#64748b' },
-    coverFooter: { position: 'absolute', bottom: 40, borderTop: '1 solid #1a2e63', width: '80%', paddingTop: 20, textAlign: 'center' },
-
-    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottom: '2 solid #1a2e63', paddingBottom: 15 },
-    logo: { width: 100 },
-    headerTitle: { fontSize: 14, color: '#1a2e63', fontWeight: 'bold' },
-
-    sectionTitle: { fontSize: 12, color: '#1a2e63', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 15, borderLeft: '4 solid #1a2e63', paddingLeft: 10 },
-
-    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 30, backgroundColor: '#f8fafc', padding: 15, borderRadius: 8 },
-    infoBox: { width: '50%', marginBottom: 12 },
-    infoLabel: { fontSize: 8, color: '#64748b', textTransform: 'uppercase', marginBottom: 2 },
-    infoValue: { fontSize: 10, color: '#1e293b', fontWeight: 'bold' },
-
-    imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
-    imageCard: { width: '48%', marginBottom: 20, border: '0.5 solid #e2e8f0', padding: 5, borderRadius: 4 },
-    image: { width: '100%', height: 180, objectFit: 'contain', backgroundColor: '#000' },
-    imageLabel: { fontSize: 8, textAlign: 'center', marginTop: 8, color: '#475569', fontWeight: 'bold' },
-
-    footer: { position: 'absolute', bottom: 20, left: 40, right: 40, borderTop: '0.5 solid #e2e8f0', paddingTop: 10, flexDirection: 'row', justifyContent: 'space-between' },
-    footerText: { fontSize: 7, color: '#94a3b8' }
-});
-
 const DataBookPremiumPDF = ({ folder, items }: { folder: DataBookFolder, items: DataBookItem[] }) => (
     <Document>
-        {/* Capa de Apresentação */}
-        <Page size="A4" style={{ padding: 0 }}>
-            <View style={pdfStyles.cover}>
-                <Image src="/logo.png" style={pdfStyles.coverLogo} />
-                <Text style={pdfStyles.coverTitle}>DATA BOOK DIGITAL</Text>
-                <Text style={pdfStyles.coverSubtitle}>Relatório de Entrega e Especificações Técnicas</Text>
-
-                <View style={pdfStyles.coverFooter}>
-                    <Text style={{ fontSize: 10, marginBottom: 5 }}>CLIENTE: {folder.cliente?.toUpperCase()}</Text>
-                    <Text style={{ fontSize: 10 }}>O.S: {folder.os_interna || '-'}</Text>
+        <Page size="A4" style={s.page} wrap>
+            {/* Header fixo */}
+            <View style={s.header} fixed>
+                <View>
+                    <Text style={s.headerTitle}>Databook Técnico</Text>
                 </View>
-            </View>
-        </Page>
-
-        {/* Informações Gerais */}
-        <Page size="A4" style={pdfStyles.page}>
-            <View style={pdfStyles.header}>
-                <Image src="/logo.png" style={pdfStyles.logo} />
-                <View style={{ textAlign: 'right' }}>
-                    <Text style={pdfStyles.headerTitle}>DADOS TÉCNICOS</Text>
-                    <Text style={{ fontSize: 8, color: '#64748b' }}>Gerado em {new Date().toLocaleDateString()}</Text>
+                <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={s.headerSubtitle}>OS: {folder.os_interna || '-'}</Text>
+                    <Text style={s.headerSubtitle}>{folder.cliente?.toUpperCase()}</Text>
                 </View>
             </View>
 
-            <View style={pdfStyles.sectionTitle}>
-                <Text>Registro Fotográfico e Documental</Text>
-            </View>
-
-            {['Peritagem', 'Montagem', 'Pintura', 'Liberação', 'Informações Complementares'].map(proc => {
-                const procItems = items.filter(i => (i.processo === proc || (!i.processo && proc === 'Peritagem')) && (i.file_type === 'image' || (i.file_type === 'other' && !i.file_data.includes('video'))));
-                if (procItems.length === 0) return null;
-
-                return (
-                    <View key={proc} style={{ marginBottom: 20 }}>
-                        <Text style={{ fontSize: 10, color: '#1a2e63', fontWeight: 'bold', marginBottom: 10, borderBottom: '1 solid #f1f5f9', paddingBottom: 5 }}>
-                            {proc.toUpperCase()}
-                        </Text>
-                        <View style={pdfStyles.imageGrid}>
-                            {procItems.map((item) => (
-                                <View key={item.id} style={pdfStyles.imageCard}>
-                                    <Image src={item.file_data} style={pdfStyles.image} />
-                                </View>
-                            ))}
+            {/* Body */}
+            <View style={s.body}>
+                {/* Dados Gerais */}
+                <View style={s.dataBox}>
+                    <View style={s.dataRow}>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Cliente</Text>
+                            <Text style={s.dataValue}>{folder.cliente}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>O.S Interna</Text>
+                            <Text style={s.dataValue}>{folder.os_interna || '-'}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>O.S Externa</Text>
+                            <Text style={s.dataValue}>{folder.os_externa || '-'}</Text>
                         </View>
                     </View>
-                );
-            })}
+                    <View style={s.dataRow}>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Pedido</Text>
+                            <Text style={s.dataValue}>{folder.pedido_compra || '-'}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>NF</Text>
+                            <Text style={s.dataValue}>{folder.nota_fiscal || '-'}</Text>
+                        </View>
+                        <View style={s.dataField}>
+                            <Text style={s.dataLabel}>Data Entrega</Text>
+                            <Text style={s.dataValue}>{folder.data_entrega ? new Date(folder.data_entrega).toLocaleDateString('pt-BR') : '-'}</Text>
+                        </View>
+                    </View>
+                </View>
 
-            <View style={pdfStyles.footer} fixed>
-                <Text style={pdfStyles.footerText}>Acesso Exclusivo via Databook Digital</Text>
-                <Text style={pdfStyles.footerText}>www.trusttecnologia.com.br</Text>
+                {/* Processos */}
+                {['Peritagem', 'Montagem', 'Pintura', 'Liberação', 'Informações Complementares'].map((proc, index) => {
+                    const procItems = items.filter(i => (i.processo === proc || (!i.processo && proc === 'Peritagem')) && (i.file_type === 'image' || (i.file_type === 'other' && !i.file_data.includes('video'))));
+                    if (procItems.length === 0) return null;
+
+                    return (
+                        <View key={proc} style={s.sectionContainer} break={index > 0}>
+                            <View style={s.sectionHeader}>
+                                <Text style={s.sectionNumber}>{index + 1}</Text>
+                                <Text style={s.sectionTitle}>{proc}</Text>
+                            </View>
+                            <View style={s.imageGrid}>
+                                {procItems.map((item, idc) => (
+                                    <ImageCard key={item.id} src={item.file_data} label={`${proc} ${idc + 1}`} />
+                                ))}
+                            </View>
+                        </View>
+                    );
+                })}
+            </View>
+
+            {/* Footer fixo */}
+            <View style={s.footer} fixed>
+                <Text style={s.footerText}>Databook Digital</Text>
+                <Text style={s.footerText}>www.trusttecnologia.com.br</Text>
             </View>
         </Page>
     </Document>
