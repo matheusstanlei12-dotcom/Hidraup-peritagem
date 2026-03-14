@@ -290,20 +290,6 @@ export const DatabookPDF = ({ peritagem, itens }: { peritagem: any, itens: any[]
                             />
                         )))}
                     </View>
-
-                    {/* Componentes */}
-                    {itens.length > 0 && (
-                        <View style={{ marginTop: 10 }}>
-                            <Text style={{ fontSize: 8, color: '#64748b', fontWeight: 'bold', marginBottom: 6 }}>Componentes Analisados:</Text>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                {itens.map(item => (
-                                    <View key={item.id} style={s.compBadge}>
-                                        <Text style={s.compText}>{item.componente} - {item.conformidade === 'CONFORME' ? '✓' : '!'} {item.solucao}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    )}
                 </View>
 
                 {/* 2. Montagem */}
@@ -357,6 +343,20 @@ export const DatabookPDF = ({ peritagem, itens }: { peritagem: any, itens: any[]
                                 <Image src={peritagem.foto_pintura_final} style={s.pinturaImage} />
                             </View>
                             <Text style={s.imageLabel}>Resultado Final</Text>
+                        </View>
+                    </View>
+                )}
+
+                {/* Componentes Analisados - Última Folha */}
+                {itens.length > 0 && (
+                    <View style={{ marginTop: 20 }} break>
+                        <Text style={{ fontSize: 10, color: '#64748b', fontWeight: 'bold', marginBottom: 10 }}>Componentes Analisados:</Text>
+                        <View style={{ flexDirection: 'column', gap: 6 }}>
+                            {itens.map(item => (
+                                <View key={item.id} style={[s.compBadge, { marginBottom: 6, paddingVertical: 6, paddingHorizontal: 10, alignSelf: 'flex-start' }]}>
+                                    <Text style={[s.compText, { fontSize: 8 }]}>{item.componente} - {item.conformidade === 'CONFORME' ? '✓' : '!'} {item.solucao}</Text>
+                                </View>
+                            ))}
                         </View>
                     </View>
                 )}
