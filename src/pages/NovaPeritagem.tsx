@@ -56,6 +56,8 @@ export const NovaPeritagem: React.FC = () => {
     const { role } = useAuth();
     const [searchParams] = useSearchParams();
     const editId = searchParams.get('id');
+    const fromWaitlist = searchParams.get('from_waitlist') === 'true';
+    const idWaitlist = searchParams.get('id_waitlist');
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(0); // 0: Seleção, 1: Formulário
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -150,10 +152,61 @@ export const NovaPeritagem: React.FC = () => {
                     cliente: clienteUrl || prev.cliente,
                     observacoes_gerais: obsUrl || prev.observacoes_gerais
                 }));
-                // Mantemos step(0) para o perito selecionar o tipo de relatório desejado
+            }
+
+            if (idWaitlist) {
+                loadFromWaitlist(idWaitlist);
             }
         }
-    }, [searchParams, editId]);
+    }, [searchParams, editId, idWaitlist]);
+
+    const loadFromWaitlist = async (id: string) => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('aguardando_peritagem')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+            if (data) {
+                setFixedData({
+                    tag: data.tag || '',
+                    local_equipamento: data.local_equipamento || '',
+                    data_inspecao: new Date().toISOString().split('T')[0],
+                    responsavel_tecnico: data.responsavel_tecnico || '',
+                    cliente: data.cliente || '',
+                    numero_os: data.os_interna || '',
+                    ni: data.ni || '',
+                    pedido: data.numero_pedido || '',
+                    ordem: data.numero_ordem || '',
+                    nota_fiscal: data.nf || '',
+                    desenho_conjunto: data.desenho_conjunto || '',
+                    tipo_modelo: data.tipo_modelo || '',
+                    fabricante: data.fabricante || '',
+                    lubrificante: data.lubrificante || '',
+                    volume: data.volume || '',
+                    acoplamento_polia: data.acoplamento_polia || '',
+                    sistema_lubrificacao: data.sistema_lubrificacao || '',
+                    outros_especificar: data.outros_especificar || '',
+                    observacoes_gerais: data.descricao_equipamento || '',
+                    area: data.area || '',
+                    linha: data.linha || '',
+                    os_interna: data.os_interna || ''
+                });
+                
+                // Sempre define um tipo padrão e avança para o formulário para mostrar os dados
+                setCylinderType('Cilindros');
+                setStep(1);
+            }
+        } catch (err) {
+            console.error('Erro ao carregar dados da lista de espera:', err);
+            alert('Não foi possível carregar os dados pré-preenchidos.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (editId) {
@@ -630,6 +683,48 @@ export const NovaPeritagem: React.FC = () => {
                 return;
             }
 
+            if (fromWaitlist) {
+                try {
+                    const { error } = await supabase
+                        .from('aguardando_peritagem')
+                        .insert([{
+                            os_interna: fixedData.os_interna,
+                            cliente: fixedData.cliente,
+                            tag: fixedData.tag,
+                            numero_ordem: fixedData.ordem,
+                            ni: fixedData.ni,
+                            nf: fixedData.nota_fiscal,
+                            local_equipamento: fixedData.local_equipamento,
+                            responsavel_tecnico: fixedData.responsavel_tecnico,
+                            numero_pedido: fixedData.pedido,
+                            desenho_conjunto: fixedData.desenho_conjunto,
+                            tipo_modelo: fixedData.tipo_modelo,
+                            fabricante: fixedData.fabricante,
+                            lubrificante: fixedData.lubrificante,
+                            volume: fixedData.volume,
+                            acoplamento_polia: fixedData.acoplamento_polia,
+                            sistema_lubrificacao: fixedData.sistema_lubrificacao,
+                            outros_especificar: fixedData.outros_especificar,
+                            descricao_equipamento: fixedData.observacoes_gerais,
+                            area: fixedData.area,
+                            linha: fixedData.linha,
+                            status: 'AGUARDANDO',
+                            empresa_id: user.user_metadata?.empresa_id
+                        }]);
+
+                    if (error) throw error;
+                    alert('Item registrado na lista de espera!');
+                    navigate('/pcp/aguardando');
+                    return;
+                } catch (err: any) {
+                    console.error('Erro ao salvar na lista de espera:', err);
+                    alert('Erro ao salvar: ' + err.message);
+                    return;
+                } finally {
+                    setLoading(false);
+                }
+            }
+
             // Se não tiver OS, gera um ID único temporário para não dar erro de duplicidade
             let numeroPeritagem = fixedData.numero_os ? fixedData.numero_os.toUpperCase() : `S/OS-${Date.now()}`;
 
@@ -796,11 +891,14 @@ export const NovaPeritagem: React.FC = () => {
             setDimStatus('azul');
 
             // 3. Atualizar status na tabela 'aguardando_peritagem' se existir
-            if (fixedData.os_interna) {
-                await supabase
-                    .from('aguardando_peritagem')
-                    .update({ status: 'PERITADO' })
-                    .eq('os_interna', fixedData.os_interna);
+            if (idWaitlist || fixedData.os_interna) {
+                const query = supabase.from('aguardando_peritagem').update({ status: 'PERITADO' });
+                
+                if (idWaitlist) {
+                    await query.eq('id', idWaitlist);
+                } else {
+                    await query.eq('os_interna', fixedData.os_interna);
+                }
             }
 
             // 3. Sincronizar Fotos com o Arquivo Geral
