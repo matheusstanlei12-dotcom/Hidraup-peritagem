@@ -1,4 +1,3 @@
-import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
 export interface PeritagemData {
@@ -224,7 +223,7 @@ export const ImageCard = ({ src, label }: { src: string, label?: string }) => (
     </View>
 );
 
-export const DatabookPDF = ({ peritagem, itens }: { peritagem: any, itens: any[] }) => (
+export const DatabookPDF = ({ peritagem, itens }: { peritagem: PeritagemData, itens: AnaliseItem[] }) => (
     <Document>
         <Page size="A4" style={s.page} wrap>
             {/* Header fixo */}
