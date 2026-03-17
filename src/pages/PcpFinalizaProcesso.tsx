@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, CheckCircle2, X, Camera, Video, Eye, ArrowLeft, CheckCircle, PlayCircle, Image as ImageIcon } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, X, Eye, ArrowLeft, CheckCircle, PlayCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './Peritagens.css';
@@ -280,9 +280,9 @@ export const PcpFinalizaProcesso: React.FC = () => {
                                             <h4 style={{ margin: 0, fontWeight: 800, color: '#1e293b' }}>Peritagem Inicial</h4>
                                             {selectedItem.foto_frontal && <CheckCircle size={16} color="#16a34a" />}
                                         </div>
-                                        {selectedItem.foto_frontal ? (
+                                        {selectedItem?.foto_frontal ? (
                                             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '8px' }}>
-                                                <img src={selectedItem.foto_frontal} alt="Peritagem" onClick={() => setPreviewImage(selectedItem.foto_frontal!)} style={{ width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #e2e8f0' }} />
+                                                <img src={selectedItem.foto_frontal} alt="Peritagem" onClick={() => setPreviewImage(selectedItem?.foto_frontal || null)} style={{ width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #e2e8f0' }} />
                                                 {analiseItens.map(item => item.fotos?.slice(0, 1).map((foto, idx) => (
                                                     <img key={`${item.id}-${idx}`} src={foto} alt={item.componente} onClick={() => setPreviewImage(foto)} style={{ width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #e2e8f0' }} />
                                                 )))}
@@ -356,7 +356,7 @@ export const PcpFinalizaProcesso: React.FC = () => {
                                         </div>
                                         {selectedItem.foto_pintura_final ? (
                                             <div style={{ display: 'flex', gap: '10px' }}>
-                                                <img src={selectedItem.foto_pintura_final} alt="Pintura Final" onClick={() => setPreviewImage(selectedItem.foto_pintura_final!)} style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #e2e8f0' }} />
+                                                <img src={selectedItem.foto_pintura_final} alt="Pintura Final" onClick={() => setPreviewImage(selectedItem?.foto_pintura_final || null)} style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #e2e8f0' }} />
                                             </div>
                                         ) : (
                                             <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Nenhuma foto de pintura registrada.</p>
@@ -372,7 +372,7 @@ export const PcpFinalizaProcesso: React.FC = () => {
                                 <ArrowLeft size={18} /> Voltar
                             </button>
                             <button
-                                onClick={() => handleFinalize(selectedItem.id)}
+                                onClick={() => selectedItem && handleFinalize(selectedItem.id)}
                                 style={{ background: '#16a34a', border: 'none', padding: '12px 32px', borderRadius: '12px', fontWeight: 800, color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 15px -3px rgba(22, 163, 74, 0.25)', fontSize: '0.95rem' }}
                             >
                                 <CheckCircle2 size={20} /> VALIDAR E FINALIZAR PROCESSO
