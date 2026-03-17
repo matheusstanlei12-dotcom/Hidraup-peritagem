@@ -659,7 +659,7 @@ export const NovaPeritagem: React.FC = () => {
         e.preventDefault();
         setLoading(true);
 
-        if (!fotoFrontal) {
+        if (!fotoFrontal && !fromWaitlist) {
             alert('A foto frontal do equipamento é obrigatória!');
             setLoading(false);
             return;
@@ -1032,7 +1032,7 @@ export const NovaPeritagem: React.FC = () => {
                 <div className="header-actions-top">
                     <button className="btn-save-top" onClick={handleSubmit} disabled={loading}>
                         <Save size={20} />
-                        {loading ? 'Salvando...' : 'Salvar Peritagem'}
+                        {loading ? 'Salvando...' : fromWaitlist ? 'Salvar na Lista' : 'Salvar Peritagem'}
                     </button>
                 </div>
             </header>
@@ -2198,7 +2198,7 @@ export const NovaPeritagem: React.FC = () => {
 
                 <div className="footer-actions">
                     <button type="button" className="btn-finalize" onClick={handleSubmit} disabled={loading}>
-                        {loading ? 'Processando...' : 'Finalizar e Registrar Peritagem'}
+                        {loading ? 'Processando...' : fromWaitlist ? 'Registrar na Lista de Espera' : 'Finalizar e Registrar Peritagem'}
                     </button>
                 </div>
             </form>
